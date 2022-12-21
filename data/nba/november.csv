@@ -1,0 +1,224 @@
+date,away_team,away_points,home_team,home_points
+"Sun, Nov 1, 2015",Atlanta Hawks,94,Charlotte Hornets,92
+"Sun, Nov 1, 2015",San Antonio Spurs,95,Boston Celtics,87
+"Sun, Nov 1, 2015",Houston Rockets,89,Miami Heat,109
+"Sun, Nov 1, 2015",Milwaukee Bucks,87,Toronto Raptors,106
+"Sun, Nov 1, 2015",Orlando Magic,87,Chicago Bulls,92
+"Sun, Nov 1, 2015",Denver Nuggets,93,Oklahoma City Thunder,117
+"Sun, Nov 1, 2015",Dallas Mavericks,103,Los Angeles Lakers,93
+"Mon, Nov 2, 2015",Cleveland Cavaliers,107,Philadelphia 76ers,100
+"Mon, Nov 2, 2015",Milwaukee Bucks,103,Brooklyn Nets,96
+"Mon, Nov 2, 2015",San Antonio Spurs,94,New York Knicks,84
+"Mon, Nov 2, 2015",Oklahoma City Thunder,105,Houston Rockets,110
+"Mon, Nov 2, 2015",Portland Trail Blazers,106,Minnesota Timberwolves,101
+"Mon, Nov 2, 2015",Memphis Grizzlies,69,Golden State Warriors,119
+"Mon, Nov 2, 2015",Phoenix Suns,96,Los Angeles Clippers,102
+"Tue, Nov 3, 2015",Chicago Bulls,105,Charlotte Hornets,130
+"Tue, Nov 3, 2015",Indiana Pacers,94,Detroit Pistons,82
+"Tue, Nov 3, 2015",Atlanta Hawks,98,Miami Heat,92
+"Tue, Nov 3, 2015",Orlando Magic,103,New Orleans Pelicans,94
+"Tue, Nov 3, 2015",Toronto Raptors,102,Dallas Mavericks,91
+"Tue, Nov 3, 2015",Memphis Grizzlies,103,Sacramento Kings,89
+"Tue, Nov 3, 2015",Denver Nuggets,120,Los Angeles Lakers,109
+"Wed, Nov 4, 2015",Boston Celtics,98,Indiana Pacers,100
+"Wed, Nov 4, 2015",San Antonio Spurs,99,Washington Wizards,102
+"Wed, Nov 4, 2015",Brooklyn Nets,87,Atlanta Hawks,101
+"Wed, Nov 4, 2015",New York Knicks,86,Cleveland Cavaliers,96
+"Wed, Nov 4, 2015",Orlando Magic,114,Houston Rockets,119
+"Wed, Nov 4, 2015",Philadelphia 76ers,87,Milwaukee Bucks,91
+"Wed, Nov 4, 2015",Toronto Raptors,103,Oklahoma City Thunder,98
+"Wed, Nov 4, 2015",Sacramento Kings,97,Phoenix Suns,118
+"Wed, Nov 4, 2015",Portland Trail Blazers,108,Utah Jazz,92
+"Wed, Nov 4, 2015",Los Angeles Clippers,108,Golden State Warriors,112
+"Thu, Nov 5, 2015",Oklahoma City Thunder,98,Chicago Bulls,104
+"Thu, Nov 5, 2015",Miami Heat,96,Minnesota Timberwolves,84
+"Thu, Nov 5, 2015",Charlotte Hornets,108,Dallas Mavericks,94
+"Thu, Nov 5, 2015",Utah Jazz,96,Denver Nuggets,84
+"Thu, Nov 5, 2015",Memphis Grizzlies,96,Portland Trail Blazers,115
+"Fri, Nov 6, 2015",Toronto Raptors,87,Orlando Magic,92
+"Fri, Nov 6, 2015",Washington Wizards,98,Boston Celtics,118
+"Fri, Nov 6, 2015",Los Angeles Lakers,104,Brooklyn Nets,98
+"Fri, Nov 6, 2015",Philadelphia 76ers,102,Cleveland Cavaliers,108
+"Fri, Nov 6, 2015",Milwaukee Bucks,99,New York Knicks,92
+"Fri, Nov 6, 2015",Miami Heat,87,Indiana Pacers,90
+"Fri, Nov 6, 2015",Atlanta Hawks,121,New Orleans Pelicans,115
+"Fri, Nov 6, 2015",Detroit Pistons,100,Phoenix Suns,92
+"Fri, Nov 6, 2015",Denver Nuggets,104,Golden State Warriors,119
+"Fri, Nov 6, 2015",Houston Rockets,116,Sacramento Kings,110
+"Sat, Nov 7, 2015",Minnesota Timberwolves,102,Chicago Bulls,93
+"Sat, Nov 7, 2015",Orlando Magic,105,Philadelphia 76ers,97
+"Sat, Nov 7, 2015",Washington Wizards,99,Atlanta Hawks,114
+"Sat, Nov 7, 2015",New Orleans Pelicans,98,Dallas Mavericks,107
+"Sat, Nov 7, 2015",Brooklyn Nets,86,Milwaukee Bucks,94
+"Sat, Nov 7, 2015",Charlotte Hornets,94,San Antonio Spurs,114
+"Sat, Nov 7, 2015",Memphis Grizzlies,79,Utah Jazz,89
+"Sat, Nov 7, 2015",Golden State Warriors,103,Sacramento Kings,94
+"Sat, Nov 7, 2015",Houston Rockets,109,Los Angeles Clippers,105
+"Sun, Nov 8, 2015",Indiana Pacers,97,Cleveland Cavaliers,101
+"Sun, Nov 8, 2015",Los Angeles Lakers,95,New York Knicks,99
+"Sun, Nov 8, 2015",Toronto Raptors,76,Miami Heat,96
+"Sun, Nov 8, 2015",Phoenix Suns,103,Oklahoma City Thunder,124
+"Sun, Nov 8, 2015",Detroit Pistons,120,Portland Trail Blazers,103
+"Mon, Nov 9, 2015",Orlando Magic,84,Indiana Pacers,97
+"Mon, Nov 9, 2015",Chicago Bulls,111,Philadelphia 76ers,88
+"Mon, Nov 9, 2015",Minnesota Timberwolves,117,Atlanta Hawks,107
+"Mon, Nov 9, 2015",Portland Trail Blazers,104,Denver Nuggets,108
+"Mon, Nov 9, 2015",San Antonio Spurs,106,Sacramento Kings,88
+"Mon, Nov 9, 2015",Detroit Pistons,95,Golden State Warriors,109
+"Mon, Nov 9, 2015",Memphis Grizzlies,92,Los Angeles Clippers,94
+"Tue, Nov 10, 2015",Utah Jazz,114,Cleveland Cavaliers,118
+"Tue, Nov 10, 2015",Oklahoma City Thunder,125,Washington Wizards,101
+"Tue, Nov 10, 2015",Los Angeles Lakers,88,Miami Heat,101
+"Tue, Nov 10, 2015",New York Knicks,111,Toronto Raptors,109
+"Tue, Nov 10, 2015",Boston Celtics,99,Milwaukee Bucks,83
+"Tue, Nov 10, 2015",Charlotte Hornets,104,Minnesota Timberwolves,95
+"Tue, Nov 10, 2015",Dallas Mavericks,105,New Orleans Pelicans,120
+"Wed, Nov 11, 2015",New York Knicks,93,Charlotte Hornets,95
+"Wed, Nov 11, 2015",Los Angeles Lakers,99,Orlando Magic,101
+"Wed, Nov 11, 2015",Toronto Raptors,119,Philadelphia 76ers,103
+"Wed, Nov 11, 2015",Indiana Pacers,102,Boston Celtics,91
+"Wed, Nov 11, 2015",New Orleans Pelicans,98,Atlanta Hawks,106
+"Wed, Nov 11, 2015",Los Angeles Clippers,108,Dallas Mavericks,118
+"Wed, Nov 11, 2015",Brooklyn Nets,106,Houston Rockets,98
+"Wed, Nov 11, 2015",Golden State Warriors,100,Memphis Grizzlies,84
+"Wed, Nov 11, 2015",Milwaukee Bucks,102,Denver Nuggets,103
+"Wed, Nov 11, 2015",Detroit Pistons,92,Sacramento Kings,101
+"Wed, Nov 11, 2015",San Antonio Spurs,113,Portland Trail Blazers,101
+"Thu, Nov 12, 2015",Utah Jazz,91,Miami Heat,92
+"Thu, Nov 12, 2015",Golden State Warriors,129,Minnesota Timberwolves,116
+"Thu, Nov 12, 2015",Los Angeles Clippers,104,Phoenix Suns,118
+"Fri, Nov 13, 2015",Minnesota Timberwolves,103,Indiana Pacers,107
+"Fri, Nov 13, 2015",Utah Jazz,93,Orlando Magic,102
+"Fri, Nov 13, 2015",Atlanta Hawks,93,Boston Celtics,106
+"Fri, Nov 13, 2015",Cleveland Cavaliers,90,New York Knicks,84
+"Fri, Nov 13, 2015",New Orleans Pelicans,81,Toronto Raptors,100
+"Fri, Nov 13, 2015",Charlotte Hornets,97,Chicago Bulls,102
+"Fri, Nov 13, 2015",Portland Trail Blazers,100,Memphis Grizzlies,101
+"Fri, Nov 13, 2015",Philadelphia 76ers,85,Oklahoma City Thunder,102
+"Fri, Nov 13, 2015",Los Angeles Lakers,82,Dallas Mavericks,90
+"Fri, Nov 13, 2015",Houston Rockets,98,Denver Nuggets,107
+"Fri, Nov 13, 2015",Brooklyn Nets,109,Sacramento Kings,111
+"Sat, Nov 14, 2015",Detroit Pistons,96,Los Angeles Clippers,101
+"Sat, Nov 14, 2015",Orlando Magic,99,Washington Wizards,108
+"Sat, Nov 14, 2015",Dallas Mavericks,110,Houston Rockets,98
+"Sat, Nov 14, 2015",Cleveland Cavaliers,105,Milwaukee Bucks,108
+"Sat, Nov 14, 2015",Philadelphia 76ers,83,San Antonio Spurs,92
+"Sat, Nov 14, 2015",Denver Nuggets,81,Phoenix Suns,105
+"Sat, Nov 14, 2015",Brooklyn Nets,99,Golden State Warriors,107
+"Sun, Nov 15, 2015",New Orleans Pelicans,87,New York Knicks,95
+"Sun, Nov 15, 2015",Memphis Grizzlies,114,Minnesota Timberwolves,106
+"Sun, Nov 15, 2015",Portland Trail Blazers,94,Charlotte Hornets,106
+"Sun, Nov 15, 2015",Utah Jazz,97,Atlanta Hawks,96
+"Sun, Nov 15, 2015",Boston Celtics,100,Oklahoma City Thunder,85
+"Sun, Nov 15, 2015",Toronto Raptors,101,Sacramento Kings,107
+"Sun, Nov 15, 2015",Detroit Pistons,85,Los Angeles Lakers,97
+"Mon, Nov 16, 2015",Dallas Mavericks,92,Philadelphia 76ers,86
+"Mon, Nov 16, 2015",Indiana Pacers,95,Chicago Bulls,96
+"Mon, Nov 16, 2015",Boston Celtics,111,Houston Rockets,95
+"Mon, Nov 16, 2015",Oklahoma City Thunder,114,Memphis Grizzlies,122
+"Mon, Nov 16, 2015",Portland Trail Blazers,80,San Antonio Spurs,93
+"Mon, Nov 16, 2015",Los Angeles Lakers,101,Phoenix Suns,120
+"Tue, Nov 17, 2015",Milwaukee Bucks,86,Washington Wizards,115
+"Tue, Nov 17, 2015",Atlanta Hawks,88,Brooklyn Nets,90
+"Tue, Nov 17, 2015",Cleveland Cavaliers,99,Detroit Pistons,104
+"Tue, Nov 17, 2015",Minnesota Timberwolves,103,Miami Heat,91
+"Tue, Nov 17, 2015",Charlotte Hornets,94,New York Knicks,102
+"Tue, Nov 17, 2015",Denver Nuggets,115,New Orleans Pelicans,98
+"Tue, Nov 17, 2015",Toronto Raptors,110,Golden State Warriors,115
+"Wed, Nov 18, 2015",Brooklyn Nets,111,Charlotte Hornets,116
+"Wed, Nov 18, 2015",Minnesota Timberwolves,101,Orlando Magic,104
+"Wed, Nov 18, 2015",Indiana Pacers,112,Philadelphia 76ers,85
+"Wed, Nov 18, 2015",Dallas Mavericks,106,Boston Celtics,102
+"Wed, Nov 18, 2015",Sacramento Kings,97,Atlanta Hawks,103
+"Wed, Nov 18, 2015",Portland Trail Blazers,103,Houston Rockets,108
+"Wed, Nov 18, 2015",New Orleans Pelicans,103,Oklahoma City Thunder,110
+"Wed, Nov 18, 2015",Denver Nuggets,98,San Antonio Spurs,109
+"Wed, Nov 18, 2015",Toronto Raptors,89,Utah Jazz,93
+"Wed, Nov 18, 2015",Chicago Bulls,103,Phoenix Suns,97
+"Thu, Nov 19, 2015",Sacramento Kings,109,Miami Heat,116
+"Thu, Nov 19, 2015",Milwaukee Bucks,100,Cleveland Cavaliers,115
+"Thu, Nov 19, 2015",Golden State Warriors,124,Los Angeles Clippers,117
+"Fri, Nov 20, 2015",Philadelphia 76ers,88,Charlotte Hornets,113
+"Fri, Nov 20, 2015",Brooklyn Nets,95,Boston Celtics,120
+"Fri, Nov 20, 2015",Houston Rockets,84,Memphis Grizzlies,96
+"Fri, Nov 20, 2015",Detroit Pistons,96,Minnesota Timberwolves,86
+"Fri, Nov 20, 2015",San Antonio Spurs,90,New Orleans Pelicans,104
+"Fri, Nov 20, 2015",New York Knicks,93,Oklahoma City Thunder,90
+"Fri, Nov 20, 2015",Utah Jazz,93,Dallas Mavericks,102
+"Fri, Nov 20, 2015",Phoenix Suns,114,Denver Nuggets,107
+"Fri, Nov 20, 2015",Los Angeles Clippers,91,Portland Trail Blazers,102
+"Fri, Nov 20, 2015",Chicago Bulls,94,Golden State Warriors,106
+"Fri, Nov 20, 2015",Toronto Raptors,102,Los Angeles Lakers,91
+"Sat, Nov 21, 2015",Sacramento Kings,97,Orlando Magic,91
+"Sat, Nov 21, 2015",Milwaukee Bucks,86,Indiana Pacers,123
+"Sat, Nov 21, 2015",Atlanta Hawks,97,Cleveland Cavaliers,109
+"Sat, Nov 21, 2015",Washington Wizards,97,Detroit Pistons,95
+"Sat, Nov 21, 2015",New York Knicks,107,Houston Rockets,102
+"Sat, Nov 21, 2015",Philadelphia 76ers,91,Miami Heat,96
+"Sat, Nov 21, 2015",Memphis Grizzlies,82,San Antonio Spurs,92
+"Sun, Nov 22, 2015",Toronto Raptors,91,Los Angeles Clippers,80
+"Sun, Nov 22, 2015",Boston Celtics,101,Brooklyn Nets,111
+"Sun, Nov 22, 2015",Phoenix Suns,116,New Orleans Pelicans,122
+"Sun, Nov 22, 2015",Dallas Mavericks,114,Oklahoma City Thunder,117
+"Sun, Nov 22, 2015",Golden State Warriors,118,Denver Nuggets,105
+"Sun, Nov 22, 2015",Portland Trail Blazers,107,Los Angeles Lakers,93
+"Mon, Nov 23, 2015",Sacramento Kings,122,Charlotte Hornets,127
+"Mon, Nov 23, 2015",Orlando Magic,103,Cleveland Cavaliers,117
+"Mon, Nov 23, 2015",New York Knicks,78,Miami Heat,95
+"Mon, Nov 23, 2015",Detroit Pistons,88,Milwaukee Bucks,109
+"Mon, Nov 23, 2015",Philadelphia 76ers,95,Minnesota Timberwolves,100
+"Mon, Nov 23, 2015",Phoenix Suns,84,San Antonio Spurs,98
+"Mon, Nov 23, 2015",Oklahoma City Thunder,111,Utah Jazz,89
+"Tue, Nov 24, 2015",Indiana Pacers,123,Washington Wizards,106
+"Tue, Nov 24, 2015",Boston Celtics,97,Atlanta Hawks,121
+"Tue, Nov 24, 2015",Dallas Mavericks,96,Memphis Grizzlies,110
+"Tue, Nov 24, 2015",Los Angeles Clippers,111,Denver Nuggets,94
+"Tue, Nov 24, 2015",Chicago Bulls,93,Portland Trail Blazers,88
+"Tue, Nov 24, 2015",Los Angeles Lakers,77,Golden State Warriors,111
+"Wed, Nov 25, 2015",Washington Wizards,87,Charlotte Hornets,101
+"Wed, Nov 25, 2015",New York Knicks,91,Orlando Magic,100
+"Wed, Nov 25, 2015",Philadelphia 76ers,80,Boston Celtics,84
+"Wed, Nov 25, 2015",Miami Heat,81,Detroit Pistons,104
+"Wed, Nov 25, 2015",Cleveland Cavaliers,99,Toronto Raptors,103
+"Wed, Nov 25, 2015",Memphis Grizzlies,102,Houston Rockets,93
+"Wed, Nov 25, 2015",Sacramento Kings,129,Milwaukee Bucks,118
+"Wed, Nov 25, 2015",Atlanta Hawks,95,Minnesota Timberwolves,99
+"Wed, Nov 25, 2015",Brooklyn Nets,99,Oklahoma City Thunder,110
+"Wed, Nov 25, 2015",Dallas Mavericks,83,San Antonio Spurs,88
+"Wed, Nov 25, 2015",New Orleans Pelicans,120,Phoenix Suns,114
+"Wed, Nov 25, 2015",Utah Jazz,102,Los Angeles Clippers,91
+"Fri, Nov 27, 2015",Cleveland Cavaliers,95,Charlotte Hornets,90
+"Fri, Nov 27, 2015",Milwaukee Bucks,90,Orlando Magic,114
+"Fri, Nov 27, 2015",Washington Wizards,78,Boston Celtics,111
+"Fri, Nov 27, 2015",Miami Heat,97,New York Knicks,78
+"Fri, Nov 27, 2015",Philadelphia 76ers,114,Houston Rockets,116
+"Fri, Nov 27, 2015",Chicago Bulls,92,Indiana Pacers,104
+"Fri, Nov 27, 2015",Atlanta Hawks,116,Memphis Grizzlies,101
+"Fri, Nov 27, 2015",Detroit Pistons,87,Oklahoma City Thunder,103
+"Fri, Nov 27, 2015",San Antonio Spurs,91,Denver Nuggets,80
+"Fri, Nov 27, 2015",Golden State Warriors,135,Phoenix Suns,116
+"Fri, Nov 27, 2015",Minnesota Timberwolves,101,Sacramento Kings,91
+"Fri, Nov 27, 2015",New Orleans Pelicans,90,Los Angeles Clippers,111
+"Sat, Nov 28, 2015",Toronto Raptors,84,Washington Wizards,82
+"Sat, Nov 28, 2015",Brooklyn Nets,88,Cleveland Cavaliers,90
+"Sat, Nov 28, 2015",Denver Nuggets,81,Dallas Mavericks,92
+"Sat, Nov 28, 2015",Atlanta Hawks,88,San Antonio Spurs,108
+"Sat, Nov 28, 2015",New Orleans Pelicans,87,Utah Jazz,101
+"Sat, Nov 28, 2015",Los Angeles Lakers,96,Portland Trail Blazers,108
+"Sat, Nov 28, 2015",Sacramento Kings,101,Golden State Warriors,120
+"Sun, Nov 29, 2015",Milwaukee Bucks,82,Charlotte Hornets,87
+"Sun, Nov 29, 2015",Minnesota Timberwolves,99,Los Angeles Clippers,107
+"Sun, Nov 29, 2015",Detroit Pistons,83,Brooklyn Nets,87
+"Sun, Nov 29, 2015",Philadelphia 76ers,84,Memphis Grizzlies,92
+"Sun, Nov 29, 2015",Boston Celtics,91,Orlando Magic,110
+"Sun, Nov 29, 2015",Phoenix Suns,107,Toronto Raptors,102
+"Sun, Nov 29, 2015",Houston Rockets,116,New York Knicks,111
+"Sun, Nov 29, 2015",Indiana Pacers,107,Los Angeles Lakers,103
+"Mon, Nov 30, 2015",Houston Rockets,105,Detroit Pistons,116
+"Mon, Nov 30, 2015",Boston Celtics,105,Miami Heat,95
+"Mon, Nov 30, 2015",Oklahoma City Thunder,100,Atlanta Hawks,106
+"Mon, Nov 30, 2015",San Antonio Spurs,89,Chicago Bulls,92
+"Mon, Nov 30, 2015",Denver Nuggets,74,Milwaukee Bucks,92
+"Mon, Nov 30, 2015",Golden State Warriors,106,Utah Jazz,103
+"Mon, Nov 30, 2015",Dallas Mavericks,98,Sacramento Kings,112
+"Mon, Nov 30, 2015",Portland Trail Blazers,87,Los Angeles Clippers,102

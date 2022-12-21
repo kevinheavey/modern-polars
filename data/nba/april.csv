@@ -1,0 +1,147 @@
+date,away_team,away_points,home_team,home_points
+"Fri, Apr 1, 2016",Philadelphia 76ers,91,Charlotte Hornets,100
+"Fri, Apr 1, 2016",Dallas Mavericks,98,Detroit Pistons,89
+"Fri, Apr 1, 2016",Brooklyn Nets,91,New York Knicks,105
+"Fri, Apr 1, 2016",Cleveland Cavaliers,110,Atlanta Hawks,108
+"Fri, Apr 1, 2016",Toronto Raptors,99,Memphis Grizzlies,95
+"Fri, Apr 1, 2016",Orlando Magic,110,Milwaukee Bucks,113
+"Fri, Apr 1, 2016",Minnesota Timberwolves,85,Utah Jazz,98
+"Fri, Apr 1, 2016",Miami Heat,112,Sacramento Kings,106
+"Fri, Apr 1, 2016",Boston Celtics,109,Golden State Warriors,106
+"Fri, Apr 1, 2016",Washington Wizards,106,Phoenix Suns,99
+"Sat, Apr 2, 2016",Indiana Pacers,115,Philadelphia 76ers,102
+"Sat, Apr 2, 2016",Detroit Pistons,94,Chicago Bulls,90
+"Sat, Apr 2, 2016",Toronto Raptors,95,San Antonio Spurs,102
+"Sat, Apr 2, 2016",Sacramento Kings,115,Denver Nuggets,106
+"Sat, Apr 2, 2016",Miami Heat,93,Portland Trail Blazers,110
+"Sun, Apr 3, 2016",New Orleans Pelicans,106,Brooklyn Nets,87
+"Sun, Apr 3, 2016",Charlotte Hornets,103,Cleveland Cavaliers,112
+"Sun, Apr 3, 2016",Oklahoma City Thunder,110,Houston Rockets,118
+"Sun, Apr 3, 2016",Washington Wizards,109,Los Angeles Clippers,114
+"Sun, Apr 3, 2016",Dallas Mavericks,88,Minnesota Timberwolves,78
+"Sun, Apr 3, 2016",Memphis Grizzlies,107,Orlando Magic,119
+"Sun, Apr 3, 2016",Utah Jazz,101,Phoenix Suns,86
+"Sun, Apr 3, 2016",Chicago Bulls,102,Milwaukee Bucks,98
+"Sun, Apr 3, 2016",Indiana Pacers,92,New York Knicks,87
+"Sun, Apr 3, 2016",Portland Trail Blazers,111,Golden State Warriors,136
+"Sun, Apr 3, 2016",Boston Celtics,107,Los Angeles Lakers,100
+"Tue, Apr 5, 2016",New Orleans Pelicans,93,Philadelphia 76ers,107
+"Tue, Apr 5, 2016",Charlotte Hornets,90,Toronto Raptors,96
+"Tue, Apr 5, 2016",Phoenix Suns,90,Atlanta Hawks,103
+"Tue, Apr 5, 2016",Chicago Bulls,92,Memphis Grizzlies,108
+"Tue, Apr 5, 2016",Detroit Pistons,89,Miami Heat,107
+"Tue, Apr 5, 2016",Cleveland Cavaliers,109,Milwaukee Bucks,80
+"Tue, Apr 5, 2016",Oklahoma City Thunder,124,Denver Nuggets,102
+"Tue, Apr 5, 2016",San Antonio Spurs,88,Utah Jazz,86
+"Tue, Apr 5, 2016",Portland Trail Blazers,115,Sacramento Kings,107
+"Tue, Apr 5, 2016",Minnesota Timberwolves,124,Golden State Warriors,117
+"Tue, Apr 5, 2016",Los Angeles Lakers,81,Los Angeles Clippers,103
+"Wed, Apr 6, 2016",Cleveland Cavaliers,109,Indiana Pacers,123
+"Wed, Apr 6, 2016",Detroit Pistons,108,Orlando Magic,104
+"Wed, Apr 6, 2016",Brooklyn Nets,103,Washington Wizards,121
+"Wed, Apr 6, 2016",New Orleans Pelicans,97,Boston Celtics,104
+"Wed, Apr 6, 2016",Charlotte Hornets,111,New York Knicks,97
+"Wed, Apr 6, 2016",Houston Rockets,86,Dallas Mavericks,88
+"Wed, Apr 6, 2016",Oklahoma City Thunder,115,Portland Trail Blazers,120
+"Wed, Apr 6, 2016",Los Angeles Clippers,91,Los Angeles Lakers,81
+"Thu, Apr 7, 2016",Toronto Raptors,87,Atlanta Hawks,95
+"Thu, Apr 7, 2016",Phoenix Suns,124,Houston Rockets,115
+"Thu, Apr 7, 2016",Chicago Bulls,98,Miami Heat,106
+"Thu, Apr 7, 2016",Minnesota Timberwolves,105,Sacramento Kings,97
+"Thu, Apr 7, 2016",San Antonio Spurs,101,Golden State Warriors,112
+"Fri, Apr 8, 2016",Brooklyn Nets,99,Charlotte Hornets,113
+"Fri, Apr 8, 2016",Miami Heat,109,Orlando Magic,112
+"Fri, Apr 8, 2016",New York Knicks,109,Philadelphia 76ers,102
+"Fri, Apr 8, 2016",Milwaukee Bucks,109,Boston Celtics,124
+"Fri, Apr 8, 2016",Washington Wizards,99,Detroit Pistons,112
+"Fri, Apr 8, 2016",Indiana Pacers,98,Toronto Raptors,111
+"Fri, Apr 8, 2016",Los Angeles Lakers,102,New Orleans Pelicans,110
+"Fri, Apr 8, 2016",Memphis Grizzlies,93,Dallas Mavericks,103
+"Fri, Apr 8, 2016",San Antonio Spurs,98,Denver Nuggets,102
+"Fri, Apr 8, 2016",Los Angeles Clippers,102,Utah Jazz,99
+"Sat, Apr 9, 2016",Phoenix Suns,121,New Orleans Pelicans,100
+"Sat, Apr 9, 2016",Boston Celtics,107,Atlanta Hawks,118
+"Sat, Apr 9, 2016",Golden State Warriors,100,Memphis Grizzlies,99
+"Sat, Apr 9, 2016",Cleveland Cavaliers,102,Chicago Bulls,105
+"Sat, Apr 9, 2016",Minnesota Timberwolves,106,Portland Trail Blazers,105
+"Sat, Apr 9, 2016",Oklahoma City Thunder,112,Sacramento Kings,114
+"Sun, Apr 10, 2016",Charlotte Hornets,98,Washington Wizards,113
+"Sun, Apr 10, 2016",Los Angeles Lakers,110,Houston Rockets,130
+"Sun, Apr 10, 2016",Dallas Mavericks,91,Los Angeles Clippers,98
+"Sun, Apr 10, 2016",Utah Jazz,100,Denver Nuggets,84
+"Sun, Apr 10, 2016",Milwaukee Bucks,109,Philadelphia 76ers,108
+"Sun, Apr 10, 2016",Brooklyn Nets,105,Indiana Pacers,129
+"Sun, Apr 10, 2016",Orlando Magic,96,Miami Heat,118
+"Sun, Apr 10, 2016",Golden State Warriors,92,San Antonio Spurs,86
+"Sun, Apr 10, 2016",Toronto Raptors,93,New York Knicks,89
+"Mon, Apr 11, 2016",Atlanta Hawks,94,Cleveland Cavaliers,109
+"Mon, Apr 11, 2016",Milwaukee Bucks,98,Orlando Magic,107
+"Mon, Apr 11, 2016",Charlotte Hornets,114,Boston Celtics,100
+"Mon, Apr 11, 2016",Washington Wizards,120,Brooklyn Nets,111
+"Mon, Apr 11, 2016",Houston Rockets,129,Minnesota Timberwolves,105
+"Mon, Apr 11, 2016",Chicago Bulls,121,New Orleans Pelicans,116
+"Mon, Apr 11, 2016",Los Angeles Lakers,79,Oklahoma City Thunder,112
+"Mon, Apr 11, 2016",Dallas Mavericks,101,Utah Jazz,92
+"Mon, Apr 11, 2016",Sacramento Kings,105,Phoenix Suns,101
+"Tue, Apr 12, 2016",New York Knicks,90,Indiana Pacers,102
+"Tue, Apr 12, 2016",Miami Heat,99,Detroit Pistons,93
+"Tue, Apr 12, 2016",Philadelphia 76ers,98,Toronto Raptors,122
+"Tue, Apr 12, 2016",Oklahoma City Thunder,98,San Antonio Spurs,102
+"Tue, Apr 12, 2016",Memphis Grizzlies,84,Los Angeles Clippers,110
+"Wed, Apr 13, 2016",Miami Heat,88,Boston Celtics,98
+"Wed, Apr 13, 2016",Toronto Raptors,103,Brooklyn Nets,96
+"Wed, Apr 13, 2016",Philadelphia 76ers,105,Chicago Bulls,115
+"Wed, Apr 13, 2016",Orlando Magic,103,Charlotte Hornets,117
+"Wed, Apr 13, 2016",Detroit Pistons,112,Cleveland Cavaliers,110
+"Wed, Apr 13, 2016",San Antonio Spurs,96,Dallas Mavericks,91
+"Wed, Apr 13, 2016",Sacramento Kings,81,Houston Rockets,116
+"Wed, Apr 13, 2016",Indiana Pacers,97,Milwaukee Bucks,92
+"Wed, Apr 13, 2016",New Orleans Pelicans,109,Minnesota Timberwolves,144
+"Wed, Apr 13, 2016",Atlanta Hawks,98,Washington Wizards,109
+"Wed, Apr 13, 2016",Memphis Grizzlies,104,Golden State Warriors,125
+"Wed, Apr 13, 2016",Utah Jazz,96,Los Angeles Lakers,101
+"Wed, Apr 13, 2016",Los Angeles Clippers,105,Phoenix Suns,114
+"Wed, Apr 13, 2016",Denver Nuggets,99,Portland Trail Blazers,107
+"Sat, Apr 16, 2016",Indiana Pacers,100,Toronto Raptors,90
+"Sat, Apr 16, 2016",Houston Rockets,78,Golden State Warriors,104
+"Sat, Apr 16, 2016",Boston Celtics,101,Atlanta Hawks,102
+"Sat, Apr 16, 2016",Dallas Mavericks,70,Oklahoma City Thunder,108
+"Sun, Apr 17, 2016",Detroit Pistons,101,Cleveland Cavaliers,106
+"Sun, Apr 17, 2016",Charlotte Hornets,91,Miami Heat,123
+"Sun, Apr 17, 2016",Memphis Grizzlies,74,San Antonio Spurs,106
+"Sun, Apr 17, 2016",Portland Trail Blazers,95,Los Angeles Clippers,115
+"Mon, Apr 18, 2016",Indiana Pacers,87,Toronto Raptors,98
+"Mon, Apr 18, 2016",Dallas Mavericks,85,Oklahoma City Thunder,84
+"Mon, Apr 18, 2016",Houston Rockets,106,Golden State Warriors,115
+"Tue, Apr 19, 2016",Boston Celtics,72,Atlanta Hawks,89
+"Tue, Apr 19, 2016",Memphis Grizzlies,68,San Antonio Spurs,94
+"Wed, Apr 20, 2016",Charlotte Hornets,103,Miami Heat,115
+"Wed, Apr 20, 2016",Detroit Pistons,90,Cleveland Cavaliers,107
+"Wed, Apr 20, 2016",Portland Trail Blazers,81,Los Angeles Clippers,102
+"Thu, Apr 21, 2016",Oklahoma City Thunder,131,Dallas Mavericks,102
+"Thu, Apr 21, 2016",Toronto Raptors,101,Indiana Pacers,85
+"Thu, Apr 21, 2016",Golden State Warriors,96,Houston Rockets,97
+"Fri, Apr 22, 2016",Cleveland Cavaliers,101,Detroit Pistons,91
+"Fri, Apr 22, 2016",Atlanta Hawks,103,Boston Celtics,111
+"Fri, Apr 22, 2016",San Antonio Spurs,96,Memphis Grizzlies,87
+"Sat, Apr 23, 2016",Toronto Raptors,83,Indiana Pacers,100
+"Sat, Apr 23, 2016",Miami Heat,80,Charlotte Hornets,96
+"Sat, Apr 23, 2016",Oklahoma City Thunder,119,Dallas Mavericks,108
+"Sat, Apr 23, 2016",Los Angeles Clippers,88,Portland Trail Blazers,96
+"Sun, Apr 24, 2016",San Antonio Spurs,116,Memphis Grizzlies,95
+"Sun, Apr 24, 2016",Golden State Warriors,121,Houston Rockets,94
+"Sun, Apr 24, 2016",Atlanta Hawks,95,Boston Celtics,104
+"Sun, Apr 24, 2016",Cleveland Cavaliers,100,Detroit Pistons,98
+"Mon, Apr 25, 2016",Miami Heat,85,Charlotte Hornets,89
+"Mon, Apr 25, 2016",Dallas Mavericks,104,Oklahoma City Thunder,118
+"Mon, Apr 25, 2016",Los Angeles Clippers,84,Portland Trail Blazers,98
+"Tue, Apr 26, 2016",Indiana Pacers,99,Toronto Raptors,102
+"Tue, Apr 26, 2016",Boston Celtics,83,Atlanta Hawks,110
+"Wed, Apr 27, 2016",Charlotte Hornets,90,Miami Heat,88
+"Wed, Apr 27, 2016",Portland Trail Blazers,108,Los Angeles Clippers,98
+"Wed, Apr 27, 2016",Houston Rockets,81,Golden State Warriors,114
+"Thu, Apr 28, 2016",Atlanta Hawks,104,Boston Celtics,92
+"Fri, Apr 29, 2016",Toronto Raptors,83,Indiana Pacers,101
+"Fri, Apr 29, 2016",Miami Heat,97,Charlotte Hornets,90
+"Fri, Apr 29, 2016",Los Angeles Clippers,103,Portland Trail Blazers,106
+"Sat, Apr 30, 2016",Oklahoma City Thunder,92,San Antonio Spurs,124

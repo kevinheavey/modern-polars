@@ -1,0 +1,231 @@
+date,away_team,away_points,home_team,home_points
+"Fri, Jan 1, 2016",Orlando Magic,91,Washington Wizards,103
+"Fri, Jan 1, 2016",Dallas Mavericks,82,Miami Heat,106
+"Fri, Jan 1, 2016",Charlotte Hornets,94,Toronto Raptors,104
+"Fri, Jan 1, 2016",New York Knicks,81,Chicago Bulls,108
+"Fri, Jan 1, 2016",Philadelphia 76ers,84,Los Angeles Lakers,93
+"Sat, Jan 2, 2016",Brooklyn Nets,100,Boston Celtics,97
+"Sat, Jan 2, 2016",Phoenix Suns,119,Sacramento Kings,142
+"Sat, Jan 2, 2016",Oklahoma City Thunder,109,Charlotte Hornets,90
+"Sat, Jan 2, 2016",Detroit Pistons,82,Indiana Pacers,94
+"Sat, Jan 2, 2016",Orlando Magic,79,Cleveland Cavaliers,104
+"Sat, Jan 2, 2016",Milwaukee Bucks,95,Minnesota Timberwolves,85
+"Sat, Jan 2, 2016",New Orleans Pelicans,105,Dallas Mavericks,98
+"Sat, Jan 2, 2016",Houston Rockets,103,San Antonio Spurs,121
+"Sat, Jan 2, 2016",Memphis Grizzlies,87,Utah Jazz,92
+"Sat, Jan 2, 2016",Denver Nuggets,108,Golden State Warriors,111
+"Sat, Jan 2, 2016",Philadelphia 76ers,99,Los Angeles Clippers,130
+"Sun, Jan 3, 2016",Atlanta Hawks,97,New York Knicks,111
+"Sun, Jan 3, 2016",Chicago Bulls,115,Toronto Raptors,113
+"Sun, Jan 3, 2016",Miami Heat,97,Washington Wizards,75
+"Sun, Jan 3, 2016",Portland Trail Blazers,112,Denver Nuggets,106
+"Sun, Jan 3, 2016",Phoenix Suns,77,Los Angeles Lakers,97
+"Mon, Jan 4, 2016",Toronto Raptors,100,Cleveland Cavaliers,122
+"Mon, Jan 4, 2016",Minnesota Timberwolves,99,Philadelphia 76ers,109
+"Mon, Jan 4, 2016",Boston Celtics,103,Brooklyn Nets,94
+"Mon, Jan 4, 2016",Orlando Magic,89,Detroit Pistons,115
+"Mon, Jan 4, 2016",Indiana Pacers,100,Miami Heat,103
+"Mon, Jan 4, 2016",San Antonio Spurs,123,Milwaukee Bucks,98
+"Mon, Jan 4, 2016",Sacramento Kings,116,Oklahoma City Thunder,104
+"Mon, Jan 4, 2016",Houston Rockets,93,Utah Jazz,91
+"Mon, Jan 4, 2016",Memphis Grizzlies,91,Portland Trail Blazers,78
+"Mon, Jan 4, 2016",Charlotte Hornets,101,Golden State Warriors,111
+"Tue, Jan 5, 2016",New York Knicks,107,Atlanta Hawks,101
+"Tue, Jan 5, 2016",Milwaukee Bucks,106,Chicago Bulls,117
+"Tue, Jan 5, 2016",Sacramento Kings,116,Dallas Mavericks,117
+"Tue, Jan 5, 2016",Golden State Warriors,109,Los Angeles Lakers,88
+"Wed, Jan 6, 2016",New York Knicks,98,Miami Heat,90
+"Wed, Jan 6, 2016",Indiana Pacers,95,Orlando Magic,86
+"Wed, Jan 6, 2016",Cleveland Cavaliers,121,Washington Wizards,115
+"Wed, Jan 6, 2016",Detroit Pistons,99,Boston Celtics,94
+"Wed, Jan 6, 2016",Toronto Raptors,91,Brooklyn Nets,74
+"Wed, Jan 6, 2016",Denver Nuggets,78,Minnesota Timberwolves,74
+"Wed, Jan 6, 2016",Dallas Mavericks,100,New Orleans Pelicans,91
+"Wed, Jan 6, 2016",Utah Jazz,98,San Antonio Spurs,123
+"Wed, Jan 6, 2016",Charlotte Hornets,102,Phoenix Suns,111
+"Wed, Jan 6, 2016",Memphis Grizzlies,94,Oklahoma City Thunder,112
+"Wed, Jan 6, 2016",Los Angeles Clippers,109,Portland Trail Blazers,98
+"Thu, Jan 7, 2016",Atlanta Hawks,126,Philadelphia 76ers,98
+"Thu, Jan 7, 2016",Boston Celtics,92,Chicago Bulls,101
+"Thu, Jan 7, 2016",Utah Jazz,94,Houston Rockets,103
+"Thu, Jan 7, 2016",Los Angeles Lakers,115,Sacramento Kings,118
+"Fri, Jan 8, 2016",Toronto Raptors,97,Washington Wizards,88
+"Fri, Jan 8, 2016",Orlando Magic,83,Brooklyn Nets,77
+"Fri, Jan 8, 2016",Denver Nuggets,84,Memphis Grizzlies,91
+"Fri, Jan 8, 2016",Dallas Mavericks,95,Milwaukee Bucks,96
+"Fri, Jan 8, 2016",Cleveland Cavaliers,125,Minnesota Timberwolves,99
+"Fri, Jan 8, 2016",Indiana Pacers,91,New Orleans Pelicans,86
+"Fri, Jan 8, 2016",New York Knicks,99,San Antonio Spurs,100
+"Fri, Jan 8, 2016",Miami Heat,103,Phoenix Suns,95
+"Fri, Jan 8, 2016",Golden State Warriors,128,Portland Trail Blazers,108
+"Fri, Jan 8, 2016",Oklahoma City Thunder,117,Los Angeles Lakers,113
+"Sat, Jan 9, 2016",Charlotte Hornets,83,Los Angeles Clippers,97
+"Sat, Jan 9, 2016",Chicago Bulls,105,Atlanta Hawks,120
+"Sat, Jan 9, 2016",Washington Wizards,105,Orlando Magic,99
+"Sat, Jan 9, 2016",Brooklyn Nets,89,Detroit Pistons,103
+"Sat, Jan 9, 2016",Toronto Raptors,108,Philadelphia 76ers,95
+"Sat, Jan 9, 2016",Miami Heat,83,Utah Jazz,98
+"Sat, Jan 9, 2016",Golden State Warriors,128,Sacramento Kings,116
+"Sun, Jan 10, 2016",New Orleans Pelicans,111,Los Angeles Clippers,114
+"Sun, Jan 10, 2016",Dallas Mavericks,93,Minnesota Timberwolves,87
+"Sun, Jan 10, 2016",Boston Celtics,98,Memphis Grizzlies,101
+"Sun, Jan 10, 2016",Cleveland Cavaliers,95,Philadelphia 76ers,85
+"Sun, Jan 10, 2016",Indiana Pacers,103,Houston Rockets,107
+"Sun, Jan 10, 2016",Milwaukee Bucks,88,New York Knicks,100
+"Sun, Jan 10, 2016",Charlotte Hornets,92,Denver Nuggets,95
+"Sun, Jan 10, 2016",Oklahoma City Thunder,110,Portland Trail Blazers,115
+"Sun, Jan 10, 2016",Utah Jazz,86,Los Angeles Lakers,74
+"Mon, Jan 11, 2016",San Antonio Spurs,106,Brooklyn Nets,79
+"Mon, Jan 11, 2016",Washington Wizards,114,Chicago Bulls,100
+"Mon, Jan 11, 2016",Miami Heat,103,Golden State Warriors,111
+"Tue, Jan 12, 2016",Phoenix Suns,97,Indiana Pacers,116
+"Tue, Jan 12, 2016",San Antonio Spurs,109,Detroit Pistons,99
+"Tue, Jan 12, 2016",Boston Celtics,114,New York Knicks,120
+"Tue, Jan 12, 2016",Houston Rockets,107,Memphis Grizzlies,91
+"Tue, Jan 12, 2016",Chicago Bulls,101,Milwaukee Bucks,106
+"Tue, Jan 12, 2016",Oklahoma City Thunder,101,Minnesota Timberwolves,96
+"Tue, Jan 12, 2016",Cleveland Cavaliers,110,Dallas Mavericks,107
+"Tue, Jan 12, 2016",New Orleans Pelicans,91,Los Angeles Lakers,95
+"Wed, Jan 13, 2016",Atlanta Hawks,84,Charlotte Hornets,107
+"Wed, Jan 13, 2016",Milwaukee Bucks,101,Washington Wizards,106
+"Wed, Jan 13, 2016",New York Knicks,104,Brooklyn Nets,110
+"Wed, Jan 13, 2016",Indiana Pacers,94,Boston Celtics,103
+"Wed, Jan 13, 2016",Minnesota Timberwolves,104,Houston Rockets,107
+"Wed, Jan 13, 2016",Dallas Mavericks,89,Oklahoma City Thunder,108
+"Wed, Jan 13, 2016",Golden State Warriors,110,Denver Nuggets,112
+"Wed, Jan 13, 2016",Utah Jazz,85,Portland Trail Blazers,99
+"Wed, Jan 13, 2016",New Orleans Pelicans,109,Sacramento Kings,97
+"Wed, Jan 13, 2016",Miami Heat,90,Los Angeles Clippers,104
+"Thu, Jan 14, 2016",Toronto Raptors,106,Orlando Magic,103
+"Thu, Jan 14, 2016",Chicago Bulls,115,Philadelphia 76ers,111
+"Thu, Jan 14, 2016",Detroit Pistons,101,Memphis Grizzlies,103
+"Thu, Jan 14, 2016",Cleveland Cavaliers,95,San Antonio Spurs,99
+"Thu, Jan 14, 2016",Sacramento Kings,103,Utah Jazz,101
+"Thu, Jan 14, 2016",Los Angeles Lakers,98,Golden State Warriors,116
+"Fri, Jan 15, 2016",Washington Wizards,118,Indiana Pacers,104
+"Fri, Jan 15, 2016",Minnesota Timberwolves,93,Oklahoma City Thunder,113
+"Fri, Jan 15, 2016",Phoenix Suns,103,Boston Celtics,117
+"Fri, Jan 15, 2016",Portland Trail Blazers,116,Brooklyn Nets,104
+"Fri, Jan 15, 2016",Dallas Mavericks,83,Chicago Bulls,77
+"Fri, Jan 15, 2016",Atlanta Hawks,101,Milwaukee Bucks,108
+"Fri, Jan 15, 2016",Charlotte Hornets,107,New Orleans Pelicans,109
+"Fri, Jan 15, 2016",Miami Heat,98,Denver Nuggets,95
+"Fri, Jan 15, 2016",Cleveland Cavaliers,91,Houston Rockets,77
+"Sat, Jan 16, 2016",Milwaukee Bucks,105,Charlotte Hornets,92
+"Sat, Jan 16, 2016",Brooklyn Nets,86,Atlanta Hawks,114
+"Sat, Jan 16, 2016",Golden State Warriors,95,Detroit Pistons,113
+"Sat, Jan 16, 2016",Portland Trail Blazers,89,Philadelphia 76ers,114
+"Sat, Jan 16, 2016",Boston Celtics,119,Washington Wizards,117
+"Sat, Jan 16, 2016",New York Knicks,95,Memphis Grizzlies,103
+"Sat, Jan 16, 2016",Los Angeles Lakers,82,Utah Jazz,109
+"Sat, Jan 16, 2016",Sacramento Kings,110,Los Angeles Clippers,103
+"Sun, Jan 17, 2016",Phoenix Suns,87,Minnesota Timberwolves,117
+"Sun, Jan 17, 2016",Miami Heat,74,Oklahoma City Thunder,99
+"Sun, Jan 17, 2016",Dallas Mavericks,83,San Antonio Spurs,112
+"Sun, Jan 17, 2016",Indiana Pacers,126,Denver Nuggets,129
+"Sun, Jan 17, 2016",Houston Rockets,112,Los Angeles Lakers,95
+"Mon, Jan 18, 2016",Philadelphia 76ers,113,New York Knicks,119
+"Mon, Jan 18, 2016",Utah Jazz,119,Charlotte Hornets,124
+"Mon, Jan 18, 2016",Portland Trail Blazers,108,Washington Wizards,98
+"Mon, Jan 18, 2016",New Orleans Pelicans,99,Memphis Grizzlies,101
+"Mon, Jan 18, 2016",Chicago Bulls,111,Detroit Pistons,101
+"Mon, Jan 18, 2016",Orlando Magic,81,Atlanta Hawks,98
+"Mon, Jan 18, 2016",Brooklyn Nets,100,Toronto Raptors,112
+"Mon, Jan 18, 2016",Golden State Warriors,132,Cleveland Cavaliers,98
+"Mon, Jan 18, 2016",Boston Celtics,113,Dallas Mavericks,118
+"Mon, Jan 18, 2016",Houston Rockets,132,Los Angeles Clippers,140
+"Tue, Jan 19, 2016",Milwaukee Bucks,91,Miami Heat,79
+"Tue, Jan 19, 2016",Minnesota Timberwolves,99,New Orleans Pelicans,114
+"Tue, Jan 19, 2016",Oklahoma City Thunder,110,Denver Nuggets,104
+"Tue, Jan 19, 2016",Indiana Pacers,97,Phoenix Suns,94
+"Wed, Jan 20, 2016",Philadelphia 76ers,96,Orlando Magic,87
+"Wed, Jan 20, 2016",Miami Heat,87,Washington Wizards,106
+"Wed, Jan 20, 2016",Cleveland Cavaliers,91,Brooklyn Nets,78
+"Wed, Jan 20, 2016",Utah Jazz,111,New York Knicks,118
+"Wed, Jan 20, 2016",Boston Celtics,109,Toronto Raptors,115
+"Wed, Jan 20, 2016",Golden State Warriors,125,Chicago Bulls,94
+"Wed, Jan 20, 2016",Detroit Pistons,123,Houston Rockets,114
+"Wed, Jan 20, 2016",Charlotte Hornets,95,Oklahoma City Thunder,109
+"Wed, Jan 20, 2016",Minnesota Timberwolves,94,Dallas Mavericks,106
+"Wed, Jan 20, 2016",Sacramento Kings,112,Los Angeles Lakers,93
+"Wed, Jan 20, 2016",Atlanta Hawks,104,Portland Trail Blazers,98
+"Thu, Jan 21, 2016",Los Angeles Clippers,102,Cleveland Cavaliers,115
+"Thu, Jan 21, 2016",Detroit Pistons,99,New Orleans Pelicans,115
+"Thu, Jan 21, 2016",Memphis Grizzlies,102,Denver Nuggets,101
+"Thu, Jan 21, 2016",Atlanta Hawks,88,Sacramento Kings,91
+"Thu, Jan 21, 2016",San Antonio Spurs,117,Phoenix Suns,89
+"Fri, Jan 22, 2016",Charlotte Hornets,120,Orlando Magic,116
+"Fri, Jan 22, 2016",Chicago Bulls,101,Boston Celtics,110
+"Fri, Jan 22, 2016",Utah Jazz,108,Brooklyn Nets,86
+"Fri, Jan 22, 2016",Los Angeles Clippers,116,New York Knicks,88
+"Fri, Jan 22, 2016",Milwaukee Bucks,98,Houston Rockets,102
+"Fri, Jan 22, 2016",Miami Heat,81,Toronto Raptors,101
+"Fri, Jan 22, 2016",Oklahoma City Thunder,109,Dallas Mavericks,106
+"Fri, Jan 22, 2016",Indiana Pacers,110,Golden State Warriors,122
+"Fri, Jan 22, 2016",San Antonio Spurs,108,Los Angeles Lakers,95
+"Sat, Jan 23, 2016",New York Knicks,84,Charlotte Hornets,97
+"Sat, Jan 23, 2016",Milwaukee Bucks,99,New Orleans Pelicans,116
+"Sat, Jan 23, 2016",Memphis Grizzlies,101,Minnesota Timberwolves,106
+"Sat, Jan 23, 2016",Chicago Bulls,96,Cleveland Cavaliers,83
+"Sat, Jan 23, 2016",Atlanta Hawks,95,Phoenix Suns,98
+"Sat, Jan 23, 2016",Detroit Pistons,101,Denver Nuggets,104
+"Sat, Jan 23, 2016",Los Angeles Lakers,103,Portland Trail Blazers,121
+"Sat, Jan 23, 2016",Indiana Pacers,97,Sacramento Kings,108
+"Sun, Jan 24, 2016",Dallas Mavericks,104,Houston Rockets,115
+"Sun, Jan 24, 2016",Los Angeles Clippers,94,Toronto Raptors,112
+"Sun, Jan 24, 2016",Boston Celtics,112,Philadelphia 76ers,92
+"Sun, Jan 24, 2016",Oklahoma City Thunder,106,Brooklyn Nets,116
+"Mon, Jan 25, 2016",Minnesota Timberwolves,107,Cleveland Cavaliers,114
+"Mon, Jan 25, 2016",Boston Celtics,116,Washington Wizards,91
+"Mon, Jan 25, 2016",Miami Heat,89,Chicago Bulls,84
+"Mon, Jan 25, 2016",Orlando Magic,102,Memphis Grizzlies,108
+"Mon, Jan 25, 2016",Houston Rockets,112,New Orleans Pelicans,111
+"Mon, Jan 25, 2016",Atlanta Hawks,119,Denver Nuggets,105
+"Mon, Jan 25, 2016",Detroit Pistons,95,Utah Jazz,92
+"Mon, Jan 25, 2016",Charlotte Hornets,129,Sacramento Kings,128
+"Mon, Jan 25, 2016",San Antonio Spurs,90,Golden State Warriors,120
+"Tue, Jan 26, 2016",Los Angeles Clippers,91,Indiana Pacers,89
+"Tue, Jan 26, 2016",Phoenix Suns,103,Philadelphia 76ers,113
+"Tue, Jan 26, 2016",Miami Heat,102,Brooklyn Nets,98
+"Tue, Jan 26, 2016",Oklahoma City Thunder,128,New York Knicks,122
+"Tue, Jan 26, 2016",Washington Wizards,89,Toronto Raptors,106
+"Tue, Jan 26, 2016",Orlando Magic,100,Milwaukee Bucks,107
+"Tue, Jan 26, 2016",Sacramento Kings,97,Portland Trail Blazers,112
+"Tue, Jan 26, 2016",Dallas Mavericks,92,Los Angeles Lakers,90
+"Wed, Jan 27, 2016",Phoenix Suns,93,Cleveland Cavaliers,115
+"Wed, Jan 27, 2016",Denver Nuggets,103,Boston Celtics,111
+"Wed, Jan 27, 2016",Philadelphia 76ers,97,Detroit Pistons,110
+"Wed, Jan 27, 2016",Los Angeles Clippers,85,Atlanta Hawks,83
+"Wed, Jan 27, 2016",Oklahoma City Thunder,126,Minnesota Timberwolves,123
+"Wed, Jan 27, 2016",Houston Rockets,99,San Antonio Spurs,130
+"Wed, Jan 27, 2016",Charlotte Hornets,73,Utah Jazz,102
+"Wed, Jan 27, 2016",Dallas Mavericks,107,Golden State Warriors,127
+"Thu, Jan 28, 2016",Atlanta Hawks,92,Indiana Pacers,111
+"Thu, Jan 28, 2016",Denver Nuggets,117,Washington Wizards,113
+"Thu, Jan 28, 2016",Milwaukee Bucks,83,Memphis Grizzlies,103
+"Thu, Jan 28, 2016",Sacramento Kings,105,New Orleans Pelicans,114
+"Thu, Jan 28, 2016",New York Knicks,93,Toronto Raptors,103
+"Thu, Jan 28, 2016",Chicago Bulls,114,Los Angeles Lakers,91
+"Fri, Jan 29, 2016",Orlando Magic,94,Boston Celtics,113
+"Fri, Jan 29, 2016",Cleveland Cavaliers,114,Detroit Pistons,106
+"Fri, Jan 29, 2016",Phoenix Suns,84,New York Knicks,102
+"Fri, Jan 29, 2016",Miami Heat,107,Milwaukee Bucks,103
+"Fri, Jan 29, 2016",Houston Rockets,108,Oklahoma City Thunder,116
+"Fri, Jan 29, 2016",Brooklyn Nets,79,Dallas Mavericks,91
+"Fri, Jan 29, 2016",Minnesota Timberwolves,90,Utah Jazz,103
+"Fri, Jan 29, 2016",Charlotte Hornets,91,Portland Trail Blazers,109
+"Fri, Jan 29, 2016",Los Angeles Lakers,93,Los Angeles Clippers,105
+"Sat, Jan 30, 2016",Golden State Warriors,108,Philadelphia 76ers,105
+"Sat, Jan 30, 2016",Detroit Pistons,107,Toronto Raptors,111
+"Sat, Jan 30, 2016",Denver Nuggets,105,Indiana Pacers,109
+"Sat, Jan 30, 2016",Brooklyn Nets,103,New Orleans Pelicans,105
+"Sat, Jan 30, 2016",Washington Wizards,123,Houston Rockets,122
+"Sat, Jan 30, 2016",Sacramento Kings,117,Memphis Grizzlies,121
+"Sat, Jan 30, 2016",San Antonio Spurs,103,Cleveland Cavaliers,117
+"Sun, Jan 31, 2016",Chicago Bulls,93,Los Angeles Clippers,120
+"Sun, Jan 31, 2016",Atlanta Hawks,87,Miami Heat,105
+"Sun, Jan 31, 2016",Boston Celtics,114,Orlando Magic,119
+"Sun, Jan 31, 2016",Phoenix Suns,78,Dallas Mavericks,91
+"Sun, Jan 31, 2016",Golden State Warriors,116,New York Knicks,95
+"Sun, Jan 31, 2016",Minnesota Timberwolves,93,Portland Trail Blazers,96
+"Sun, Jan 31, 2016",Charlotte Hornets,101,Los Angeles Lakers,82
