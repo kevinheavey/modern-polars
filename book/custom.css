@@ -1,0 +1,8 @@
+.dataframe {
+    display: inline-block;
+}
+.dataframe td {
+    vertical-align: middle;
+    text-align: right;
+}
+tbody tr:hover {background: rgba(66, 165, 245, 0.2);}

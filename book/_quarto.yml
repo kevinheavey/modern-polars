@@ -1,0 +1,22 @@
+project:
+  type: book
+
+book:
+  title: "Modern Polars"
+  author: "Kevin Heavey"
+  date: "22/12/2022"
+  chapters:
+    - index.qmd
+    - intro.qmd
+    - summary.qmd
+
+format:
+  html:
+    theme: cosmo
+    code-fold: false
+    css: custom.css
+  pdf:
+    documentclass: scrreprt
+
+
+
