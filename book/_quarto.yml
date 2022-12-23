@@ -7,7 +7,7 @@ book:
   date: "22/12/2022"
   chapters:
     - index.qmd
-    - intro.qmd
+    - indexing.qmd
     - summary.qmd
 
 format:
@@ -15,8 +15,6 @@ format:
     theme: cosmo
     code-fold: false
     css: custom.css
-  pdf:
-    documentclass: scrreprt
 
 
 
