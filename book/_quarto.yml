@@ -17,6 +17,7 @@ format:
       dark: solar
     code-fold: false
     css: custom.css
+    backgroundcolor: "#F5F5F5"
 
 # good themes: default, cosmo, flatly, lumen, minty, pulse, sandstone, solar, united
 # favourites: minty, cosmo
