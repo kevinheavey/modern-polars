@@ -26,7 +26,7 @@ if not dest.exists():
 extracted = data_dir / "On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv"
 ```
 
-### Read the data
+## Read the data
 
 :::{.callout-tip}
 The examples in this book use the [lazy evaluation](https://pola-rs.github.io/polars-book/user-guide/coming_from_pandas.html?highlight=lazy#be-lazy)
@@ -85,6 +85,7 @@ doesn't work in lazy mode and may be deprecated in future 🙃
 Here are some examples:
 
 ### Rows by number, columns by name
+
 
 ::: {.panel-tabset}
 ## Polars (recommended)
