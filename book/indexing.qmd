@@ -204,7 +204,7 @@ f.assign(b=f["b"].mask(f["a"] <=3, f["b"] // 10))
 
 ## Summary
 
-Basically, there's no index in Polars and square brackets are bad.
+Basically, there's no index in Polars and square brackets are bad most of the time.
 I think the lack of an index is quite acceptable even if there are
 cases where it's useful. Most Pandas users just call `.reset_index()`
 all the time anyway.
