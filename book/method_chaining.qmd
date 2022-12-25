@@ -11,6 +11,8 @@ when *Modern Pandas* was released, methods like `assign` and `pipe` were quite r
 
 Fortunately Polars is very fluent. The expression API provides a very elegant way to do a bunch of stuff to a dataframe in one fell swoop, and Polars mostly doesn't mutate dataframes in-place (method chaining with side effects is usually a bad idea).
 
+Let's see how this looks in practice by cleaning up the flight data we gathered in @indexing.
+
 ## Read the data
 
 ``` {python}

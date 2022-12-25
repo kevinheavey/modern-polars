@@ -1,5 +1,7 @@
 # Indexing (Or Lack Thereof)
 
+This chapter is about indexes, which are the source of much confusion in Pandas and simply don't exist in Polars.
+
 ## Fetch Data (No Dataframes Here)
 
 First we fetch some flight delay data. This part isn't about dataframes so feel free to skip the code.
@@ -126,7 +128,7 @@ we just use `.filter`:
 (
     df_pl
     .filter(pl.col("IATA_CODE_Reporting_Airline").is_in(['AA', 'DL']))
-    .select(["Dest", "Tail_Number"])
+    .select(["IATA_CODE_Reporting_Airline", "Dest", "Tail_Number"])
 )
 ```
 
@@ -197,7 +199,7 @@ f.loc[f['a'] <= 3, "b"] = f['b'] // 10
 f
 ```
 
-## Pandas (also good)
+## Pandas (better)
 
 ``` {python}
 f = pd.DataFrame({'a':[1,2,3,4,5], 'b':[10,20,30,40,50]})

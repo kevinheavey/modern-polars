@@ -8,13 +8,13 @@ book:
   chapters:
     - index.qmd
     - indexing.qmd
+    - method_chaining.qmd
     - summary.qmd
 
 format:
   html:
     theme:
       light: cosmo
-      dark: solar
     code-fold: false
     css: custom.css
     backgroundcolor: "#F5F5F5"
