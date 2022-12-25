@@ -8,7 +8,7 @@ It'll probably break one day too, so the output is saved in this book's reposito
 ``` {python}
 #| code-fold: true
 from pathlib import Path
-from zipfile import Zipfile
+from zipfile import ZipFile
 import requests
 
 data_dir = Path("../data")
