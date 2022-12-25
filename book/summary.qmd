@@ -1,3 +1,5 @@
 # Summary
 
-In summary, this book has no content whatsoever.
+
+
+I did feel somewhat uneasy about bugs I ran into 

@@ -44,7 +44,7 @@ It's just inconvenient to use the lazy API when displaying dozens of intermediat
 
 ``` {python}
 import polars as pl
-pl.Config.set_tbl_rows(5) # don't print too many rows in this book
+pl.Config.set_tbl_rows(5) # don't print too many rows in the book
 df_pl = pl.read_csv(extracted)
 ```
 

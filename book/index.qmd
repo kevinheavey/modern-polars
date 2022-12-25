@@ -1,6 +1,6 @@
 # Preface {.unnumbered}
 
-This book is a side-by-side comparison of the [Polars](https://www.pola.rs/)
+This is a side-by-side comparison of the [Polars](https://www.pola.rs/)
 and [Pandas](https://pandas.pydata.org/) dataframe libraries,
 based on the series [Modern Pandas](https://tomaugspurger.github.io/posts/modern-8-scaling/) by Tom Augsburger.
 
@@ -18,7 +18,7 @@ This is also a book for someone who knows Polars but not Pandas, if such a perso
 
 You don't need to have read Modern Pandas, though I of course think it's a great read.
 
-## Why write this book?
+## Why write this?
 
 There's this weird phenomenon where people write data programming code as if they hate themselves.
 Many of them are academic or quant types who seem to have some complex about being "bad at coding".
