@@ -1,16 +1,15 @@
 # Method Chaining
 
 Many people don't need to be told why method chaining is nice. Many languages make it easy to write
-`thing.min().abs()` instead of `abs(min(thing))`.
+`thing.min().abs().str()` instead of `str(abs(min(thing)))`.
 
 But the Python standard library tends to prefer the ugly way, so if you've spent a lot of time doing vanilla Python stuff, you may have become accustomed to writing
-nasty nested function calls or declaring intermediate variables like `min_thing`.
+nasty nested function calls or declaring intermediate variables like `min_thing`. This is sad because a sensible degree of method chaining can make code a lot easier to read.
 
-A sensible degree of method chaining can make code a lot easier to read,
-but it's not always easy for languages and libraries to accommodate it - in fancy terms, to be [Fluent Interfaces](https://en.wikipedia.org/wiki/Fluent_interface). Even Pandas used to be much less fluent:
+It's not always easy for libraries to accommodate method chaining - in fancy terms, to be [fluent interfaces](https://en.wikipedia.org/wiki/Fluent_interface). Even Pandas used to be much less fluent:
 when *Modern Pandas* was released, methods like `assign` and `pipe` were quite recent.
 
-Polars is maximally fluent. The expression API provides a very elegant way to do a bunch of stuff to a dataframe in one fell swoop, and it provides very few ways to mutate dataframes in place (method chaining with side effects is usually a bad idea).
+Fortunately Polars is very fluent. The expression API provides a very elegant way to do a bunch of stuff to a dataframe in one fell swoop, and Polars mostly doesn't mutate dataframes in-place (method chaining with side effects is usually a bad idea).
 
 ## Read the data
 
