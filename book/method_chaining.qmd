@@ -1,4 +1,16 @@
-# Indexing (Or Lack Thereof)
+# Method Chaining
+
+Many people don't need to be told why method chaining is nice. Many languages make it easy to write
+`thing.min().abs()` instead of `abs(min(thing))`.
+
+But the Python standard library tends to prefer the ugly way, so if you've spent a lot of time doing vanilla Python stuff, you may have become accustomed to writing
+nasty nested function calls or declaring intermediate variables like `min_thing`.
+
+A sensible degree of method chaining can make code a lot easier to read,
+but it's not always easy for languages and libraries to accommodate it - in fancy terms, to be [Fluent Interfaces](https://en.wikipedia.org/wiki/Fluent_interface). Even Pandas used to be much less fluent:
+when *Modern Pandas* was released, methods like `assign` and `pipe` were quite recent.
+
+Polars is maximally fluent. The expression API provides a very elegant way to do a bunch of stuff to a dataframe in one fell swoop, and it provides very few ways to mutate dataframes in place (method chaining with side effects is usually a bad idea).
 
 ## Fetch Data (No Dataframes Here)
 
@@ -7,7 +19,6 @@ First we fetch some flight delay data:
 ``` {python}
 #| code-fold: true
 from pathlib import Path
-from zipfile import Zipfile
 import requests
 
 data_dir = Path("../data")
@@ -24,9 +35,6 @@ if not dest.exists():
         for chunk in r.iter_content(chunk_size=102400):
             if chunk:
                 f.write(chunk)
-
-    with ZipFile(dest) as zf:
-        zf.extract(zf.filelist[0].filename, path="data/")
 extracted = data_dir / "On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv"
 ```
 
