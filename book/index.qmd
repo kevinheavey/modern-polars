@@ -18,7 +18,7 @@ This is also a book for someone who knows Polars but not Pandas, if such a perso
 
 You don't need to have read Modern Pandas, though I of course think it's a great read.
 
-## Why write this?
+## Why?
 
 There's this weird phenomenon where people write data programming code as if they hate themselves.
 Many of them are academic or quant types who seem to have some complex about being "bad at coding".
@@ -31,7 +31,7 @@ make a compelling case for Pandas having too much going on.
 Having used Pandas a lot, I *think* Polars is more intuitive and does a better job of having One Obvious Way to do stuff. 
 It's also much faster at most things, even when you do Pandas the right way.
 
-Hopefully this work shows you how and why to prefer Polars over Pandas.
+Hopefully this work shows you how, why and when to prefer Polars.
 
 ## Credit
 
@@ -41,5 +41,4 @@ quite a lot of people are already familiar with.
 
 So credit goes to Tom for the Pandas examples, for most of the data
 fetching code and for the general structure of the articles.
-
 Meanwhile the text content and the Polars examples are all from me.

@@ -5,6 +5,8 @@ book:
   title: "Modern Polars"
   author: "Kevin Heavey"
   date: "22/12/2022"
+  sidebar: 
+    background: "#F5F5F5"
   chapters:
     - index.qmd
     - indexing.qmd

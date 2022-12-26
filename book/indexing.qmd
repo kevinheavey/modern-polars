@@ -1,4 +1,4 @@
-# Indexing (Or Lack Thereof)
+# Indexing (Or Lack Thereof) {#sec-indexing}
 
 This chapter is about indexes, which are the source of much confusion in Pandas and simply don't exist in Polars.
 

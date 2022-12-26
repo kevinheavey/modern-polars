@@ -3,3 +3,8 @@
 
 
 I did feel somewhat uneasy about bugs I ran into 
+
+
+## Other stuff
+
+- tidypolars
