@@ -133,24 +133,24 @@ It turns out that combining `pl.Date` and `pl.Time` isn't that straightforward: 
 It's time for some method chaining. First, some common variables for both the Polars and Pandas code:
 
 ``` {python}
-category_cols = (
+category_cols = [
     "Dest",
     "Tail_Number",
     "IATA_CODE_Reporting_Airline",
     "CancellationCode",
-)
-time_cols = ("DepTime", "ArrTime", "CRSArrTime", "CRSDepTime")
+]
+time_cols = ["DepTime", "ArrTime", "CRSArrTime", "CRSDepTime"]
 cols = (
     category_cols
     + time_cols
-    + (
+    + [
         "FlightDate",
         "Flight_Number_Reporting_Airline",
         "OriginCityName",
         "DestCityName",
         "Origin",
         "DepDelay",
-    )
+    ]
 )
 ```
 
@@ -184,10 +184,198 @@ dtypes_pd = (
 df_pd = (
     pd.read_csv(extracted, dtype=dtypes_pd, usecols=cols, na_values="")
     .pipe(extract_city_name_pd)
-    .pipe(time_to_datetime_pd, list(time_cols))
+    .pipe(time_to_datetime_pd, time_cols)
     .assign(FlightDate=lambda df: pd.to_datetime(df["FlightDate"]))
 )
 df_pd[cols].head()
 ```
 
 :::
+
+Differences between the two approaches:
+
+1. Since `scan_csv` is lazy, using `scan_csv` followed by `.select`ing a subset of columns is equivalent to `usecols` in `pd.read_csv`. This is why `pl.scan_csv` itself doesn't have a parameter for choosing a subset of columns to read.
+2. Polars does have a `.pipe` method, but we don't use it in this case since it's easier to work with expressions.
+
+::: {.callout-tip}
+Q: `.with_columns` is for adding new columns or overwriting existing ones. But `.select` can also do those things, so what's the difference? 
+
+A: `.with_columns` is just convenient for when you don't want to reselect all the columns you're not modifying.
+:::
+
+
+## Example plots
+
+### Daily Flights
+
+Here's how plotting the number of daily flights looks in Pandas and Polars:
+
+::: {.callout-note}
+Polars works fine with Matplotlib and Plotly, but it doesn't work with Seaborn or have its own `.plot` method. The latter two are very convenient
+for exploratory data analysis. So for these examples we'll just use `to_pandas` followed by `plot` or a Seaborn function after doing all the data manipulation in Polars.
+:::
+
+::: {.panel-tabset}
+## Polars
+
+``` {python}
+# filter for the busiest airlines
+filter_expr = pl.col("IATA_CODE_Reporting_Airline").is_in(
+    pl.col("IATA_CODE_Reporting_Airline")
+    .value_counts(sort=True)
+    .struct.field("IATA_CODE_Reporting_Airline")
+    .head(5)
+)
+(
+    df_pl
+    .drop_nulls(subset=["DepTime", "IATA_CODE_Reporting_Airline"])
+    .filter(filter_expr)
+    .sort("DepTime")
+    .groupby_dynamic("DepTime", every="1h", by="IATA_CODE_Reporting_Airline")
+    .agg(pl.col("Flight_Number_Reporting_Airline").count())
+    .pivot(
+        index="DepTime",
+        columns="IATA_CODE_Reporting_Airline",
+        values="Flight_Number_Reporting_Airline",
+    )
+    .sort("DepTime")
+    # every missing hour with 0 so the plot looks better
+    .upsample(time_column="DepTime", every="1h")
+    .fill_null(0)
+    .select([pl.col("DepTime"), pl.col(pl.UInt32).rolling_sum(24)])
+    .to_pandas()
+    .set_index("DepTime")
+    .rename_axis("Flights per Day", axis=1)
+    .plot()
+)
+```
+
+## Polars
+
+``` {python}
+(
+    df_pd
+    .dropna(subset=["DepTime", "IATA_CODE_Reporting_Airline"])
+    # filter for the busiest airlines
+    .loc[
+        lambda x: x["IATA_CODE_Reporting_Airline"].isin(
+            x["IATA_CODE_Reporting_Airline"].value_counts().index[:5]
+        )
+    ]
+    .assign(
+        IATA_CODE_Reporting_Airline=lambda x: x[
+            "IATA_CODE_Reporting_Airline"
+        ].cat.remove_unused_categories()  #  annoying pandas behaviour
+    )
+    .set_index("DepTime")
+    # TimeGrouper to resample & groupby at once
+    .groupby(["IATA_CODE_Reporting_Airline", pd.Grouper(freq="H")])[
+        "Flight_Number_Reporting_Airline"
+    ]
+    .count()
+    # the .pivot takes care of this in the Polars code.
+    .unstack(0)
+    .fillna(0)
+    .rolling(24)
+    .sum()
+    .rename_axis("Flights per Day", axis=1)
+    .plot()
+)
+```
+:::
+
+Differences between Polars and Pandas:
+
+1. To group by a time window and another value, we use `.groupby_dynamic`. In Pandas we use .`groupby` with this `pd.Grouper` helper.
+2. Instead of `.rolling(n).sum()`, Polars has `.rolling_sum(n)`.
+3. If you see Pandas code using `.unstack`, the corresponding Polars code probably needs `.pivot`.
+4. In Polars, `.value_counts` returns a `pl.Struct` column containing the value and the value count. In Pandas it returns a series where the elements are the value counts and the index contains the values themselves.
+
+### Planes With Multiple Daily Flights
+
+Now let's see if planes with multiple flights per day tend to get delayed as the day goes on:
+
+
+::: {.panel-tabset}
+## Polars
+
+```python
+flights_pl = (
+    df_pl.select(pl.col(["FlightDate", "Tail_Number", "DepTime", "DepDelay"]))
+    .drop_nulls()
+    .sort("DepTime")
+    .filter(pl.col("DepDelay") < 500)
+    .with_column(
+        pl.col("DepTime").rank().over(["FlightDate", "Tail_Number"]).alias("turn")
+    )
+)
+
+fig, ax = plt.subplots(figsize=(15, 5))
+sns.boxplot(x="turn", y="DepDelay", data=flights_pl.to_pandas(), ax=ax)
+ax.set_ylim(-50, 50)
+```
+
+## Pandas
+
+```python
+flights_pd = (
+    df_pd[["FlightDate", "Tail_Number", "DepTime", "DepDelay"]]
+    .dropna()
+    .sort_values('DepTime')
+    .loc[lambda x: x["DepDelay"] < 500]
+    .assign(turn = lambda x:
+        x.groupby(["FlightDate", "Tail_Number"])
+        ["DepTime"].transform('rank')
+        .astype(int)
+    )
+)
+fig, ax = plt.subplots(figsize=(15, 5))
+sns.boxplot(x="turn", y="DepDelay", data=flights_pd, ax=ax)
+ax.set_ylim(-50, 50)
+```
+
+:::
+
+One new thing here: [window function](https://pola-rs.github.io/polars-book/user-guide/dsl/window_functions.html).
+When Pandas code looks like `.groupby("country")["population"].transform("sum")`, the equivalent Polars code will look like
+`pl.col("population").sum().over("country")`.
+
+### Delay by hour of the day
+
+Maybe later flights have longer delays:
+
+::: {.panel-tabset}
+## Polars
+
+```python
+plt.figure(figsize=(15, 5))
+(
+    df_pl.select(
+        pl.col(
+            ["FlightDate", "Tail_Number", "DepTime", "DepDelay"],
+        )
+    )
+    .drop_nulls()
+    .filter(pl.col("DepDelay").is_between(5, 600))
+    .with_column(pl.col("DepTime").dt.hour().alias("hour"))
+    .to_pandas()
+    .pipe((sns.boxplot, "data"), x="hour", y="DepDelay")
+)
+```
+
+## Pandas
+
+```python
+plt.figure(figsize=(15, 5))
+(
+    df_pd[["FlightDate", "Tail_Number", "DepTime", "DepDelay"]]
+    .dropna()
+    .loc[lambda df: df["DepDelay"].between(5, 600, inclusive="neither")]
+    .assign(hour=lambda df: df["DepTime"].dt.hour)
+    .pipe((sns.boxplot, "data"), x="hour", y="DepDelay")
+)
+```
+
+:::
+
+It's worth noting that Polars has an `is_between` method that's similar to Pandas `between`, but the Polars one excludes the boundaries by default while Pandas includes them.
