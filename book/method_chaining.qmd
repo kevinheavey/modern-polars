@@ -19,6 +19,8 @@ Let's see how this looks in practice by cleaning up the flight data we gathered 
 from pathlib import Path
 import polars as pl
 import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 pl.Config.set_tbl_rows(5)
 pd.options.display.max_rows = 5
@@ -231,7 +233,10 @@ filter_expr = pl.col("IATA_CODE_Reporting_Airline").is_in(
     .drop_nulls(subset=["DepTime", "IATA_CODE_Reporting_Airline"])
     .filter(filter_expr)
     .sort("DepTime")
-    .groupby_dynamic("DepTime", every="1h", by="IATA_CODE_Reporting_Airline")
+    .groupby_dynamic(
+        "DepTime",
+        every="1h",
+        by="IATA_CODE_Reporting_Airline")
     .agg(pl.col("Flight_Number_Reporting_Airline").count())
     .pivot(
         index="DepTime",
@@ -239,7 +244,7 @@ filter_expr = pl.col("IATA_CODE_Reporting_Airline").is_in(
         values="Flight_Number_Reporting_Airline",
     )
     .sort("DepTime")
-    # every missing hour with 0 so the plot looks better
+    # fill every missing hour with 0 so the plot looks better
     .upsample(time_column="DepTime", every="1h")
     .fill_null(0)
     .select([pl.col("DepTime"), pl.col(pl.UInt32).rolling_sum(24)])
@@ -250,7 +255,7 @@ filter_expr = pl.col("IATA_CODE_Reporting_Airline").is_in(
 )
 ```
 
-## Polars
+## Pandas
 
 ``` {python}
 (
@@ -299,27 +304,42 @@ Now let's see if planes with multiple flights per day tend to get delayed as the
 ::: {.panel-tabset}
 ## Polars
 
-```python
+``` {python}
 flights_pl = (
-    df_pl.select(pl.col(["FlightDate", "Tail_Number", "DepTime", "DepDelay"]))
+    df_pl.select(
+        pl.col([
+            "FlightDate",
+            "Tail_Number",
+            "DepTime",
+            "DepDelay"
+        ])
+    )
     .drop_nulls()
     .sort("DepTime")
     .filter(pl.col("DepDelay") < 500)
     .with_column(
-        pl.col("DepTime").rank().over(["FlightDate", "Tail_Number"]).alias("turn")
+        pl.col("DepTime")
+        .rank()
+        .over(["FlightDate", "Tail_Number"])
+        .alias("turn")
     )
 )
 
-fig, ax = plt.subplots(figsize=(15, 5))
+fig, ax = plt.subplots(figsize=(10, 5))
 sns.boxplot(x="turn", y="DepDelay", data=flights_pl.to_pandas(), ax=ax)
 ax.set_ylim(-50, 50)
 ```
 
 ## Pandas
 
-```python
+``` {python}
 flights_pd = (
-    df_pd[["FlightDate", "Tail_Number", "DepTime", "DepDelay"]]
+    df_pd[[
+        "FlightDate",
+        "Tail_Number",
+        "DepTime",
+        "DepDelay"
+    ]]
     .dropna()
     .sort_values('DepTime')
     .loc[lambda x: x["DepDelay"] < 500]
@@ -329,16 +349,22 @@ flights_pd = (
         .astype(int)
     )
 )
-fig, ax = plt.subplots(figsize=(15, 5))
+fig, ax = plt.subplots(figsize=(10, 5))
 sns.boxplot(x="turn", y="DepDelay", data=flights_pd, ax=ax)
 ax.set_ylim(-50, 50)
 ```
 
 :::
 
-One new thing here: [window function](https://pola-rs.github.io/polars-book/user-guide/dsl/window_functions.html).
-When Pandas code looks like `.groupby("country")["population"].transform("sum")`, the equivalent Polars code will look like
-`pl.col("population").sum().over("country")`.
+One new thing here: [window functions](https://pola-rs.github.io/polars-book/user-guide/dsl/window_functions.html).
+When Pandas code looks like:
+```python
+.groupby("country")["population"].transform("sum")
+```
+the equivalent Polars code will look like:
+```python
+pl.col("population").sum().over("country")
+```
 
 ### Delay by hour of the day
 
@@ -347,8 +373,8 @@ Maybe later flights have longer delays:
 ::: {.panel-tabset}
 ## Polars
 
-```python
-plt.figure(figsize=(15, 5))
+``` {python}
+plt.figure(figsize=(10, 5))
 (
     df_pl.select(
         pl.col(
@@ -365,8 +391,8 @@ plt.figure(figsize=(15, 5))
 
 ## Pandas
 
-```python
-plt.figure(figsize=(15, 5))
+``` {python}
+plt.figure(figsize=(10, 5))
 (
     df_pd[["FlightDate", "Tail_Number", "DepTime", "DepDelay"]]
     .dropna()
