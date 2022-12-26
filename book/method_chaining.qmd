@@ -71,3 +71,123 @@ You'll find it's often easier to pass around `Expr`s than dataframes because:
     because it's slow and awkward to work with - notice how the most convenient way to get the first element of a list column in Pandas is to call `.str[0]`, even though this is a list, not a string 🤯
     
     I'm not sure if that's even supposed to work. In contrast, Polars actually has first class support for list columns, and they are fast **as long as they don't have mixed types.**
+
+::: {.panel-tabset}
+## Polars
+
+``` {python}
+def time_col_pl(col: str) -> pl.Expr:
+    col_expr = pl.col(col)
+    return (
+        pl.when(col_expr == "2400")
+        .then("0000")
+        .otherwise(col_expr)
+        .str.strptime(pl.Time, "%H%M", strict=True)
+        .alias(col)
+    )
+
+
+def time_to_datetime_pl(columns: list[str]) -> list[pl.Expr]:
+    """
+    Combine all time items into datetimes.
+
+    2014-01-01,0914 -> 2014-01-01 09:14:00
+    """
+    date_val = pl.col("FlightDate").dt.epoch("us")
+    return [
+        (date_val + time_col_pl(col).to_physical() // 1000)
+        .cast(pl.Datetime)
+        .alias(col)
+        for col in columns
+    ]
+```
+
+## Pandas
+
+``` {python}
+def time_col_pd(col: str, df: pd.DataFrame) -> pd.Series:
+    timepart = df[col].replace("2400", "0000")
+    return pd.to_datetime(df["FlightDate"] + ' ' +
+                            timepart.str.slice(0, 2) + ':' +
+                            timepart.str.slice(2, 4),
+                            errors='coerce')
+
+def time_to_datetime_pd(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
+    '''
+    Combine all time items into datetimes.
+
+    2014-01-01,0914 -> 2014-01-01 09:14:00
+    '''
+    return df.assign(**{col: time_col_pd(col, df) for col in columns})
+```
+
+:::
+
+The Pandas version concatenates the date and time strings then parses the datetime string.
+We could do the same in Polars but I wanted to show you the `pl.Date` and `pl.Time` dtypes, which Pandas lacks.
+It turns out that combining `pl.Date` and `pl.Time` isn't that straightforward: I had to convert them both to microseconds, add them and then cast as `pl.Datetime`.
+
+
+## Brining It All Back Home
+
+It's time for some method chaining. First, some common variables for both the Polars and Pandas code:
+
+``` {python}
+category_cols = (
+    "Dest",
+    "Tail_Number",
+    "IATA_CODE_Reporting_Airline",
+    "CancellationCode",
+)
+time_cols = ("DepTime", "ArrTime", "CRSArrTime", "CRSDepTime")
+cols = (
+    category_cols
+    + time_cols
+    + (
+        "FlightDate",
+        "Flight_Number_Reporting_Airline",
+        "OriginCityName",
+        "DestCityName",
+        "Origin",
+        "DepDelay",
+    )
+)
+```
+
+Now to read the CSVs and use the functions we defined above:
+
+::: {.panel-tabset}
+## Polars
+
+``` {python}
+dtypes_pl = (
+    {col: pl.Categorical for col in category_cols}
+    | {"FlightDate": pl.Date}
+    | {col: pl.Utf8 for col in time_cols}
+)
+df_pl = (
+    pl.scan_csv(extracted, dtypes=dtypes_pl, null_values="")
+    .select(cols)
+    .with_columns([extract_city_name_pl(), *time_to_datetime_pl(time_cols)])
+    .collect()
+)
+df_pl.head()
+```
+
+## Pandas
+
+``` {python}
+dtypes_pd = (
+    {col: pd.CategoricalDtype() for col in category_cols}
+    | {col: pd.StringDtype() for col in time_cols}
+)
+df_pd = (
+    pd.read_csv(extracted, dtype=dtypes_pd, usecols=cols, na_values="", engine="pyarrow")
+    .pipe(extract_city_name_pd)
+    .pipe(time_to_datetime_pd, list(time_cols))
+    .assign(FlightDate=lambda df: pd.to_datetime(df["FlightDate"]))
+)
+df_pd.head()
+```
+
+:::
