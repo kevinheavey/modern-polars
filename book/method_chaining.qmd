@@ -13,11 +13,61 @@ Fortunately Polars is very fluent. The expression API provides a very elegant wa
 
 Let's see how this looks in practice by cleaning up the flight data we gathered in @sec-indexing.
 
-## Read the data
+## Setup
 
 ``` {python}
 from pathlib import Path
+import polars as pl
+import pandas as pd
+
+pl.Config.set_tbl_rows(5)
+pd.options.display.max_rows = 5
 
 data_dir = Path("../data")
 extracted = data_dir / "On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv"
 ```
+
+## Extract city names
+
+The dataset has two columns that look like `$city, $state`. Let's define a function that removes the state part from these columns. There's no method chaining yet but we do have a few things to talk about while we're here:
+
+::: {.panel-tabset}
+## Polars
+
+``` {python}
+def extract_city_name_pl() -> pl.Expr:
+    """
+    Chicago, IL -> Chicago for OriginCityName and DestCityName
+    """
+    cols = ["OriginCityName", "DestCityName"]
+    # note that lists are OK in Polars if they have the same data type
+    return pl.col(cols).str.split(",").arr.get(0)
+```
+
+## Pandas
+
+``` {python}
+def extract_city_name_pd(df: pd.DataFrame) -> pl.DataFrame:
+    """
+    Chicago, IL -> Chicago for OriginCityName and DestCityName
+    """
+    cols = ["OriginCityName", "DestCityName"]
+    return df.assign(**{col: df[col].str.split(",", regex=False).str[0] for col in cols})
+```
+
+:::
+
+Some things to note:
+
+1. Our Pandas function adds columns to a dataframe, while our Polars function simply generates a Polars *expression*.
+You'll find it's often easier to pass around `Expr`s than dataframes because: 
+    i. They work on both `DataFrame` and `LazyFrame`, and they aren't bound to any particular data.
+    ii. Polars performs better if you put everything in one `.select` or `.with_columns` call, rather than calling `.select` multiple times. If you pass around expressions, this pattern is easy.
+2.  Polars is fast and convenient for doing the same thing to multiple columns. We can pass a list of columns to `pl.col`
+    and then call a method on that `pl.col` as if it were one column. When the expression gets executed it will be parallelized by Polars.
+
+    Meanwhile in Pandas we have to loop through the columns to create a dictionary of kwargs for `.assign`. This is not parallel. (We could use `.apply` with `axis=0` instead but this would still take place sequentially and isn't any easier to read, in my opinion).
+3.  Calling `.str.split` in Polars creates a column where every element is a list. This kind of data is annoying in Pandas
+    because it's slow and awkward to work with - notice how the most convenient way to get the first element of a list column in Pandas is to call `.str[0]`, even though this is a list, not a string 🤯
+    
+    I'm not sure if that's even supposed to work. In contrast, Polars actually has first class support for list columns, and they are fast **as long as they don't have mixed types.**
