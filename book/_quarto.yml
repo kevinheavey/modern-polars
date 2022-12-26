@@ -4,9 +4,12 @@ project:
 book:
   title: "Modern Polars"
   author: "Kevin Heavey"
-  date: "22/12/2022"
+  favicon: polar-bear-airpods-no-background.png
+  cover-image-alt: A drawing of a polar bear wearing airpods
   sidebar: 
     background: "#F5F5F5"
+    logo: polar-bear-airpods-no-background.png
+    search: true
   chapters:
     - index.qmd
     - indexing.qmd
