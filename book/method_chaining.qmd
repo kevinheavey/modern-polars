@@ -182,12 +182,12 @@ dtypes_pd = (
     | {col: pd.StringDtype() for col in time_cols}
 )
 df_pd = (
-    pd.read_csv(extracted, dtype=dtypes_pd, usecols=cols, na_values="", engine="pyarrow")
+    pd.read_csv(extracted, dtype=dtypes_pd, usecols=cols, na_values="")
     .pipe(extract_city_name_pd)
     .pipe(time_to_datetime_pd, list(time_cols))
     .assign(FlightDate=lambda df: pd.to_datetime(df["FlightDate"]))
 )
-df_pd.head()
+df_pd[cols].head()
 ```
 
 :::
