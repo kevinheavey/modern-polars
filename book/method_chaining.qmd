@@ -68,7 +68,7 @@ You'll find it's often easier to pass around `Expr`s than dataframes because:
 2.  Polars is fast and convenient for doing the same thing to multiple columns. We can pass a list of columns to `pl.col`
     and then call a method on that `pl.col` as if it were one column. When the expression gets executed it will be parallelized by Polars.
 
-    Meanwhile in Pandas we have to loop through the columns to create a dictionary of kwargs for `.assign`. This is not parallel. (We could use `.apply` with `axis=0` instead but this would still take place sequentially and isn't any easier to read, in my opinion).
+    Meanwhile in Pandas we have to loop through the columns to create a dictionary of kwargs for `.assign`. This is not parallelized. (We could use `.apply` with `axis=0` instead but this would still take place sequentially and isn't any easier to read, in my opinion).
 3.  Calling `.str.split` in Polars creates a column where every element is a list. This kind of data is annoying in Pandas
     because it's slow and awkward to work with - notice how the most convenient way to get the first element of a list column in Pandas is to call `.str[0]`, even though this is a list, not a string 🤯
     
@@ -200,7 +200,7 @@ Differences between the two approaches:
 2. Polars does have a `.pipe` method, but we don't use it in this case since it's easier to work with expressions.
 
 ::: {.callout-tip}
-Q: `.with_columns` is for adding new columns or overwriting existing ones. But `.select` can also do those things, so what's the difference? 
+Q: The `.with_columns` method is for adding new columns or overwriting existing ones. But `.select` can also do those things, so what's the difference?
 
 A: `.with_columns` is just convenient for when you don't want to reselect all the columns you're not modifying.
 :::
@@ -213,8 +213,8 @@ A: `.with_columns` is just convenient for when you don't want to reselect all th
 Here's how plotting the number of daily flights looks in Pandas and Polars:
 
 ::: {.callout-note}
-Polars works fine with Matplotlib and Plotly, but it doesn't work with Seaborn or have its own `.plot` method. The latter two are very convenient
-for exploratory data analysis. So for these examples we'll just use `to_pandas` followed by `plot` or a Seaborn function after doing all the data manipulation in Polars.
+Polars works fine with Matplotlib and Plotly, but it doesn't work with Seaborn, nor does it have its own `.plot` method. The latter two are very convenient
+for exploratory data analysis, so for these examples we'll just use `to_pandas` followed by `plot` or a Seaborn function after doing all the data manipulation in Polars.
 :::
 
 ::: {.panel-tabset}
@@ -408,3 +408,17 @@ It's worth noting that Polars has an `is_between` method that's similar to Panda
 
 
 ## How much is too much?
+
+The above examples have some fairly long method chains that could perhaps be split up. That said, if I saw them in a PR I probably wouldn't mind. Here's a chain that's too long:
+
+![](pandas_chain_tweet.png){fig-alt="A tweet with a code screenshot containing a very long method chain, and an angry reply."}
+
+I would argue this code is not hard to follow, but empirically it provokes disgust in people. I think it's just visually shocking, which is often a hallmark of terrible code. That's enough reason to avoid doing this. You don't want people assuming you've lost your mind.
+
+In this case, it would probably be enough to just move those long lists to their own variables. That would make it more obvious that the code is really doing simple, menial things.
+
+## Summary
+
+- Method chaining is good but use it with care.
+- The Polars code looks pretty good here next to Pandas. It's less clunky and more conducive to fluent programming. 
+- If you want to translate Pandas code to Polars, pay attention to the examples above and the accompanying notes on the API differences.
