@@ -1,0 +1,14 @@
+# Performance
+
+Mention .profile
+
+Show gcd
+Show window functions (show how sorting speeds up)
+Show bread-and-butter messy data example
+List performance rules:
+    - Be lazy
+    - Use expressions
+    - Smallest ints required
+    - Use efficient storage (no CSVs)
+    - Use categoricals for recurring strings
+    - Only use the columns you need

@@ -14,6 +14,7 @@ book:
     - index.qmd
     - indexing.qmd
     - method_chaining.qmd
+    - performance.qmd
     - summary.qmd
 
 format:
