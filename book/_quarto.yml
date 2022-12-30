@@ -15,6 +15,7 @@ book:
     - indexing.qmd
     - method_chaining.qmd
     - performance.qmd
+    - tidy.qmd
     - summary.qmd
 
 format:
@@ -27,4 +28,3 @@ format:
 
 # good themes: default, cosmo, flatly, lumen, minty, pulse, sandstone, solar, united
 # favourites: minty, cosmo
-
