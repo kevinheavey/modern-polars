@@ -1,14 +1,21 @@
 # Performance
 
+As you've probably heard by now, [Polars is very very fast](https://www.pola.rs/benchmarks.html).
+
 Mention .profile
 
+Show bread-and-butter messy data example
 Show gcd
 Show window functions (show how sorting speeds up)
-Show bread-and-butter messy data example
 List performance rules:
     - Be lazy
     - Use expressions
     - Smallest ints required
-    - Use efficient storage (no CSVs)
+    - Use efficient storage (if you're storing stuff in files, Parquet is a good choice)
     - Use categoricals for recurring strings
     - Only use the columns you need
+
+::: {.callout-tip}
+If your colleagues are happy with CSVs and can't be convinced to use something else,
+tell them that the Modern Polars book says they're dumb and they should feel bad.
+:::
