@@ -1,0 +1,135 @@
+# Reshaping and Tidy Data
+
+There's a [whole paper](https://vita.had.co.nz/papers/tidy-data.pdf) by Hadley Wickham about tidy data but it's in a PDF so you're probably not going to read it. Here's the paper's definition of tidy data:
+
+1. Each variable forms a column.
+2. Each observation forms a row.
+3. Each type of observational unit forms a table.
+
+As Mr Wickham notes, this is [Codd's 3rd Normal Form](https://en.wikipedia.org/wiki/Third_normal_form)
+but in statspeak rather than databasespeak.
+
+The meaning of "variable" and "observation" depend on what we're studying, so tidy data is a concept that you mostly learn through experience and ✨vibes✨.
+
+Now we'll explore what tidy data looks like for an NBA results dataset, where we want to investigate if home team advantage is real.
+
+## Get the data
+
+``` {python}
+from pathlib import Path
+import polars as pl
+import pandas as pd
+
+pl.Config.set_tbl_rows(5)
+pd.options.display.max_rows = 5
+
+nba_dir = Path("../data/nba/")
+
+column_names = {
+    "Date": "date",
+    "Visitor/Neutral": "away_team",
+    "PTS": "away_points",
+    "Home/Neutral": "home_team",
+    "PTS.1": "home_points",
+}
+
+if not nba_dir.exists():
+    nba_dir.mkdir()
+    for month in (
+        "october",
+        "november",
+        "december",
+        "january",
+        "february",
+        "march",
+        "april",
+        "may",
+        "june",
+    ):
+        # In practice we would do more data cleaning here, and save to parquet not CSV.
+        # But we save messy data here so we can clean it later for pedagogical purposes.
+        url = f"http://www.basketball-reference.com/leagues/NBA_2016_games-{month}.html"
+        tables = pd.read_html(url)
+        raw = (
+            pl.from_pandas(tables[0].query("Date != 'Playoffs'"))
+            .rename(column_names)
+            .select(column_names.values())
+        )
+        raw.write_csv(nba_dir / f"{month}.csv")
+
+nba_glob = nba_dir / "*.csv"
+pl.scan_csv(nba_glob).head().collect()
+```
+
+## Cleaning 🧹
+
+Nothing super interesting here:
+
+::: {.panel-tabset}
+## Polars
+
+``` {python}
+games_pl = (
+    pl.scan_csv(nba_glob)
+    .filter(
+        ~pl.fold(
+            acc=True,
+            f=lambda acc, s: acc & s.is_null(),
+            exprs=pl.all(),
+        )
+    )
+    .with_row_count("game_id")
+    .with_column(
+        pl.col("date").str.strptime(pl.Date, "%a, %b %d, %Y"),
+    )
+)
+games_pl.head().collect()
+```
+
+## Pandas
+
+``` {python}
+games_pd = (
+    pl.read_csv(nba_glob)
+    .to_pandas()
+    .dropna(thresh=4)
+    .assign(date=lambda x: pd.to_datetime(x["date"], format="%a, %b %d, %Y"))
+    .set_index("date", append=True)
+    .rename_axis(["game_id", "date"])
+    .sort_index()
+)
+games_pd.head()
+```
+:::
+
+One thing we haven't seen already is [`pl.fold`](https://pola-rs.github.io/polars-book/user-guide/dsl/folds.html).
+This is for fast horizontal operations, and it's what the Polars docs recommend for dropping a row where every column is null. In Pandas we do that via `.dropna(thresh=num_cols)`.
+
+## Pivot and Melt
+
+I recently came across someone who was doing advanced quantitative research in Python yet had never heard of the Pandas `.pivot` method. I shudder to imagine the code he must have written in the absence of this knowledge, so here's a simple explanation of `pivot`ing and `melt`ing, lest anyone else suffer in ignorance.
+
+### Pivot
+
+Suppose you have a dataframe that looks like this:
+
+``` {python}
+#| code-fold: true
+
+```
+
+
+``` {python}
+tidy_pl = (
+    games_pl.melt(
+        id_vars=["game_id", "date"],
+        value_vars=["away_team", "home_team"],
+        value_name="team",
+    )
+    .sort("date")
+    .with_column(pl.col("date").alias("rest").diff().over("team").dt.days() - 1)
+    .drop_nulls("rest")
+    .collect()
+)
+tidy_pl.head()
+```
