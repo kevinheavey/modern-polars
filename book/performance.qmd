@@ -1,21 +1,532 @@
 # Performance
 
 As you've probably heard by now, [Polars is very very fast](https://www.pola.rs/benchmarks.html).
+Well-written Polars is quicker than well-written Pandas, and it's easier to write Polars well. With that in mind...
 
-Mention .profile
+## Six fairly obvious performance rules
 
-Show bread-and-butter messy data example
-Show gcd
-Show window functions (show how sorting speeds up)
-List performance rules:
-    - Be lazy
-    - Use expressions
-    - Smallest ints required
-    - Use efficient storage (if you're storing stuff in files, Parquet is a good choice)
-    - Use categoricals for recurring strings
-    - Only use the columns you need
+Here are some tips that are almost always a good idea:
+
+- Use the lazy API.
+- Use `Expr`s, and don't use `.apply` unless you really have to.
+- Use the smallest necessary numeric types (so if you have an integer between 0 and 100, use `pl.UInt8`, not `pl.Int64`). This likely won't speed things up but will use less memory.
+- Use efficient storage (if you're dumping stuff in files, Parquet is a good choice).
+- Use categoricals for recurring strings (but note that it may not be worth it if there's not much repetition).
+- Only select the columns you need.
 
 ::: {.callout-tip}
 If your colleagues are happy with CSVs and can't be convinced to use something else,
-tell them that the Modern Polars book says they're dumb and they should feel bad.
+tell them that the Modern Polars book says they should feel bad.
 :::
+
+These are basically the same rules you'd follow when using Pandas, except for the one about the lazy API.
+Now for some comparisons between the performance of idiomatic Pandas and Polars.
+
+## Polars is faster at the boring stuff
+
+Here we'll clean up a messy dataset, kindly [provided](https://www.kaggle.com/datasets/yagunnersya/fifa-21-messy-raw-dataset-for-cleaning-exploring?resource=download) by Kaggle user Rachit Toshniwal as a deliberate example of a really crap CSV. Most of the cleanup involves extracting numeric data from awkward strings.
+
+Also, the data is too small so I've concatenated it to itself 20 times. We're not doing anything that will care about the duplication.
+
+For this exercise we'll assume we want to make use of all the columns. First some boilerplate where we map out the different data types:
+
+``` {python}
+#| code-fold: true
+import pandas as pd
+import polars as pl
+import numpy as np
+import math
+str_cols = [
+    "Name",
+    "LongName",
+    "playerUrl",
+    "photoUrl",
+]
+initial_category_cols_pl = [
+    "Nationality",
+    "Preferred Foot",
+    "Best Position",
+    "A/W",
+    "D/W"
+]
+category_cols = [*initial_category_cols_pl, "Club"]
+date_cols = [
+    "Joined",
+    "Loan Date End"
+]
+# these all start with the euro symbol and end with 0, M or K
+money_cols = [
+    "Value",
+    "Wage",
+    "Release Clause"
+]
+star_cols = [
+    "W/F",
+    "SM",
+    "IR",
+]
+# Contract col is a range of years
+# Positions is a list of positions
+# Height is in cm
+# Weight is in kg
+# Hits is numbers with K and M 
+messy_cols = [
+    "Contract",
+    "Positions",
+    "Height",
+    "Weight",
+    "Hits"
+]
+initially_str_cols = str_cols + date_cols + money_cols + star_cols + messy_cols
+initially_str_cols_pl = [*initially_str_cols, "Club"]
+u32_cols = [
+    "ID",
+    "Total Stats"
+]
+u8_cols = [
+    'Age',
+    '↓OVA',
+    'POT',
+    'BOV',
+    'Crossing',
+    'Finishing',
+    'Heading Accuracy',
+    'Short Passing',
+    'Volleys',
+    'Dribbling',
+    'Curve',
+    'FK Accuracy',
+    'Long Passing',
+    'Ball Control',
+    'Acceleration',
+    'Sprint Speed',
+    'Agility',
+    'Reactions',
+    'Balance',
+    'Shot Power',
+    'Jumping',
+    'Stamina',
+    'Strength',
+    'Long Shots',
+    'Aggression',
+    'Interceptions',
+    'Positioning',
+    'Vision',
+    'Penalties',
+    'Composure',
+    'Marking',
+    'Standing Tackle',
+    'Sliding Tackle',
+    'GK Diving',
+    'GK Handling',
+    'GK Kicking',
+    'GK Positioning',
+    'GK Reflexes',
+    'PAC',
+    'SHO',
+    'PAS',
+    'DRI',
+    'DEF',
+    'PHY'
+]
+
+u16_cols = [
+    'Attacking',
+    'Skill',
+    'Movement',
+    'Power',
+    'Mentality',
+    'Defending',
+    'Goalkeeping',
+    'Total Stats',
+    'Base Stats'
+]
+```
+
+### Dtypes
+
+Here are the initial dtypes for the two dataframes:
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+# can't use UInt8/16 in scan_csv
+dtypes_pl = (
+    {col: pl.Utf8 for col in initially_str_cols_pl}
+    | {col: pl.Categorical for col in initial_category_cols_pl}
+    | {col: pl.UInt32 for col in [*u32_cols, *u16_cols, *u8_cols]}
+)
+```
+## Pandas
+``` {python}
+dtypes_pd = (
+    {col: pd.StringDtype() for col in initially_str_cols}
+    | {col: pd.CategoricalDtype() for col in category_cols}
+    | {col: "uint32" for col in u32_cols}
+    | {col: "uint8" for col in u8_cols}
+    | {col: "uint16" for col in u16_cols}
+)
+```
+:::
+
+One thing I'll note here is that Pandas numeric types are somewhat confusing: `"uint32"` means `np.uint32` which is not the same thing as `pd.UInt32Dtype()`. Only the latter is nullable. On the other hand, Polars has just one unsigned 32-bit integer type, and it's nullable.
+
+::: {.callout-tip}
+Polars expressions have a [`shrink_dtype`](https://pola-rs.github.io/polars/py-polars/html/reference/expressions/api/polars.Expr.shrink_dtype.html#polars-expr-shrink-dtype) method that can be more convenient than manually specifying the dtypes yourself. It's not magic though, and it has to spend time finding the min and max of the column.
+:::
+
+
+
+### Data cleaning
+
+There's not much that you haven't seen here already, so we won't explain the code line by line. The main new thing here is [`pl.when`](https://pola-rs.github.io/polars/py-polars/html/reference/expressions/api/polars.when.html#polars.when) for ternary expressions.
+
+::: {.panel-tabset}
+## Polars
+
+``` {python}
+def parse_date_pl(col: pl.Expr) -> pl.Expr:
+    return col.str.strptime(pl.Date, fmt="%b %d, %Y")
+
+def parse_suffixed_num_pl(col: pl.Expr) -> pl.Expr:
+    suffix = col.str.slice(-1, 1)
+    suffix_value = (
+        pl.when(suffix == "K")
+        .then(1_000)
+        .when(suffix == "M")
+        .then(1_000_000)
+        .otherwise(1)
+        .cast(pl.UInt32)
+    )
+    without_suffix = (
+        col
+        .str.replace("K", "", literal=True)
+        .str.replace("M", "", literal=True)
+        .cast(pl.Float32)
+    )
+    original_name = col.meta.output_name()
+    return (suffix_value * without_suffix).alias(original_name)
+
+def parse_money_pl(col: pl.Expr) -> pl.Expr:
+    return parse_suffixed_num_pl(col.str.slice(1)).cast(pl.UInt32)
+
+def parse_star_pl(col: pl.Expr) -> pl.Expr:
+    return col.str.slice(0, 1).cast(pl.UInt8)
+
+def feet_to_cm_pl(col: pl.Expr) -> pl.Expr:
+    feet_inches_split = col.str.split_exact("'", 1)
+    total_inches = (
+        (feet_inches_split.struct.field("field_0").cast(pl.UInt8, strict=False) * 12)
+        + feet_inches_split.struct.field("field_1").str.rstrip('"').cast(pl.UInt8, strict=False)
+    )
+    return (total_inches * 2.54).round(0).cast(pl.UInt8)
+
+def parse_height_pl(col: pl.Expr) -> pl.Expr:
+    is_cm = col.str.ends_with("cm")
+    return (
+        pl.when(is_cm)
+        .then(col.str.slice(0, 3).cast(pl.UInt8, strict=False))
+        .otherwise(feet_to_cm_pl(col))
+    )
+
+def parse_weight_pl(col: pl.Expr) -> pl.Expr:
+    is_kg = col.str.ends_with("kg")
+    without_unit = col.str.extract(r"(\d+)").cast(pl.UInt8)
+    return (
+        pl.when(is_kg)
+        .then(without_unit)
+        .otherwise((without_unit * 0.453592).round(0).cast(pl.UInt8))
+    )
+
+def parse_contract_pl(col: pl.Expr) -> list[pl.Expr]:
+    contains_tilde = col.str.contains(" ~ ", literal=True)
+    loan_str = " On Loan"
+    loan_col = col.str.ends_with(loan_str)
+    split = (
+        pl.when(contains_tilde)
+        .then(col)
+        .otherwise(None)
+        .str.split_exact(" ~ ", 1)
+    )
+    start = split.struct.field("field_0").cast(pl.UInt16).alias("contract_start")
+    end = split.struct.field("field_1").cast(pl.UInt16).alias("contract_end")
+    free_agent = (col == "Free").alias("free_agent").fill_null(False)
+    loan_date = (
+        pl.when(loan_col)
+        .then(col)
+        .otherwise(None)
+        .str.split_exact(" On Loan", 1)
+        .struct.field("field_0")
+        .alias("loan_date_start")
+    )
+    return [start, end, free_agent, parse_date_pl(loan_date)]
+```
+
+## Pandas
+
+``` {python}
+def parse_date_pd(col: pd.Series) -> pd.Series:
+    return pd.to_datetime(col, format="%b %d, %Y")
+
+def parse_suffixed_num_pd(col: pd.Series) -> pd.Series:
+    suffix_value = (
+        col
+        .str[-1]
+        .map({"K": 1_000, "M": 1_000_000})
+        .fillna(1)
+        .astype("uint32")
+    )
+    without_suffix = (
+        col
+        .str.replace("K", "", regex=False)
+        .str.replace("M", "", regex=False)
+        .astype("float")
+    )
+    return suffix_value * without_suffix
+
+def parse_money_pd(col: pd.Series) -> pd.Series:
+    return parse_suffixed_num_pd(col.str[1:]).astype("uint32")
+
+def parse_star_pd(col: pd.Series) -> pd.Series:
+    return col.str[0].astype("uint8")
+
+def feet_to_cm_pd(col: pd.Series) -> pd.Series:
+    feet_inches_split = col.str.split("'", expand=True)
+    total_inches = (
+        feet_inches_split[0].astype("uint8").mul(12)
+        + feet_inches_split[1].str[:-1].astype("uint8")
+    )
+    return total_inches.mul(2.54).round().astype("uint8")
+
+def parse_height_pd(col: pd.Series) -> pd.Series:
+    is_cm = col.str.endswith("cm")
+    cm_values = col.loc[is_cm].str[:-2].astype("uint8")
+    inches_as_cm = feet_to_cm_pd(col.loc[~is_cm])
+    return pd.concat([cm_values, inches_as_cm])
+
+def parse_weight_pd(col: pd.Series) -> pd.Series:
+    is_kg = col.str.endswith("kg")
+    without_unit = col.where(is_kg, col.str[:-3]).mask(is_kg, col.str[:-2]).astype("uint8")
+    return without_unit.where(is_kg, without_unit.mul(0.453592).round().astype("uint8"))
+
+def parse_contract_pd(df: pd.DataFrame) -> pd.DataFrame:
+    contract_col = df["Contract"]
+    contains_tilde = contract_col.str.contains(" ~ ", regex=False)
+    split = (
+        contract_col.loc[contains_tilde].str.split(" ~ ", expand=True).astype(pd.UInt16Dtype())
+    )
+    split.columns = ["contract_start", "contract_end"]
+    not_tilde = contract_col.loc[~contains_tilde]
+    free_agent = (contract_col == "Free").rename("free_agent").fillna(False)
+    loan_date = parse_date_pd(not_tilde.loc[~free_agent].str[:-8]).rename("loan_date_start")
+    return pd.concat([df.drop("Contract", axis=1), split, free_agent, loan_date], axis=1)
+```
+
+:::
+
+### Performance comparison
+
+In this example, **Polars is ~150x faster than Pandas**:
+
+::: {.panel-tabset}
+## Polars
+
+``` {python}
+%%timeit
+new_cols_pl = ([
+    pl.col("Club").str.strip().cast(pl.Categorical),
+    parse_suffixed_num_pl(pl.col("Hits")).cast(pl.UInt32),
+    pl.col("Positions").str.split(","),
+    parse_height_pl(pl.col("Height")),
+    parse_weight_pl(pl.col("Weight")),
+]
++ [parse_date_pl(pl.col(col)) for col in date_cols]
++ [parse_money_pl(pl.col(col)) for col in money_cols]
++ [parse_star_pl(pl.col(col)) for col in star_cols]
++ parse_contract_pl(pl.col("Contract"))
++ [pl.col(col).cast(pl.UInt16) for col in u16_cols]
++ [pl.col(col).cast(pl.UInt8) for col in u8_cols]
+)
+fifa_pl = (
+    pl.scan_csv("../data/fifa21_raw_v2.csv", dtypes=dtypes_pl)
+    .with_columns(new_cols_pl)
+    .drop("Contract")
+    .rename({"↓OVA": "OVA"})
+    .collect()
+)
+```
+
+## Pandas
+
+``` {python}
+%%timeit
+fifa_pd = (
+    pd.read_csv("../data/fifa21_raw_big.csv", dtype=dtypes_pd)
+    .assign(Club=lambda df: df["Club"].cat.rename_categories(lambda c: c.strip()),
+        **{col: lambda df: parse_date_pd(df[col]) for col in date_cols},
+        **{col: lambda df: parse_money_pd(df[col]) for col in money_cols},
+        **{col: lambda df: parse_star_pd(df[col]) for col in star_cols},
+        Hits=lambda df: parse_suffixed_num_pd(df["Hits"]).astype(pd.UInt32Dtype()),
+        Positions=lambda df: df["Positions"].str.split(","),
+        Height=lambda df: parse_height_pd(df["Height"]),
+        Weight=lambda df: parse_weight_pd(df["Weight"])
+    )
+    .pipe(parse_contract_pd)
+    .rename(columns={"↓OVA": "OVA"})
+)
+```
+:::
+
+You could play around with the timings here and even try the [`.profile`](https://pola-rs.github.io/polars/py-polars/html/reference/lazyframe/api/polars.LazyFrame.profile.html) method to see what Polars spends its time on. In this scenario the speed advantage of Polars likely comes down to three things:
+
+1. It is much faster at reading CSVs.
+2. It is much faster at processing strings.
+3. It can select/assign columns in parallel.
+
+## NumPy can make Polars faster
+
+Polars gets along well with NumPy [ufuncs](https://numpy.org/doc/stable/reference/ufuncs.html), even in lazy mode (which is weird because NumPy has no lazy API). Let's see how this looks by calculating the [great-circle distance](http://www.johndcook.com/blog/python_longitude_latitude/) between a bunch of coordinates.
+
+### Get the data
+
+We create a lazy dataframe containing pairs of airports and their coordinates:
+
+``` {python}
+airports = pl.scan_csv("../data/airports.csv").drop_nulls().unique(subset=["AIRPORT"])
+pairs = airports.join(airports, on="AIRPORT", how="cross").filter(
+    (pl.col("AIRPORT") != pl.col("AIRPORT_right"))
+    & (pl.col("LATITUDE") != pl.col("LATITUDE_right"))
+    & (pl.col("LONGITUDE") != pl.col("LONGITUDE_right"))
+)
+```
+
+### Calculate great-circle distance
+
+One use case for NumPy ufuncs is doing computations that Polars expressions don't support. In this example Polars can do everything we need, though the ufunc version ends up being slightly faster:
+
+::: {.panel-tabset}
+## Polars
+
+``` {python}
+def deg2rad_pl(degrees: pl.Expr) -> pl.Expr:
+    return degrees * math.pi / 180
+
+def gcd_pl(lat1: pl.Expr, lng1: pl.Expr, lat2: pl.Expr, lng2: pl.Expr):
+    ϕ1 = deg2rad_pl(90 - lat1)
+    ϕ2 = deg2rad_pl(90 - lat2)
+
+    θ1 = deg2rad_pl(lng1)
+    θ2 = deg2rad_pl(lng2)
+
+    cos = ϕ1.sin() * ϕ2.sin() * (θ1 - θ2).cos() + ϕ1.cos() * ϕ2.cos()
+    arc = cos.arccos()
+    return arc * 6373
+```
+
+## NumPy
+
+``` {python}
+def gcd_np(lat1, lng1, lat2, lng2):
+    ϕ1 = np.deg2rad(90 - lat1)
+    ϕ2 = np.deg2rad(90 - lat2)
+
+    θ1 = np.deg2rad(lng1)
+    θ2 = np.deg2rad(lng2)
+
+    cos = np.sin(ϕ1) * np.sin(ϕ2) * np.cos(θ1 - θ2) + np.cos(ϕ1) * np.cos(ϕ2)
+    arc = np.arccos(cos)
+    return arc * 6373
+```
+:::
+
+We can pass Polars expressions directly to our `gcd_np` function, which is pretty nice since these things don't even store the data themselves:
+
+``` {python}
+%%timeit
+pairs.select(
+    gcd_np(
+        pl.col("LATITUDE"),
+        pl.col("LONGITUDE"),
+        pl.col("LATITUDE_right"),
+        pl.col("LONGITUDE_right")
+    )
+).collect()
+```
+
+On my machine the NumPy version tends to be 5-20% faster than the pure Polars version:
+
+``` {python}
+%%timeit
+pairs.select(
+    gcd_pl(
+        pl.col("LATITUDE"),
+        pl.col("LONGITUDE"),
+        pl.col("LATITUDE_right"),
+        pl.col("LONGITUDE_right")
+    )
+).collect()
+```
+
+This may not be a huge performance difference, but it at least means you don't sacrifice speed when relying on NumPy. There are some [gotchas](https://pola-rs.github.io/polars-book/user-guide/howcani/interop/numpy.html) though so watch out for those.
+
+Also watch out for `.to_numpy()` - you don't always need to call this and it can slow things down:
+
+``` {python}
+%%timeit
+collected = pairs.collect()
+gcd_np(
+    collected["LATITUDE"].to_numpy(),
+    collected["LONGITUDE"].to_numpy(),
+    collected["LATITUDE_right"].to_numpy(),
+    collected["LONGITUDE_right"].to_numpy()
+)
+```
+
+## Polars can be slower than Pandas sometimes, maybe
+
+Here's an example where we calculate z-scores, using window functions in Polars and using groupby-transform in Pandas:
+
+``` {python}
+def create_frame(n, n_groups):
+    return pl.DataFrame(
+        {"name": np.random.randint(0, n_groups, size=n), "value2": np.random.randn(n)}
+    )
+
+def pandas_transform(df: pd.DataFrame) -> pd.DataFrame:
+    g = df.groupby("name")["value2"]
+    v = df["value2"]
+    return (v - g.transform(np.mean)) / g.transform(np.std)
+
+
+def polars_transform() -> pl.Expr:
+    v = pl.col("value2")
+    return (v - v.mean().over("name")) / v.std().over("name")
+
+rand_df_pl = create_frame(50_000_000, 50_000)
+rand_df_pd = rand_df_pl.to_pandas()
+```
+
+The Pandas version tends to be ~25% faster on my machine:
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+%timeit rand_df_pl.select(polars_transform())
+```
+## Pandas
+``` {python}
+%timeit pandas_transform(rand_df_pd)
+```
+:::
+
+This example isn't telling you to use Pandas in this specific situation. Once you add in the time spent reading a file, Polars likely wins.
+
+And even here, if you sort by the `name` col, Polars wins again. It has fast-track algorithms for sorted data.
+
+
+## Summary
+
+- Polars is really fast. Pandas was already respectably fast and Polars wipes the floor with it.
+- You can still make Polars slow if you do silly things with it, but it's easier to do the right thing with Polars.
+- Polars works well with NumPy ufuncs.
+- There are still some situations where Pandas can be faster. They are probably not compelling, but we shouldn't pretend they don't exist.

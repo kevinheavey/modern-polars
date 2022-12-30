@@ -420,5 +420,5 @@ In this case, it would probably be enough to just move those long lists to their
 ## Summary
 
 - Method chaining is great but use it with care.
-- The Polars code looks pretty good here next to Pandas. It's less clunky and more conducive to fluent programming. 
+- The Polars code looks pretty good here next to Pandas. It's less clunky and more conducive to fluent programming. I've noticed some people are under the impression that you should only use Polars when you need it, but I would argue the above examples show that it's better for small data too.
 - If you want to translate Pandas code to Polars, pay attention to the examples above and the accompanying notes on the API differences.
