@@ -115,9 +115,38 @@ Suppose you have a dataframe that looks like this:
 
 ``` {python}
 #| code-fold: true
-
+from datetime import date
+prices = pl.DataFrame({
+    "date": [*[date(2020, 1, 1)]*4, *[date(2020, 1, 2)]*4, *[date(2020, 1, 3)]*4],
+    "ticker": [*["AAPL", "TSLA", "MSFT", "NFLX"]*3],
+    "price": [100, 200, 300, 400, 110, 220, 330, 420, 105, 210, 315, 440],
+})
+prices
 ```
 
+In both Polars and Pandas you can call `df.pivot(index="date", values="price", columns="ticker")`
+to get a dataframe that looks like this:
+
+``` {python}
+#| code-fold: true
+pivoted = prices.pivot(index="date", values="price", columns="ticker")
+pivoted
+```
+
+As you can see, `.pivot` creates a dataframe where the columns are the unique labels from one column ("ticker"), alongside the index column ("date"). The values for the non-index columns are taken from the corresponding rows of the `values` column ("price").
+
+If our dataframe had multiple prices for the same ticker on the same date, we would use the `aggregate_fn` parameter of the `.pivot` method, e.g.: `prices.pivot(..., aggregate_fn="mean")`. Pivoting with an aggregate function gives us similar behaviour to what Excel calls "pivot tables".
+
+### Melt
+
+Melt is the inverse of pivot. While pivot takes us from *long* data to *wide* data, melt goes from wide to long.
+If we call `.melt(id_vars="date", value_name="price")` on our pivoted dataframe we get our original dataframe back:
+
+``` {python}
+pivoted.melt(id_vars="date", value_name="price")
+```
+
+If you're still reading
 
 ``` {python}
 tidy_pl = (
