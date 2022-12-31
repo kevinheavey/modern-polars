@@ -13,6 +13,7 @@ from datetime import datetime, date
 import requests
 import polars as pl
 import pandas as pd
+import matplotlib.pyplot as plt
 
 pl.Config.set_tbl_rows(5)
 pd.options.display.max_rows = 5
