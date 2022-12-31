@@ -1,0 +1,3 @@
+# Scaling
+
+In this chapter we'll mostly compare Polars to Dask rather than to Pandas. This isn't an apples-to-apples comparison, because Dask helps scale Pandas but it [might help scale Polars too one day](https://twitter.com/RitchieVink/status/1598759986271748107?s=20&t=xBNrw_C9wOU5ddf0wW0XpQ).

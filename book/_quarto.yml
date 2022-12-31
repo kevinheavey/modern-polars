@@ -15,7 +15,9 @@ book:
     # - indexing.qmd
     # - method_chaining.qmd
     # - performance.qmd
-    - tidy.qmd
+    # - tidy.qmd
+    # - timeseries.qmd
+    - scaling.qmd
     - summary.qmd
 
 format:
