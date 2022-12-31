@@ -36,9 +36,9 @@ Hopefully this work shows you how, why and when to prefer Polars.
 ## Credit
 
 The Pandas examples are mostly lifted from Tom's articles, with some updates for data that's no longer available, and some
-code changes to reflect how Pandas is written in 2022. This isn't just me being lazy - I want to draw on Pandas examples that
+code changes to reflect how Pandas is written in 2023. This isn't just me being lazy - I want to draw on Pandas examples that
 quite a lot of people are already familiar with.
 
 So credit goes to Tom for the Pandas examples, for most of the data
 fetching code and for the general structure of the articles.
-Meanwhile the text content and the Polars examples are all from me.
+Meanwhile the text content and the Polars examples are from me.

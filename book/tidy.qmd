@@ -11,7 +11,7 @@ but in statspeak rather than databasespeak.
 
 The meaning of "variable" and "observation" depend on what we're studying, so tidy data is a concept that you mostly learn through experience and ✨vibes✨.
 
-Now we'll explore what tidy data looks like for an NBA results dataset, where we want to investigate if home team advantage is real.
+Now we'll explore what tidy data looks like for an NBA results dataset.
 
 ## Get the data
 
@@ -107,7 +107,7 @@ This is for fast horizontal operations, and it's what the Polars docs recommend 
 
 ## Pivot and Melt
 
-I recently came across someone who was doing advanced quantitative research in Python yet had never heard of the Pandas `.pivot` method. I shudder to imagine the code he must have written in the absence of this knowledge, so here's a simple explanation of `pivot`ing and `melt`ing, lest anyone else suffer in ignorance.
+I recently came across someone who was doing advanced quantitative research in Python yet had never heard of the Pandas `.pivot` method. I shudder to imagine the code he must have written in the absence of this knowledge, so here's a simple explanation of `pivot`ing and `melt`ing, lest anyone else suffer in ignorance. If you already know what pivot and melt are, feel free to scroll past this bit.
 
 ### Pivot
 
@@ -143,10 +143,16 @@ Melt is the inverse of pivot. While pivot takes us from *long* data to *wide* da
 If we call `.melt(id_vars="date", value_name="price")` on our pivoted dataframe we get our original dataframe back:
 
 ``` {python}
+#| code-fold: true
 pivoted.melt(id_vars="date", value_name="price")
 ```
 
-If you're still reading
+## Tidy NBA data
+
+Suppose we want to calculate the days of rest each team had before each game. In the current structure this is difficult because we need to track both the `home_team` and `away_team` columns. We'll use `.melt` so that there's a single `team` column. This makes it easier to add a `rest` column with the per-team rest days between games.
+
+::: {.panel-tabset}
+## Polars
 
 ``` {python}
 tidy_pl = (
@@ -162,3 +168,406 @@ tidy_pl = (
 )
 tidy_pl.head()
 ```
+
+## Pandas
+``` {python}
+tidy_pd = (
+    games_pd.reset_index()
+    .melt(
+        id_vars=["game_id", "date"],
+        value_vars=["away_team", "home_team"],
+        value_name="team",
+    )
+    .assign(
+        rest=lambda df: df.sort_values("date").groupby("team")["date"].diff().dt.days
+        - 1
+    )
+    .dropna(subset=["rest"])
+)
+tidy_pd
+```
+:::
+
+Now we use `.pivot` so that this days-of-rest data can be added back to the original dataframe. We'll also add columns for the spread between the home team's rest and away team's rest, and a flag for whether the home team won.
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+by_game_pl = (
+    tidy_pl
+    .pivot(
+        values="rest",
+        index=["game_id", "date"],
+        columns="variable"
+    )
+    .rename({"away_team": "away_rest", "home_team": "home_rest"})
+)
+joined_pl = (
+    by_game_pl
+    .join(games_pl, on=["game_id", "date"])
+    .with_columns(
+    [
+        pl.col("home_points").alias("home_win") > pl.col("away_points"),
+        pl.col("home_rest").alias("rest_spread") - pl.col("away_rest"),
+    ]
+    )
+)
+joined_pl
+```
+## Pandas
+``` {python}
+by_game_pd = (
+    tidy_pd
+    .pivot(
+        values="rest",
+        index=["game_id", "date"],
+        columns="variable"
+    )
+    .rename(
+        columns={"away_team": "away_rest", "home_team": "home_rest"}
+    )
+)
+joined_pd = by_game_pd.join(games_pd).assign(
+    home_win=lambda df: df["home_points"] > df["away_points"],
+    rest_spread=lambda df: df["home_rest"] - df["away_rest"],
+)
+joined_pd
+```
+
+Here's a lightly edited quote from *Modern Pandas*:
+
+> One somewhat subtle point: an "observation" depends on the question being asked. So really, we have two tidy datasets, `tidy_pl` for answering team-level questions, and `joined` for answering game-level questions.
+
+Let's use the team-level dataframe to see each team's average days of rest, both at home and away:
+
+``` {python}
+sns.catplot(
+    tidy_pl.to_pandas(),
+    x="variable",
+    y="rest",
+    col="team",
+    col_wrap=5,
+    kind="bar",
+    aspect=0.6,
+)
+```
+
+Plotting the distribution of `rest_spread`:
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+delta_pl = joined_pl["rest_spread"]
+ax = (
+    delta_pl
+    .value_counts()
+    .drop_nulls()
+    .to_pandas()
+    .set_index("rest_spread")
+    ["counts"]
+    .reindex(np.arange(delta_pl.min(), delta_pl.max() + 1), fill_value=0)
+    .sort_index()
+    .plot(kind="bar", color="k", width=0.9, rot=0, figsize=(12, 6))
+)
+ax.set(xlabel="Difference in Rest (Home - Away)", ylabel="Games")
+```
+## Pandas
+``` {python}
+delta_pd = joined_pd["rest_spread"]
+ax = (
+    delta_pd
+    .value_counts()
+    .reindex(np.arange(delta_pd.min(), delta_pd.max() + 1), fill_value=0)
+    .sort_index()
+    .plot(kind="bar", color="k", width=0.9, rot=0, figsize=(12, 6))
+)
+ax.set(xlabel="Difference in Rest (Home - Away)", ylabel="Games")
+```
+:::
+
+Plotting the win percent by rest_spread:
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+fig, ax = plt.subplots(figsize=(12, 6))
+sns.barplot(
+    x="rest_spread",
+    y="home_win",
+    data=joined_pl.filter(pl.col("rest_spread").is_between(-3, 3)).to_pandas(),
+    color="#4c72b0",
+    ax=ax,
+)
+```
+## Pandas
+``` {python}
+fig, ax = plt.subplots(figsize=(12, 6))
+sns.barplot(
+    x="rest_spread",
+    y="home_win",
+    data=joined_pd.query('-3 <= rest_spread <= 3').to_pandas(),
+    color="#4c72b0",
+    ax=ax,
+)
+```
+:::
+
+## Stack / Unstack vs Melt / Pivot
+
+Pandas has special methods `stack` and `unstack` for reshaping data with a MultiIndex. Polars doesn't have an index, so anywhere you see `stack` / `unstack` in Pandas, the equivalent Polars code will use `melt` / `pivot`.
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+rest_pl = (
+    tidy_pl
+    .groupby(["date", "variable"])
+    .agg(pl.col("rest").mean())
+)
+rest_pl
+```
+## Pandas
+``` {python}
+rest_pd = (
+    tidy_pd
+    .groupby(["date", "variable"])
+    ["rest"]
+    .mean()
+)
+rest_pd
+```
+
+In Polars we use `.pivot` to do what in Pandas would require `.unstack`:
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+rest_pl.pivot(index="date", columns="variable", values="rest")
+```
+## Pandas
+``` {python}
+rest_pd.unstack()
+```
+:::
+
+Plotting the moving average of rest days:
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+ax = (
+    rest_pl.pivot(index="date", values="rest", columns="variable")
+    .filter(pl.col("away_team") < 7)
+    .sort("date")
+    .select([pl.col("date"), pl.col(pl.Float64).rolling_mean(7)])
+    .to_pandas()
+    .set_index("date")
+    .plot(figsize=(12, 6), linewidth=3)
+)
+ax.set(ylabel="Rest (7 day MA)")
+```
+## Pandas
+``` {python}
+ax = (
+    rest_pd.unstack()
+    .query('away_team < 7')
+    .sort_index()
+    .rolling(7)
+    .mean()
+    .plot(figsize=(12, 6), linewidth=3)
+)
+ax.set(ylabel="Rest (7 day MA)")
+```
+:::
+
+## Mini Project: Home Court Advantage?
+
+We may as well do some (not very rigorous) analysis: let's see if home advantage is a real thing.
+
+### Find the win percent for each team
+
+We want to control for the strength of the teams playing. The team's victory percentage is probably not a good control but it's what we'll use:
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+win_col = pl.col("win")
+wins_pl = (
+    joined_pl.melt(
+        id_vars=["game_id", "date", "home_win"],
+        value_name="team",
+        variable_name="is_home",
+        value_vars=["home_team", "away_team"],
+    )
+    .with_column(pl.col("home_win").alias("win") == (pl.col("is_home") == "home_team"))
+    .groupby(["team", "is_home"])
+    .agg(
+        [
+            win_col.sum().alias("n_wins"),
+            win_col.count().alias("n_games"),
+            win_col.mean().alias("win_pct"),
+        ]
+    )
+)
+wins_pl.head()
+```
+## Pandas
+``` {python}
+wins_pd = (
+    joined_pd
+    .reset_index()
+    .melt(
+        id_vars=["game_id", "date", "home_win"],
+        value_name="team",
+        var_name="is_home",
+        value_vars=["home_team", "away_team"],
+    )
+    .assign(win=lambda df: df["home_win"] == (df["is_home"] == "home_team"))
+    .groupby(["team", "is_home"])["win"]
+    .agg(['sum', 'count', 'mean'])
+    .rename(columns={
+        "sum": 'n_wins',
+        "count": 'n_games',
+        "mean": 'win_pct'
+    })
+)
+wins_pd.head()
+```
+:::
+
+## Some visualisations
+
+``` {python}
+g = sns.FacetGrid(wins_pl.to_pandas(), hue="team", aspect=0.8, palette=["k"], height=5)
+g.map(
+    sns.pointplot,
+    "is_home",
+    "win_pct",
+    order=["away_team", "home_team"]).set(ylim=(0, 1))
+```
+
+``` {python}
+sns.catplot(
+    wins_pl.to_pandas(),
+    x="is_home",
+    y="win_pct",
+    col="team",
+    col_wrap=5,
+    hue="team",
+    kind="point",
+    aspect=0.7,
+)
+```
+
+Now we calculate the win percent by team, regardless of whether they're home or away:
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+win_percent_pl = (
+    wins_pl.groupby("team").agg(
+        pl.col("n_wins").sum().alias("win_pct") / pl.col("n_games").sum()
+    )
+)
+win_percent_pl.head()
+```
+## Pandas
+``` {python}
+win_percent_pd = (
+    wins_pd
+    .groupby(level="team", as_index=True)
+    .apply(lambda x: x["n_wins"].sum() / x["n_games"].sum())
+)
+win_percent_pd.head()
+```
+:::
+
+``` {python}
+(
+    win_percent_pl
+    .sort("win_pct")
+    .to_pandas()
+    .set_index("team")
+    .plot.barh(figsize=(6, 12), width=0.85, color="k")
+)
+plt.xlabel("Win Percent")
+```
+
+Here's a plot of team home court advantage against team overall win percentage:
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+(
+    wins_pl.pivot(index="team", columns="is_home", values="win_pct")
+    .with_columns(
+        [
+            pl.col("home_team").alias("Home Win % - Away %") - pl.col("away_team"),
+            (pl.col("home_team").alias("Overall %") + pl.col("away_team")) / 2,
+        ]
+    )
+    .to_pandas()
+    .pipe((sns.regplot, "data"), x="Overall %", y="Home Win % - Away %")
+)
+```
+## Pandas
+``` {python}
+(
+    wins_pd
+    ["win_pct"]
+    .unstack()
+    .assign(**{'Home Win % - Away %': lambda x: x["home_team"] - x["away_team"],
+               'Overall %': lambda x: (x["home_team"] + x["away_team"]) / 2})
+     .pipe((sns.regplot, 'data'), x='Overall %', y='Home Win % - Away %')
+)
+```
+:::
+
+Let's add the win percent back to the dataframe and run a regression:
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+reg_df_pl = (
+    joined_pl.join(win_percent_pl, left_on="home_team", right_on="team")
+    .rename({"win_pct": "home_strength"})
+    .join(win_percent_pl, left_on="away_team", right_on="team")
+    .rename({"win_pct": "away_strength"})
+    .with_columns(
+        [
+            pl.col("home_points").alias("point_diff") - pl.col("away_points"),
+            pl.col("home_rest").alias("rest_diff") - pl.col("away_rest"),
+            pl.col("home_win").cast(pl.UInt8),  # for statsmodels
+        ]
+    )
+)
+reg_df_pl.head()
+```
+## Pandas
+``` {python}
+reg_df_pd = (
+    joined_pd.assign(
+        away_strength=joined_pd['away_team'].map(win_percent_pd),
+        home_strength=joined_pd['home_team'].map(win_percent_pd),
+        point_diff=joined_pd['home_points'] - joined_pd['away_points'],
+        rest_diff=joined_pd['home_rest'] - joined_pd['away_rest'])
+)
+reg_df_pd.head()
+```
+
+``` {python}
+import statsmodels.formula.api as sm
+
+mod = sm.logit(
+    "home_win ~ home_strength + away_strength + home_rest + away_rest",
+    reg_df_pl.to_pandas(),
+)
+res = mod.fit()
+res.summary()
+```
+
+You can play around with the regressions yourself but we'll end them here since they're not great.
+
+## Summary
+
+This was mostly a demonstration of `.pivot` and `.melt`, with several different examples of reshaping data in Polars and Pandas.
