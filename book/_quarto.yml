@@ -12,9 +12,9 @@ book:
     search: true
   chapters:
     - index.qmd
-    - indexing.qmd
-    - method_chaining.qmd
-    - performance.qmd
+    # - indexing.qmd
+    # - method_chaining.qmd
+    # - performance.qmd
     - tidy.qmd
     - summary.qmd
 
