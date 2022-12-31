@@ -16,7 +16,7 @@ import pandas as pd
 
 pl.Config.set_tbl_rows(5)
 pd.options.display.max_rows = 5
-data_path = Path("data/ohlcv.pq")
+data_path = Path("../data/ohlcv.pq")
 
 
 def epoch_ms(dt: datetime) -> int:
