@@ -295,6 +295,7 @@ Differences between Polars and Pandas:
 2. Instead of `.rolling(n).sum()`, Polars has `.rolling_sum(n)`.
 3. If you see Pandas code using `.unstack`, the corresponding Polars code probably needs `.pivot`.
 4. In Polars, `.value_counts` returns a `pl.Struct` column containing the value and the value count. In Pandas it returns a series where the elements are the value counts and the index contains the values themselves.
+5. In Polars we need to select all the UInt32 cols at one point using pl.col(pl.UInt32). In Pandas, the way `.rolling` works means we don't need to select these cols explicitly, but if we did it would look like `df.select_dtypes("uint32")`.
 
 ### Planes With Multiple Daily Flights
 
