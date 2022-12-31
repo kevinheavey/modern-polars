@@ -81,11 +81,11 @@ ohlcv_pd.loc["2021-02"]
 
 Resampling is like a special case of `groupby` for a time column. You can of course use regular `.groupby` with a time column, but it won't be as powerful because it doesn't understand time like resampling methods do.
 
-There are two kinds of resampling: downsampling and upsampling.
+There are two kinds of resampling: *downsampling* and *upsampling*.
 
 ### Downsampling
 
-Downsampling moves from a higher time frequency to a lower time frequency. This requires us to choose some aggregation or subsetting, since we're reducing the number of rows in our data.
+Downsampling moves from a higher time frequency to a lower time frequency. This requires some aggregation or subsetting, since we're reducing the number of rows in our data.
 
 In Polars we use the [`.groupby_dynamic`](https://pola-rs.github.io/polars/py-polars/html/reference/dataframe/api/polars.DataFrame.groupby_dynamic.html#polars.DataFrame.groupby_dynamic) method for downsampling (we also use `groupby_dynamic` when we want to combine resampling with regular groupby logic).
 
@@ -122,7 +122,7 @@ ohlcv_pd.resample("W").agg(['mean', 'sum'])
 
 ### Upsampling
 
-Upsampling moves in the opposite direction, from low-frequency data to high frequency data. Since we can't create new data by magic, upsampling defaults to filling the new rows with nulls (which we could then interpolate, perhaps). In Polars we have a special [`upsample`](https://pola-rs.github.io/polars/py-polars/html/reference/dataframe/api/polars.DataFrame.groupby_dynamic.html#polars.DataFrame.groupby_dynamic) method for this, while Pandas reuses its [`resample`](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.resample.html) method.
+Upsampling moves in the opposite direction, from low-frequency data to high frequency data. Since we can't create new data by magic, upsampling defaults to filling the new rows with nulls (which we could then interpolate, perhaps). In Polars we have a special [`upsample`](https://pola-rs.github.io/polars/py-polars/html/reference/dataframe/api/polars.DataFrame.upsample.html#polars.DataFrame.upsample) method for this, while Pandas reuses its [`resample`](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.resample.html) method.
 
 
 ::: {.panel-tabset}
@@ -154,7 +154,6 @@ ohlcv_pl.select(
     ]
 ).to_pandas().set_index("time").plot()
 
-plt.legend(bbox_to_anchor=(1.25, 0.5))
 plt.ylabel("Close ($)")
 ```
 ## Pandas
@@ -164,7 +163,7 @@ ohlcv_pd["close"].rolling(28).mean().plot(label="28D MA")
 ohlcv_pd["close"].expanding().mean().plot(label="Expanding Average")
 ohlcv_pd["close"].ewm(alpha=0.03).mean().plot(label="EWMA($\\alpha=.03$)")
 
-plt.legend(bbox_to_anchor=(1.25, 0.5))
+plt.legend(bbox_to_anchor=(0.63, 0.27))
 plt.ylabel("Close ($)")
 ```
 :::
@@ -213,7 +212,7 @@ plt.ylabel("Close ($)")
 
 ### Offsets
 
-Pandas has two similar timedelta objects: `DateOffset` which respects calendar arithmetic, and `Timedelta` which respects absolute time arithmetic. `DateOffset` understands things like daylight savings time, and can work with holidays too.
+Pandas has two similar objects for datetime arithmetic: `DateOffset` which respects calendar arithmetic, and `Timedelta` which respects absolute time arithmetic. `DateOffset` understands things like daylight savings time, and can work with holidays too.
 
 Polars just has a `Duration` type which is like Pandas `Timedelta`.
 
@@ -230,7 +229,7 @@ ohlcv_pd.index + pd.Timedelta(80, "D")
 ```
 ## Pandas (DateOffset)
 ``` {python}
-ohlcv_pd.index + pd.DateOffset(months=3, days=-2)
+ohlcv_pd.index + pd.DateOffset(months=3, days=-10)
 ```
 :::
 
