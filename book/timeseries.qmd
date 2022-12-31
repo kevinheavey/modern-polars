@@ -1,0 +1,268 @@
+# Timeseries
+
+Temporal data is an area in which Pandas actually far outshines R's dataframe libraries. Things like resampling and rolling calculations are baked into the dataframe library and work quite well. Fortunately this is also true of Polars!
+
+## Get the data
+
+We'll download a year's worth of daily price and volume data for Bitcoin:
+
+``` {python}
+from pathlib import Path
+from io import StringIO
+from datetime import datetime, date
+import requests
+import polars as pl
+import pandas as pd
+
+pl.Config.set_tbl_rows(5)
+pd.options.display.max_rows = 5
+data_path = Path("data/ohlcv.pq")
+
+
+def epoch_ms(dt: datetime) -> int:
+    return int(dt.timestamp()) * 1000
+
+
+if data_path.exists():
+    ohlcv_pl = pl.read_parquet(data_path)
+
+else:
+    start = epoch_ms(datetime(2021, 1, 1))
+    end = epoch_ms(datetime(2022, 1, 1))
+    url = (
+        "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&"
+        f"interval=1d&startTime={start}&endTime={end}"
+    )
+    resp = requests.get(url)
+    time_col = "time"
+    ohlcv_cols = [
+        "open",
+        "high",
+        "low",
+        "close",
+        "volume",
+    ]
+    cols_to_use = [time_col, *ohlcv_cols] 
+    cols = cols_to_use + [f"ignore_{i}" for i in range(6)]
+    ohlcv_pl = pl.from_records(resp.json(), orient="row", columns=cols).select(
+        [
+            pl.col(time_col).cast(pl.Datetime).dt.with_time_unit("ms").cast(pl.Date),
+            pl.col(ohlcv_cols).cast(pl.Float64),
+        ]
+    )
+    ohlcv_pl.write_parquet(data_path)
+
+ohlcv_pd = ohlcv_pl.to_pandas().set_index("time")
+```
+
+## Filtering
+
+Pandas has special methods for filtering data with a DatetimeIndex. Since Polars doesn't have an index, we just use `.filter`. I will admit the Pandas code is more convenient for things like filtering for a specific month:
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+ohlcv_pl.filter(
+    pl.col("time").is_between(
+        date(2021, 1, 31),
+        date(2021, 3, 1)
+    )
+)
+
+```
+## Pandas
+``` {python}
+ohlcv_pd.loc["2021-02"]
+```
+:::
+
+## Resampling
+
+Resampling is like a special case of `groupby` for a time column. You can of course use regular `.groupby` with a time column, but it won't be as powerful because it doesn't understand time like resampling methods do.
+
+There are two kinds of resampling: downsampling and upsampling.
+
+### Downsampling
+
+Downsampling moves from a higher time frequency to a lower time frequency. This requires us to choose some aggregation or subsetting, since we're reducing the number of rows in our data.
+
+In Polars we use the [`.groupby_dynamic`](https://pola-rs.github.io/polars/py-polars/html/reference/dataframe/api/polars.DataFrame.groupby_dynamic.html#polars.DataFrame.groupby_dynamic) method for downsampling (we also use `groupby_dynamic` when we want to combine resampling with regular groupby logic).
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+ohlcv_pl.groupby_dynamic("time", every="5d").agg(pl.col(pl.Float64).mean())
+
+```
+## Pandas
+``` {python}
+ohlcv_pd.resample("5d").mean()
+```
+:::
+
+Resampling and performing multiple aggregations to each column:
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+ohlcv_pl.groupby_dynamic("time", every="1w").agg(
+    [
+        pl.col(pl.Float64).mean().suffix("_mean"),
+        pl.col(pl.Float64).sum().suffix("_sum")
+    ]
+)
+
+```
+## Pandas
+``` {python}
+ohlcv_pd.resample("W").agg(['mean', 'sum'])
+```
+:::
+
+### Upsampling
+
+Upsampling moves in the opposite direction, from low-frequency data to high frequency data. Since we can't create new data by magic, upsampling defaults to filling the new rows with nulls (which we could then interpolate, perhaps). In Polars we have a special [`upsample`](https://pola-rs.github.io/polars/py-polars/html/reference/dataframe/api/polars.DataFrame.groupby_dynamic.html#polars.DataFrame.groupby_dynamic) method for this, while Pandas reuses its [`resample`](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.resample.html) method.
+
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+ohlcv_pl.upsample("time", every="6h")
+```
+## Pandas
+``` {python}
+ohlcv_pd.resample("6H").mean()
+```
+:::
+
+## Rolling / Expanding / EW
+
+Polars supports all three of these but they're not quite as powerful as in Pandas, since they don't have as many different methods. The `expanding` support is [more limited again](https://github.com/pola-rs/polars/issues/4799), though there are workarounds for this (see below):
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+close = pl.col("close")
+ohlcv_pl.select(
+    [
+        pl.col("time"),
+        close.alias("Raw"),
+        close.rolling_mean(28).alias("28D MA"),
+        close.alias("Expanding Average").cumsum() / (close.cumcount() + 1),
+        close.ewm_mean(alpha=0.03).alias("EWMA($\\alpha=.03$)"),
+    ]
+).to_pandas().set_index("time").plot()
+
+plt.legend(bbox_to_anchor=(1.25, 0.5))
+plt.ylabel("Close ($)")
+```
+## Pandas
+``` {python}
+ohlcv_pd["close"].plot(label="Raw")
+ohlcv_pd["close"].rolling(28).mean().plot(label="28D MA")
+ohlcv_pd["close"].expanding().mean().plot(label="Expanding Average")
+ohlcv_pd["close"].ewm(alpha=0.03).mean().plot(label="EWMA($\\alpha=.03$)")
+
+plt.legend(bbox_to_anchor=(1.25, 0.5))
+plt.ylabel("Close ($)")
+```
+:::
+
+Polars doesn't have an `expanding_mean` yet so we make do by combining `cumsum` and `cumcount`.
+
+### Combining rolling aggregations
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+mean_std_pl = ohlcv_pl.select(
+    [
+        "time",
+        pl.col("close").rolling_mean(30, center=True).alias("mean"),
+        pl.col("close").rolling_std(30, center=True).alias("std"),
+    ]
+)
+ax = mean_std_pl.to_pandas().set_index("time")["mean"].plot()
+ax.fill_between(
+    mean_std_pl["time"].to_numpy(),
+    mean_std_pl["mean"] - mean_std_pl["std"],
+    mean_std_pl["mean"] + mean_std_pl["std"],
+    alpha=0.25,
+)
+plt.tight_layout()
+plt.ylabel("Close ($)")
+```
+## Pandas
+``` {python}
+roll_pd = ohlcv_pd["close"].rolling(30, center=True)
+mean_std_pd = roll_pd.agg(["mean", "std"])
+ax = mean_std_pd["mean"].plot()
+ax.fill_between(
+    mean_std_pd.index,
+    mean_std_pd["mean"] - mean_std_pd["std"],
+    mean_std_pd["mean"] + mean_std_pd["std"],
+    alpha=0.25,
+)
+plt.tight_layout()
+plt.ylabel("Close ($)")
+```
+:::
+
+## Grab Bag
+
+### Offsets
+
+Pandas has two similar timedelta objects: `DateOffset` which respects calendar arithmetic, and `Timedelta` which respects absolute time arithmetic. `DateOffset` understands things like daylight savings time, and can work with holidays too.
+
+Polars just has a `Duration` type which is like Pandas `Timedelta`.
+
+ohlcv_pl.select(pl.col("time") + pl.duration(days=80))
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+ohlcv_pl.select(pl.col("time") + pl.duration(days=80))
+```
+## Pandas (Timedelta)
+``` {python}
+ohlcv_pd.index + pd.Timedelta(80, "D")
+```
+## Pandas (DateOffset)
+``` {python}
+ohlcv_pd.index + pd.DateOffset(months=3, days=-2)
+```
+:::
+
+### Holiday calendars
+
+Not many people know this, but Pandas can do some quite powerful stuff with [Holiday Calendars](https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html?highlight=holiday#holidays-holiday-calendars). There is an [open issue](https://github.com/pola-rs/polars/issues/5713) to add this to Polars.
+
+### Timezones
+
+Suppose we know that our timestamps are UTC, and we want to see what time it was in `US/Eastern`:
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+(
+    ohlcv_pl
+    .with_column(
+        pl.col("time")
+        .cast(pl.Datetime)
+        .dt.with_time_zone("US/Eastern")
+    )
+)
+```
+## Pandas
+``` {python}
+(
+    ohlcv_pd
+    .tz_localize('UTC')
+    .tz_convert('US/Eastern')
+)
+```
+:::
+
+## Conclusion
+
+Polars has really good time series support, though expanding aggregations and holiday calendars are niches in which it is lacking. Pandas `DateTimeIndex`es are quite cool too, even if they do bring some pain.
