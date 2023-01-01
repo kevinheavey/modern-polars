@@ -42,3 +42,7 @@ quite a lot of people are already familiar with.
 So credit goes to Tom for the Pandas examples, for most of the data
 fetching code and for the general structure of the articles.
 Meanwhile the text content and the Polars examples are from me.
+
+## Contributing
+
+This book is free and open source, so please do [raise an issue](https://github.com/kevinheavey/modern-polars/issues/new) if you notice a problem!
