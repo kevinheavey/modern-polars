@@ -12,11 +12,11 @@ By now you should have a good idea of what Polars can do and how it compares to 
 
 ## Reasons not to use Polars
 
+- You have a bunch of stuff in another library that works fine but doesn't have good tests. Even if Polars becomes bug-free, various default behaviours might differ from your expectations.
+- If Mr Vink quits or whatever then Polars probably stagnates. It does have a vibrant community of contributors but Ritchie has the [lion's share](https://github.com/pola-rs/polars/graphs/contributors) of contributions (most open source projects are like this and that's mostly OK).
 - It's young. This means:
   - It's likely to be buggier than Pandas. I do feel somewhat uneasy about all the bugs I ran into while writing this. Those bugs were fixed quickly but they suggest that more time is needed to battle-test the library.
   - The API is likely to change.
-- You have a bunch of stuff in another library that works fine but doesn't have good tests. Even if Polars becomes bug-free, various default behaviours might differ from your expectations.
-- If Mr Vink quits or whatever then Polars probably stagnates. It does have a vibrant community of contributors but Ritchie has the [lion's share](https://github.com/pola-rs/polars/graphs/contributors) of contributions (most open source projects are like this and that's mostly OK).
 
 
 ## Other cool stuff you might like
