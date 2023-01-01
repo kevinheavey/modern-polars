@@ -17,7 +17,7 @@ book:
     # - performance.qmd
     # - tidy.qmd
     # - timeseries.qmd
-    - scaling.qmd
+    # - scaling.qmd
     - summary.qmd
 
 format:
