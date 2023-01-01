@@ -10,6 +10,10 @@ book:
     background: "#F5F5F5"
     logo: polar-bear-airpods-no-background.png
     search: true
+  repo-url: https://github.com/kevinheavey/modern-polars/
+  repo-subdir: book
+  repo-branch: master
+  repo-actions: [edit, issue, source]
   chapters:
     - index.qmd
     # - indexing.qmd
