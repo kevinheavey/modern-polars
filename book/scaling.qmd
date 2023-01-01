@@ -1,3 +1,82 @@
 # Scaling
 
-In this chapter we'll mostly compare Polars to Dask rather than to Pandas. This isn't an apples-to-apples comparison, because Dask helps scale Pandas but it [might help scale Polars too one day](https://twitter.com/RitchieVink/status/1598759986271748107?s=20&t=xBNrw_C9wOU5ddf0wW0XpQ).
+In this chapter we'll mostly compare Polars to Dask rather than to Pandas. This isn't an apples-to-apples comparison, because Dask helps scale Pandas but it [might help scale Polars too one day](https://twitter.com/RitchieVink/status/1598759986271748107?s=20&t=xBNrw_C9wOU5ddf0wW0XpQ). Dask, like Spark, can run on a single node or on a cluster with thousands of nodes.
+
+Polars doesn't come with any tooling for running on a cluster, but it does have a streaming mode for larger-than-memory datasets on a single machine. It also uses memory more efficiently than Pandas. These two things mean you can use Polars for much bigger data than Pandas can handle, and hopefully you won't need Dask or Spark until you're actually running on a cluster.
+
+:::{.callout-note}
+I use "Dask" here as a shorthand for `dask.dataframe`. Dask does [a bunch of other stuff too](https://docs.dask.org/en/stable/).
+:::
+
+:::{.callout-warning}
+The streaming features of Polars are very new at the time of writing, so approach with caution!
+:::
+
+## Get the data
+
+We'll be using political donation data from the [FEC](https://www.fec.gov/data/browse-data/?tab=bulk-data). Warning: this takes a few minutes.
+
+``` {python}
+import asyncio
+from zipfile import ZipFile
+from pathlib import Path
+from io import BytesIO
+import httpx
+import polars as pl
+import pandas as pd
+
+
+pl.Config.set_tbl_rows(5)
+pd.options.display.max_rows = 5
+
+fec_dir = Path("../data/fec")
+
+async def download_and_save_cm(year: str, client: httpx.AsyncClient):
+    cm_cols = ["CMTE_ID", "CMTE_NM", "CMTE_PTY_AFFILIATION"]
+    dtypes = {"CMTE_PTY_AFFILIATION": pl.Categorical}
+    url = f"https://www.fec.gov/files/bulk-downloads/20{year}/cm{year}.zip"
+    resp = await client.get(url)
+    with ZipFile(BytesIO(resp.content)) as z:
+        pl.read_csv(
+            z.read("cm.txt"),
+            has_header=False,
+            columns=[0, 1, 10],
+            new_columns=cm_cols,
+            sep="|",
+            dtypes=dtypes,
+        ).write_parquet(fec_dir / f"cm{year}.pq")
+
+async def download_and_save_indiv(year: str, client: httpx.AsyncClient):
+    dtypes = {
+        "CMTE_ID": pl.Utf8,
+        "EMPLOYER": pl.Categorical,
+        "OCCUPATION": pl.Categorical,
+        "TRANSACTION_DT": pl.Utf8,
+        "TRANSACTION_AMT": pl.Int32,
+    }
+    url = f"https://www.fec.gov/files/bulk-downloads/20{year}/indiv{year}.zip"
+    resp = await client.get(url)
+    with ZipFile(BytesIO(resp.content)) as z:
+        pl.read_csv(
+            z.read("itcont.txt"),
+            has_header=False,
+            columns=[0, 11, 12, 13, 14],
+            new_columns=list(dtypes.keys()),
+            sep="|",
+            dtypes=dtypes,
+            encoding="cp1252",
+        ).with_column(
+            pl.col("TRANSACTION_DT").str.strptime(pl.Date, fmt="%m%d%Y", strict=False)
+        ).write_parquet(
+            fec_dir / f"indiv{year}.pq"
+        )
+
+years = ["08", "10", "12", "14", "16"]
+if not fec_dir.exists():
+    fec_dir.mkdir()
+    async with httpx.AsyncClient(follow_redirects=True, timeout=None) as client:
+        cm_tasks = [download_and_save_cm(year, client) for year in years]
+        indiv_tasks = [download_and_save_indiv(year, client) for year in years]
+        tasks = cm_tasks + indiv_tasks
+        await asyncio.gather(*tasks)
+```
