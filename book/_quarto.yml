@@ -14,6 +14,11 @@ book:
   repo-subdir: book
   repo-branch: master
   repo-actions: [edit, issue, source]
+  sharing: [twitter, facebook, linkedin]
+  comments:
+    giscus:
+      repo: kevinheavey/modern-polars
+
   chapters:
     - index.qmd
     # - indexing.qmd
