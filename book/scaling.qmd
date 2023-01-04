@@ -20,6 +20,7 @@ We'll be using political donation data from the [FEC](https://www.fec.gov/data/b
 import asyncio
 from zipfile import ZipFile
 from pathlib import Path
+from datetime import date
 from io import BytesIO
 import httpx
 import polars as pl
@@ -80,3 +81,403 @@ if not fec_dir.exists():
         tasks = cm_tasks + indiv_tasks
         await asyncio.gather(*tasks)
 ```
+
+## Simple aggregation
+
+Suppose we want to find the most common occupations among political donors. Let's assume that this data is too big for your machine's memory to read it in all at once.
+
+We can solve this using Polars streaming mode, using Dask's lazy dataframe or simply using Pandas to read the files one by one and keep a running total:
+
+::: {.panel-tabset}
+## Polars
+
+``` {python}
+# otherwise we can't read categoricals from multiple files
+pl.toggle_string_cache(True)
+occupation_counts_pl = (
+    pl.scan_parquet(fec_dir / "indiv*.pq", cache=False)
+    .select(pl.col("OCCUPATION").value_counts(multithreaded=True, sort=True))
+    .collect()
+)
+occupation_counts_pl
+```
+
+## Dask
+
+``` {python}
+import dask.dataframe as dd
+from dask import compute
+occupation_counts_dd = dd.read_parquet(
+    fec_dir / "indiv*.pq", engine="pyarrow", columns=["OCCUPATION"]
+)["OCCUPATION"].value_counts()
+occupation_counts_dd.compute()
+```
+
+## Pandas
+
+``` {python}
+files = sorted(fec_dir.glob("indiv*.pq"))
+
+total_counts_pd = pd.Series(dtype="int64")
+
+for year in files:
+    occ_pd = pd.read_parquet(year, columns=["OCCUPATION"], engine="pyarrow")
+    counts = occ_pd["OCCUPATION"].value_counts()
+    total_counts_pd = total_counts_pd.add(counts, fill_value=0).astype("int64")
+
+total_counts_pd.nlargest(100)
+```
+:::
+
+::: {.callout-note}
+Polars can handle some larger-than-memory data even without streaming. Thanks to [predicate pushdown](https://pola-rs.github.io/polars-book/user-guide/optimizations/lazy/predicate-pushdown.html), we can filter dataframes without reading all the data into memory first. So `streaming` mode is most useful for cases where we really do need to read in a lot of data.
+:::
+
+
+## Executing multiple queries in parallel
+
+Often we want to generate multiple insights from the same data, and we need them in separate dataframes. In this case, using `collect_all` is more efficient than calling `.collect` multiple times, because Polars can avoid repeating common operations like reading the data.
+
+Let's compute the average donation size, the total donated by employer and the average donation by occupation:
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+indiv_pl = pl.scan_parquet(fec_dir / "indiv*.pq")
+avg_transaction_lazy_pl = indiv_pl.select(pl.col("TRANSACTION_AMT").mean())
+total_by_employer_lazy_pl = (
+    indiv_pl.drop_nulls("EMPLOYER")
+    .groupby("EMPLOYER")
+    .agg([pl.col("TRANSACTION_AMT").sum()])
+    .sort("TRANSACTION_AMT", reverse=True)
+    .head(10)
+)
+avg_by_occupation_lazy_pl = (
+    indiv_pl.groupby("OCCUPATION")
+    .agg([pl.col("TRANSACTION_AMT").mean()])
+    .sort("TRANSACTION_AMT", reverse=True)
+    .head(10)
+)
+
+avg_transaction_pl, total_by_employer_pl, avg_by_occupation_pl = pl.collect_all(
+    [avg_transaction_lazy_pl, total_by_employer_lazy_pl, avg_by_occupation_lazy_pl],
+    streaming=True,
+    common_subplan_elimination=False, # cannot use CSE with streaming
+)
+```
+
+## Dask
+``` {python}
+indiv_dd = (
+    dd.read_parquet(fec_dir / "indiv*.pq", engine="pyarrow")
+    # pandas and dask want datetimes but this is a date col
+    .assign(
+        TRANSACTION_DT=lambda df: dd.to_datetime(df["TRANSACTION_DT"], errors="coerce")
+    )
+)
+avg_transaction_lazy_dd = indiv_dd["TRANSACTION_AMT"].mean()
+total_by_employer_lazy_dd = (
+    indiv_dd.groupby("EMPLOYER")["TRANSACTION_AMT"].sum().nlargest(10)
+)
+avg_by_occupation_lazy_dd = (
+    indiv_dd.groupby("OCCUPATION")["TRANSACTION_AMT"].mean().nlargest(10)
+)
+avg_transaction_dd, total_by_employer_dd, avg_by_occupation_dd = compute(
+    avg_transaction_lazy_dd, total_by_employer_lazy_dd, avg_by_occupation_lazy_dd
+)
+
+```
+:::
+
+### avg_transaction
+::: {.panel-tabset}
+## Polars
+``` {python}
+avg_transaction_pl
+```
+
+## Dask
+``` {python}
+avg_transaction_dd
+```
+:::
+
+### total_by_employer
+::: {.panel-tabset}
+## Polars
+``` {python}
+total_by_employer_pl
+```
+
+## Dask
+``` {python}
+total_by_employer_dd
+```
+:::
+
+### avg_by_occupation
+::: {.panel-tabset}
+## Polars
+``` {python}
+avg_by_occupation_pl
+```
+
+## Dask
+``` {python}
+avg_by_occupation_dd
+```
+:::
+
+
+## Filtering
+
+Let's filter for only the 10 most common occupations and compute some summary statistics:
+
+### avg_by_occupation
+::: {.panel-tabset}
+## Polars
+``` {python}
+top_occupations_pl = (
+    occupation_counts_pl.select(
+        pl.col("OCCUPATION")
+        .struct.field("OCCUPATION")
+        .drop_nulls()
+        .head(10)
+    )
+    .to_series()
+)
+top_occupations_pl
+```
+
+## Dask
+``` {python}
+top_occupations_dd = occupation_counts_dd.head(10).index
+```
+:::
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+donations_pl_lazy = (
+    indiv_pl.filter(pl.col("OCCUPATION").is_in(top_occupations_pl.to_list()))
+    .groupby("OCCUPATION")
+    .agg(pl.col("TRANSACTION_AMT").mean())
+)
+total_avg_pl, occupation_avg_pl = pl.collect_all(
+    [indiv_pl.select(pl.col("TRANSACTION_AMT").mean()), donations_pl_lazy],
+    streaming=True,
+    common_subplan_elimination=False
+)
+```
+
+## Dask
+``` {python}
+donations_dd_lazy = (
+    indiv_dd[indiv_dd["OCCUPATION"].isin(top_occupations_dd)]
+    .groupby("OCCUPATION")["TRANSACTION_AMT"]
+    .mean()
+    .dropna()
+)
+total_avg_dd, occupation_avg_dd = compute(
+    indiv_dd["TRANSACTION_AMT"].mean(), donations_dd_lazy
+)
+```
+:::
+
+### Plotting
+
+These results are small enough to plot:
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+ax = (
+    occupation_avg_pl
+    .to_pandas()
+    .set_index("OCCUPATION")
+    .squeeze()
+    .sort_values(ascending=False)
+    .plot.barh(color="k", width=0.9)
+)
+lim = ax.get_ylim()
+ax.vlines(total_avg_pl, *lim, color="C1", linewidth=3)
+ax.legend(["Average donation"])
+ax.set(xlabel="Donation Amount", title="Average Dontation by Occupation")
+```
+
+## Dask
+``` {python}
+ax = occupation_avg_dd.sort_values(ascending=False).plot.barh(color="k", width=0.9)
+lim = ax.get_ylim()
+ax.vlines(total_avg_dd, *lim, color="C1", linewidth=3)
+ax.legend(["Average donation"])
+ax.set(xlabel="Donation Amount", title="Average Dontation by Occupation")
+```
+:::
+
+## Resampling
+
+Resampling is another useful way to get our data down to a manageable size:
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+daily_pl = (
+    indiv_pl.select(["TRANSACTION_DT", "TRANSACTION_AMT"])
+    .drop_nulls()
+    .sort("TRANSACTION_DT")
+    .groupby_dynamic("TRANSACTION_DT", every="1d")
+    .agg(pl.col("TRANSACTION_AMT").sum())
+    .filter(
+        pl.col("TRANSACTION_DT")
+        .is_between(date(2011, 1, 1), date(2017, 1, 1))
+    )
+    .with_column(pl.col("TRANSACTION_AMT") / 1000)
+    .collect()
+)
+ax = (
+    daily_pl.select(
+        [pl.col("TRANSACTION_DT").cast(pl.Datetime), "TRANSACTION_AMT"]
+    )
+    .to_pandas()
+    .set_index("TRANSACTION_DT")
+    .squeeze()
+    .plot(figsize=(12, 6))
+)
+ax.set(ylim=0, title="Daily Donations", ylabel="$ (thousands)")
+```
+
+## Dask
+``` {python}
+daily_dd = (
+    indiv_dd[["TRANSACTION_DT", "TRANSACTION_AMT"]]
+    .dropna()
+    .set_index("TRANSACTION_DT")["TRANSACTION_AMT"]
+    .resample("D")
+    .sum()
+    .loc["2011":"2016"]
+    .div(1000)
+    .compute()
+)
+
+ax = daily_dd.plot(figsize=(12, 6))
+ax.set(ylim=0, title="Daily Donations", ylabel="$ (thousands)")
+```
+:::
+
+## Joining
+
+Polars joins work in streaming mode. Let's add join the donations data with the **committee master** data, which contains information about the committees people donate to.
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+cm_pl = (
+    # This data is small so we don't use streaming.
+    # Also, .last isn't available in lazy mode.
+    pl.read_parquet(fec_dir / "cm*.pq")
+    # Some committees change their name, but the ID stays the same
+    .groupby("CMTE_ID", maintain_order=True).last()
+)
+cm_pl
+```
+
+## Dask
+``` {python}
+cm_dd = (
+    # This data is small but we use dask here as a convenient way to read a glob of files.
+    dd.read_parquet(fec_dir / "cm*.pq")
+    .compute()
+    # Some committees change their name, but the ID stays the same
+    # If we use .last instead of .nth(-1), we get the last non-null value
+    .groupby("CMTE_ID", as_index=False)
+    .nth(-1)
+)
+cm_dd
+```
+:::
+
+Merging:
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+indiv_filtered_pl = indiv_pl.filter(
+    pl.col("TRANSACTION_DT").is_between(
+        date(2007, 1, 1), date(2017, 1, 1), include_bounds=True
+    )
+)
+merged_pl = indiv_filtered_pl.join(cm_pl.lazy(), on="CMTE_ID")
+```
+
+## Dask
+``` {python}
+indiv_filtered_dd = indiv_dd[
+    (indiv_dd["TRANSACTION_DT"] >= pd.Timestamp("2007-01-01"))
+    & (indiv_dd["TRANSACTION_DT"] <= pd.Timestamp("2017-01-01"))
+]
+merged_dd = dd.merge(indiv_filtered_dd, cm_dd, on="CMTE_ID")
+```
+:::
+
+Daily donations by party:
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+party_donations_pl = (
+    merged_pl.groupby(["TRANSACTION_DT", "CMTE_PTY_AFFILIATION"])
+    .agg(pl.col("TRANSACTION_AMT").sum())
+    .sort(["TRANSACTION_DT", "CMTE_PTY_AFFILIATION"])
+    .collect()
+)
+
+```
+## Dask
+``` {python}
+party_donations_dd = (
+    (
+        merged_dd.groupby(["TRANSACTION_DT", "CMTE_PTY_AFFILIATION"])[
+            "TRANSACTION_AMT"
+        ].sum()
+    )
+    .compute()
+    .sort_index()
+)
+```
+:::
+
+Plotting daily donations:
+
+::: {.panel-tabset}
+## Polars
+``` {python}
+ax = (
+    party_donations_pl
+    .pivot(
+        index="TRANSACTION_DT", columns="CMTE_PTY_AFFILIATION", values="TRANSACTION_AMT"
+    )[1:, :]
+    .select(
+        [pl.col("TRANSACTION_DT"), pl.col(pl.Int32).rolling_mean(30, min_periods=0)]
+    )
+    .to_pandas()
+    .set_index("TRANSACTION_DT")
+    [["DEM", "REP"]]
+    .plot(color=["C0", "C3"], figsize=(12, 6), linewidth=3)
+)
+ax.set(title="Daily Donations (30-D Moving Average)", xlabel="Date")
+```
+## Dask
+``` {python}
+ax = (
+    party_donations_dd
+    .unstack("CMTE_PTY_AFFILIATION")
+    .iloc[1:]
+    .rolling("30D")
+    .mean()
+    [["DEM", "REP"]]
+    .plot(color=["C0", "C3"], figsize=(12, 6), linewidth=3)
+)
+ax.set(title="Daily Donations (30-D Moving Average)", xlabel="Date")
+```
+:::
