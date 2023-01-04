@@ -7,16 +7,22 @@ By now you should have a good idea of what Polars can do and how it compares to 
 - It's really fast.
 - It has a nice API.
 - It does most of the things Pandas does (the biggest missing things are plotting and some I/O methods).
-- It's available in Python, Rust, NodeJS and Ruby.
-- The lead dev, Ritchie Vink is **very** productive and quick to fix bugs.
+- It's available in Python, Rust, NodeJS and Ruby. This is partly because most of the code is written in Rust, and calling Rust in other languages works much better than calling Python.
+- The lead dev is **very** productive and quick to fix bugs.
 
 ## Reasons not to use Polars
 
-- You have a bunch of stuff in another library that works fine but doesn't have good tests. Even if Polars becomes bug-free, various default behaviours might differ from your expectations.
-- If Mr Vink quits or whatever then Polars probably stagnates. It does have a vibrant community of contributors but Ritchie has the [lion's share](https://github.com/pola-rs/polars/graphs/contributors) of contributions (most open source projects are like this and that's mostly OK).
-- It's young. This means:
-  - It's likely to be buggier than Pandas. I do feel somewhat uneasy about all the bugs I ran into while writing this. Those bugs were fixed quickly but they suggest that more time is needed to battle-test the library.
-  - The API is likely to change.
+### Bugs
+
+By my count I ran into [11 bugs](https://github.com/pola-rs/polars/issues?q=is%3Aissue+author%3Akevinheavey) while writing this book. They were fixed quickly and tests were added to make sure they don't happen again, but it all makes me feel somewhat uneasy. It's not like Pandas hasn't gone through a whole insectarium of bugs, but Polars probably has more right now due to being newer.
+
+### If it ain't broke, don't fix it
+
+Suppose you have a bunch of important stuff in another library that works fine, even if it's a bit slow. Maybe it doesn't have good tests. Switching to another library is tricky may not be worth it here. Even if Polars is bug-free, various default behaviours might differ from your expectations.
+
+### API stability
+
+Since Polars is young and has not made a 1.0 release yet, the API is subject to breaking changes. Indeed, it has quite a few features that are explicitly labelled as experimental.
 
 
 ## Other cool stuff you might like
