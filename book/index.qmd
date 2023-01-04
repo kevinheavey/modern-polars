@@ -12,11 +12,9 @@ For the most part, I argue that Polars is "better" than Pandas, though I do try 
 
 ## Who is this for?
 
-This is for people who already have some familiarity with Pandas, though you don't need to know Polars to read it.
+This is not a beginner's introduction to data programming, though you certainly don't need to be an expert to read it. If you have some familiarity with any dataframe library, most of the examples should make sense, but if you're familiar with Pandas they'll make even more sense because all the Polars code is accompanied by the equivalent Pandas code.
 
-This is also a book for someone who knows Polars but not Pandas, if such a person exists.
-
-You don't need to have read Modern Pandas, though I of course think it's a great read.
+You don't need to have read **Modern Pandas**, though I of course think it's a great read.
 
 ## Why?
 
