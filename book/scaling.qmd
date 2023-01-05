@@ -143,6 +143,7 @@ Let's compute the average donation size, the total donated by employer and the a
 ::: {.panel-tabset}
 ## Polars
 ``` {python}
+%%time
 indiv_pl = pl.scan_parquet(fec_dir / "indiv*.pq")
 avg_transaction_lazy_pl = indiv_pl.select(pl.col("TRANSACTION_AMT").mean())
 total_by_employer_lazy_pl = (
@@ -168,6 +169,7 @@ avg_transaction_pl, total_by_employer_pl, avg_by_occupation_pl = pl.collect_all(
 
 ## Dask
 ``` {python}
+%%time
 indiv_dd = (
     dd.read_parquet(fec_dir / "indiv*.pq", engine="pyarrow")
     # pandas and dask want datetimes but this is a date col
@@ -187,6 +189,13 @@ avg_transaction_dd, total_by_employer_dd, avg_by_occupation_dd = compute(
 )
 
 ```
+
+The Polars code above tends to be ~3.5x faster than Dask on my machine, which if anything is a smaller speedup than I expected. 
+
+We should also profile memory usage, since it could be the case that Polars is just running faster because it's reading in bigger chunks. According to the [`fil`](https://pythonspeed.com/fil/docs/index.html)
+profiler, the Dask example's memory usage peaks at 1450 MiB, while Polars uses ~10% more than that.
+
+Before I forget, here are the results of our computations:
 :::
 
 ### avg_transaction
