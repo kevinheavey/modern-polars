@@ -8,3 +8,5 @@ data/fifa*
 debug/
 target/
 **/*.rs.bk
+/.quarto/
+/_site/
