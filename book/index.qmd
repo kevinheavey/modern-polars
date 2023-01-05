@@ -41,6 +41,27 @@ So credit goes to Tom for the Pandas examples, for most of the data
 fetching code and for the general structure of the articles.
 Meanwhile the text content and the Polars examples are from me.
 
+## Running the code yourself
+
+If you want to replicate the results in this book, you can install the same package versions using the [env.yml](https://github.com/kevinheavey/modern-polars/blob/master/env.yml) file:
+
+```shell
+mamba env create -f env.yml
+```
+
+If you're not using mamba/conda you can install the following package versions and it should work:
+
+```
+polars: 0.15.12
+pyarrow: 10.0.1
+pandas: 1.5.2
+numpy: 1.23.5
+fsspec: 2022.11.0
+matplotlib: 3.6.2
+seaborn: 0.12.1
+filprofiler: 2022.11.0
+```
+
 ## Contributing
 
 This book is free and open source, so please do [raise an issue](https://github.com/kevinheavey/modern-polars/issues/new) if you notice a problem!
