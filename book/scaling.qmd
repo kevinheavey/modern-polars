@@ -97,7 +97,7 @@ pl.toggle_string_cache(True)
 occupation_counts_pl = (
     pl.scan_parquet(fec_dir / "indiv*.pq", cache=False)
     .select(pl.col("OCCUPATION").value_counts(multithreaded=True, sort=True))
-    .collect()
+    .collect(streaming=True)
 )
 occupation_counts_pl
 ```
@@ -344,7 +344,7 @@ daily_pl = (
         .is_between(date(2011, 1, 1), date(2017, 1, 1), closed="left")
     )
     .with_column(pl.col("TRANSACTION_AMT") / 1000)
-    .collect()
+    .collect(streaming=True)
 )
 ax = (
     daily_pl.select(
@@ -443,7 +443,7 @@ party_donations_pl = (
     merged_pl.groupby(["TRANSACTION_DT", "CMTE_PTY_AFFILIATION"])
     .agg(pl.col("TRANSACTION_AMT").sum())
     .sort(["TRANSACTION_DT", "CMTE_PTY_AFFILIATION"])
-    .collect()
+    .collect(streaming=True)
 )
 
 ```
