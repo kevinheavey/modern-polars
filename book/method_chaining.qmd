@@ -129,7 +129,7 @@ We could do the same in Polars but I wanted to show you the `pl.Date` and `pl.Ti
 It turns out that combining `pl.Date` and `pl.Time` isn't that straightforward: we have to convert them both to microseconds, add them and then cast as `pl.Datetime`.
 
 
-## Brining It All Back Home
+## Bringing It All Back Home
 
 It's time for some method chaining. First, some common variables for both the Polars and Pandas code:
 
