@@ -2,7 +2,7 @@
 
 In this chapter we'll mostly compare Polars to Dask rather than to Pandas. This isn't an apples-to-apples comparison, because Dask helps scale Pandas but it [might help scale Polars too one day](https://twitter.com/RitchieVink/status/1598759986271748107?s=20&t=xBNrw_C9wOU5ddf0wW0XpQ). Dask, like Spark, can run on a single node or on a cluster with thousands of nodes.
 
-Polars doesn't come with any tooling for running on a cluster, but it does have a streaming mode for larger-than-memory datasets on a single machine. It also uses memory more efficiently than Pandas. These two things mean you can use Polars for much bigger data than Pandas can handle, and hopefully you won't need Dask or Spark until you're actually running on a cluster.
+Polars doesn't come with any tooling for running on a cluster, but it does have a streaming mode for larger-than-memory datasets on a single machine. It also uses memory more efficiently than Pandas. These two things mean you can use Polars for much bigger data than Pandas can handle, and hopefully you won't need tools like Dask or Spark until you're actually running on a cluster.
 
 :::{.callout-note}
 I use "Dask" here as a shorthand for `dask.dataframe`. Dask does [a bunch of other stuff too](https://docs.dask.org/en/stable/).
@@ -86,7 +86,7 @@ if not fec_dir.exists():
 
 Suppose we want to find the most common occupations among political donors. Let's assume that this data is too big for your machine's memory to read it in all at once.
 
-We can solve this using Polars streaming mode, using Dask's lazy dataframe or simply using Pandas to read the files one by one and keep a running total:
+We can solve this using Polars streaming, using Dask's lazy dataframe or simply using Pandas to read the files one by one and keeping a running total:
 
 ::: {.panel-tabset}
 ## Polars
@@ -241,8 +241,9 @@ avg_by_occupation_dd
 
 Let's filter for only the 10 most common occupations and compute some summary statistics:
 
-### avg_by_occupation
+### avg_by_occupation, filtered
 Getting the most common occupations:
+
 ::: {.panel-tabset}
 ## Polars
 ``` {python}
@@ -395,11 +396,14 @@ cm_pl
 ## Dask
 ``` {python}
 cm_dd = (
-    # This data is small but we use dask here as a convenient way to read a glob of files.
+    # This data is small but we use dask here as a 
+    # convenient way to read a glob of files.
     dd.read_parquet(fec_dir / "cm*.pq")
     .compute()
-    # Some committees change their name, but the ID stays the same
-    # If we use .last instead of .nth(-1), we get the last non-null value
+    # Some committees change their name, but the
+    # ID stays the same.
+    # If we use .last instead of .nth(-1),
+    # we get the last non-null value
     .groupby("CMTE_ID", as_index=False)
     .nth(-1)
 )

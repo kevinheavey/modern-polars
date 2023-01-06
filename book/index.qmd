@@ -62,6 +62,10 @@ seaborn: 0.12.1
 filprofiler: 2022.11.0
 ```
 
+### Data
+
+All the data fetching code is included, but will eventually break as websites change or shut down. The smaller datasets have been checked in [here](https://github.com/kevinheavey/modern-polars/tree/master/data) for posterity.
+
 ## Contributing
 
 This book is free and open source, so please do [open an issue](https://github.com/kevinheavey/modern-polars/issues/new) if you notice a problem!

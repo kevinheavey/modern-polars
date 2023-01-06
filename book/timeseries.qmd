@@ -93,7 +93,11 @@ In Polars we use the [`.groupby_dynamic`](https://pola-rs.github.io/polars/py-po
 ::: {.panel-tabset}
 ## Polars
 ``` {python}
-ohlcv_pl.groupby_dynamic("time", every="5d").agg(pl.col(pl.Float64).mean())
+(
+    ohlcv_pl
+    .groupby_dynamic("time", every="5d")
+    .agg(pl.col(pl.Float64).mean())
+)
 
 ```
 ## Pandas
@@ -217,8 +221,6 @@ Pandas has two similar objects for datetime arithmetic: `DateOffset` which respe
 
 Polars just has a `Duration` type which is like Pandas `Timedelta`.
 
-ohlcv_pl.select(pl.col("time") + pl.duration(days=80))
-
 ::: {.panel-tabset}
 ## Polars
 ``` {python}
@@ -236,7 +238,7 @@ ohlcv_pd.index + pd.DateOffset(months=3, days=-10)
 
 ### Holiday calendars
 
-Not many people know this, but Pandas can do some quite powerful stuff with [Holiday Calendars](https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html?highlight=holiday#holidays-holiday-calendars). There is an [open issue](https://github.com/pola-rs/polars/issues/5713) to add this to Polars.
+Not many people know this, but Pandas can do some quite powerful stuff with [Holiday Calendars](https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html?highlight=holiday#holidays-holiday-calendars). There is an [open issue](https://github.com/pola-rs/polars/issues/5713) to add this functionality to Polars.
 
 ### Timezones
 
