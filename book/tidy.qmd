@@ -161,7 +161,7 @@ tidy_pl = (
         value_vars=["away_team", "home_team"],
         value_name="team",
     )
-    .sort("date")
+    .sort("game_id")
     .with_column(pl.col("date").alias("rest").diff().over("team").dt.days() - 1)
     .drop_nulls("rest")
     .collect()

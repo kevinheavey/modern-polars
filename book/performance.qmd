@@ -9,7 +9,7 @@ Here are some tips that are almost always a good idea:
 
 - Use the lazy API.
 - Use `Expr`s, and don't use `.apply` unless you really have to.
-- Use the smallest necessary numeric types (so if you have an integer between 0 and 100, use `pl.UInt8`, not `pl.Int64`). This likely won't speed things up but will use less memory.
+- Use the smallest necessary numeric types (so if you have an integer between 0 and 255, use `pl.UInt8`, not `pl.Int64`). This likely won't speed things up but will use less memory.
 - Use efficient storage (if you're dumping stuff in files, Parquet is a good choice).
 - Use categoricals for recurring strings (but note that it may not be worth it if there's not much repetition).
 - Only select the columns you need.
@@ -26,7 +26,13 @@ Now for some comparisons between the performance of idiomatic Pandas and Polars.
 
 Here we'll clean up a messy dataset, kindly [provided](https://www.kaggle.com/datasets/yagunnersya/fifa-21-messy-raw-dataset-for-cleaning-exploring?resource=download) by Kaggle user Rachit Toshniwal as a deliberate example of a really crap CSV. Most of the cleanup involves extracting numeric data from awkward strings.
 
-Also, the data is too small so I've concatenated it to itself 20 times. We're not doing anything that will care about the duplication.
+Also, the data is too small so I've concatenated it to itself 20 times. We're not doing anything that will care about the duplication. Here's how the raw data looks:
+
+``` {python}
+#| code-fold: true
+import pandas as pd
+pd.read_csv("data/fifa21_raw_big.csv", dtype="string", nrows=2)
+```
 
 For this exercise we'll assume we want to make use of all the columns. First some boilerplate where we map out the different data types:
 
@@ -377,6 +383,23 @@ fifa_pd = (
 ```
 :::
 
+Output:
+
+::: {.panel-tabset}
+## Polars
+
+``` {python}
+fifa_pl.head()
+```
+
+## Pandas
+
+``` {python}
+fifa_pd.head()
+```
+:::
+
+
 You could play around with the timings here and even try the [`.profile`](https://pola-rs.github.io/polars/py-polars/html/reference/lazyframe/api/polars.LazyFrame.profile.html) method to see what Polars spends its time on. In this scenario the speed advantage of Polars likely comes down to three things:
 
 1. It is much faster at reading CSVs.
@@ -506,7 +529,7 @@ rand_df_pl = create_frame(50_000_000, 50_000)
 rand_df_pd = rand_df_pl.to_pandas()
 ```
 
-The Pandas version tends to be ~25% faster on my machine:
+The Pandas version tends to be 10-60% faster on my machine:
 
 ::: {.panel-tabset}
 ## Polars
@@ -527,6 +550,6 @@ And even here, if you sort by the `name` col, Polars wins again. It has fast-tra
 ## Summary
 
 - Polars is really fast. Pandas was already respectably fast and Polars wipes the floor with it.
-- You can still make Polars slow if you do silly things with it, but it's easier to do the right thing with Polars.
+- You can still make Polars slow if you do silly things with it, but compared to Pandas it's easier to do the right thing in the first place.
 - Polars works well with NumPy ufuncs.
 - There are still some situations where Pandas can be faster. They are probably not compelling, but we shouldn't pretend they don't exist.

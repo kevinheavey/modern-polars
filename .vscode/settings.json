@@ -1,3 +1,34 @@
 {
-    "python.formatting.provider": "black"
+    "python.formatting.provider": "black",
+    "cSpell.words": [
+        "airpods",
+        "astype",
+        "backgroundcolor",
+        "barh",
+        "CMTE",
+        "dask",
+        "dataframe",
+        "dropna",
+        "dtype",
+        "favourites",
+        "figsize",
+        "giscus",
+        "Heavey",
+        "iloc",
+        "indiv",
+        "isin",
+        "kevinheavey",
+        "linewidth",
+        "matplotlib",
+        "pyarrow",
+        "pyplot",
+        "seaborn",
+        "subdir",
+        "subplan",
+        "timeseries",
+        "vlines",
+        "xlabel",
+        "ylabel",
+        "ylim"
+    ]
 }

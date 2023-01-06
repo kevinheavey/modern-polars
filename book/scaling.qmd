@@ -312,7 +312,7 @@ ax = (
 lim = ax.get_ylim()
 ax.vlines(total_avg_pl, *lim, color="C1", linewidth=3)
 ax.legend(["Average donation"])
-ax.set(xlabel="Donation Amount", title="Average Dontation by Occupation")
+ax.set(xlabel="Donation Amount", title="Average Donation by Occupation")
 ```
 
 ## Dask
@@ -321,7 +321,7 @@ ax = occupation_avg_dd.sort_values(ascending=False).plot.barh(color="k", width=0
 lim = ax.get_ylim()
 ax.vlines(total_avg_dd, *lim, color="C1", linewidth=3)
 ax.legend(["Average donation"])
-ax.set(xlabel="Donation Amount", title="Average Dontation by Occupation")
+ax.set(xlabel="Donation Amount", title="Average Donation by Occupation")
 ```
 :::
 

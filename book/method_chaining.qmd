@@ -42,7 +42,6 @@ def extract_city_name_pl() -> pl.Expr:
     Chicago, IL -> Chicago for OriginCityName and DestCityName
     """
     cols = ["OriginCityName", "DestCityName"]
-    # note that lists are OK in Polars if they have the same data type
     return pl.col(cols).str.split(",").arr.get(0)
 ```
 
@@ -413,12 +412,12 @@ The above examples have some fairly long method chains that could perhaps be spl
 
 ![](pandas_chain_tweet.png){fig-alt="A tweet with a code screenshot containing a very long method chain, and an angry reply."}
 
-I would argue this code is not hard to follow, but empirically it provokes disgust in people. I think it's just visually shocking, which is often a hallmark of terrible code. That's enough reason to avoid doing this. You don't want people assuming you've lost your mind.
+I would argue this code is not hard to follow, but empirically it provokes disgust in people. I think it's just visually shocking, which is often a hallmark of terrible code. That's enough reason to avoid doing this. You don't want folks assuming you've lost your mind.
 
-In this case, it would probably be enough to just move those long lists to their own variables. That would make it more obvious that the code is really doing simple, menial things.
+In the above example, it would probably be enough to just move those long lists to their own variables. That would make it more obvious that the code is really doing simple, menial things.
 
 ## Summary
 
 - Method chaining is great but use it with care.
-- The Polars code looks pretty good here next to Pandas. It's less clunky and more conducive to fluent programming. I've noticed some people are under the impression that you should only use Polars when you need it (implying you need it less often than Pandas), but I would argue the above examples show that it's better for small data too.
+- The Polars code looks pretty good here next to Pandas. It's less clunky and more conducive to fluent programming. I've noticed some people are under the impression that you should only use Polars when you need the performance, but I would argue the above examples show that it's better for small data too.
 - If you want to translate Pandas code to Polars, pay attention to the examples above and the accompanying notes on the API differences.
