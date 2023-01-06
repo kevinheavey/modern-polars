@@ -130,10 +130,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 <link rel="stylesheet" href="custom.css">
-<meta name="twitter:title" content="Modern Polars - 1&nbsp; Indexing (Or Lack Thereof)">
-<meta name="twitter:description" content="This chapter is about indexes, which are the source of much confusion in Pandas and simply don’t exist in Polars.">
-<meta name="twitter:image" content="https://kevinheavey.github.io/modern-polars/polar-bear-airpods-no-background.png">
-<meta name="twitter:card" content="summary_large_image">
 </head>
 
 <body class="nav-sidebar floating">
@@ -338,7 +334,7 @@ Tip
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>pd.options.display.max_rows <span class="op">=</span> <span class="dv">5</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>df_pd <span class="op">=</span> pd.read_csv(extracted)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_56750/2313300556.py:3: DtypeWarning: Columns (76,77,84) have mixed types. Specify dtype option on import or set low_memory=False.
+<pre><code>/tmp/ipykernel_60519/2313300556.py:3: DtypeWarning: Columns (76,77,84) have mixed types. Specify dtype option on import or set low_memory=False.
   df_pd = pd.read_csv(extracted)</code></pre>
 </div>
 </div>
@@ -1138,7 +1134,7 @@ i64
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>f[f[<span class="st">'a'</span>] <span class="op">&lt;=</span> <span class="dv">3</span>][<span class="st">'b'</span>] <span class="op">=</span> f[<span class="st">'b'</span>] <span class="op">//</span> <span class="dv">10</span></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>f</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_56750/1317853993.py:2: SettingWithCopyWarning: 
+<pre><code>/tmp/ipykernel_60519/1317853993.py:2: SettingWithCopyWarning: 
 A value is trying to be set on a copy of a slice from a DataFrame.
 Try using .loc[row_indexer,col_indexer] = value instead
 
