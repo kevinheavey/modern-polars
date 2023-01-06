@@ -386,7 +386,7 @@ Warning
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>occupation_counts_pl <span class="op">=</span> (</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    pl.scan_parquet(fec_dir <span class="op">/</span> <span class="st">"indiv*.pq"</span>, cache<span class="op">=</span><span class="va">False</span>)</span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    .select(pl.col(<span class="st">"OCCUPATION"</span>).value_counts(multithreaded<span class="op">=</span><span class="va">True</span>, sort<span class="op">=</span><span class="va">True</span>))</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    .collect()</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    .collect(streaming<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>occupation_counts_pl</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
@@ -555,8 +555,8 @@ Note
 <span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    common_subplan_elimination<span class="op">=</span><span class="va">False</span>, <span class="co"># cannot use CSE with streaming</span></span>
 <span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>CPU times: user 10.5 s, sys: 1.92 s, total: 12.4 s
-Wall time: 4.53 s</code></pre>
+<pre><code>CPU times: user 13.3 s, sys: 2.33 s, total: 15.6 s
+Wall time: 5.02 s</code></pre>
 </div>
 </div>
 </div>
@@ -581,8 +581,8 @@ Wall time: 4.53 s</code></pre>
 <span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    avg_transaction_lazy_dd, total_by_employer_lazy_dd, avg_by_occupation_lazy_dd</span>
 <span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>CPU times: user 24.6 s, sys: 3.8 s, total: 28.4 s
-Wall time: 20.1 s</code></pre>
+<pre><code>CPU times: user 27.1 s, sys: 4.33 s, total: 31.4 s
+Wall time: 21.1 s</code></pre>
 </div>
 </div>
 </div>
@@ -879,7 +879,7 @@ f64
 </tr>
 <tr>
 <td>
-"PERRY HOMES"
+"MOORE CAPITAL ...
 </td>
 <td>
 500000.0
@@ -887,7 +887,7 @@ f64
 </tr>
 <tr>
 <td>
-"MOORE CAPITAL ...
+"OWNER, FOUNDER...
 </td>
 <td>
 500000.0
@@ -1131,7 +1131,7 @@ cat
 <span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>        .is_between(date(<span class="dv">2011</span>, <span class="dv">1</span>, <span class="dv">1</span>), date(<span class="dv">2017</span>, <span class="dv">1</span>, <span class="dv">1</span>), closed<span class="op">=</span><span class="st">"left"</span>)</span>
 <span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>    .with_column(pl.col(<span class="st">"TRANSACTION_AMT"</span>) <span class="op">/</span> <span class="dv">1000</span>)</span>
-<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>    .collect()</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>    .collect(streaming<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> (</span>
 <span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>    daily_pl.select(</span>
@@ -1420,24 +1420,21 @@ null
 <span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>    merged_pl.groupby([<span class="st">"TRANSACTION_DT"</span>, <span class="st">"CMTE_PTY_AFFILIATION"</span>])</span>
 <span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    .agg(pl.col(<span class="st">"TRANSACTION_AMT"</span>).<span class="bu">sum</span>())</span>
 <span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    .sort([<span class="st">"TRANSACTION_DT"</span>, <span class="st">"CMTE_PTY_AFFILIATION"</span>])</span>
-<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    .collect()</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    .collect(streaming<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>PARTITIONED DS</code></pre>
-</div>
 </div>
 </div>
 <div id="tabset-12-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-12-2-tab">
 <div class="cell" data-execution_count="26">
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>party_donations_dd <span class="op">=</span> (</span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>    (</span>
-<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>        merged_dd.groupby([<span class="st">"TRANSACTION_DT"</span>, <span class="st">"CMTE_PTY_AFFILIATION"</span>])[</span>
-<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>            <span class="st">"TRANSACTION_AMT"</span></span>
-<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>        ].<span class="bu">sum</span>()</span>
-<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>    .compute()</span>
-<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>    .sort_index()</span>
-<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>party_donations_dd <span class="op">=</span> (</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>    (</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>        merged_dd.groupby([<span class="st">"TRANSACTION_DT"</span>, <span class="st">"CMTE_PTY_AFFILIATION"</span>])[</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>            <span class="st">"TRANSACTION_AMT"</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>        ].<span class="bu">sum</span>()</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>    .compute()</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>    .sort_index()</span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
@@ -1448,20 +1445,20 @@ null
 <div class="tab-content">
 <div id="tabset-13-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-13-1-tab">
 <div class="cell" data-execution_count="27">
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> (</span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>    party_donations_pl</span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    .pivot(</span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>        index<span class="op">=</span><span class="st">"TRANSACTION_DT"</span>, columns<span class="op">=</span><span class="st">"CMTE_PTY_AFFILIATION"</span>, values<span class="op">=</span><span class="st">"TRANSACTION_AMT"</span></span>
-<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>    )[<span class="dv">1</span>:, :]</span>
-<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    .select(</span>
-<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>        [pl.col(<span class="st">"TRANSACTION_DT"</span>), pl.col(pl.Int32).rolling_mean(<span class="dv">30</span>, min_periods<span class="op">=</span><span class="dv">0</span>)]</span>
-<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>    .to_pandas()</span>
-<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>    .set_index(<span class="st">"TRANSACTION_DT"</span>)</span>
-<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>    [[<span class="st">"DEM"</span>, <span class="st">"REP"</span>]]</span>
-<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>    .plot(color<span class="op">=</span>[<span class="st">"C0"</span>, <span class="st">"C3"</span>], figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">6</span>), linewidth<span class="op">=</span><span class="dv">3</span>)</span>
-<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(title<span class="op">=</span><span class="st">"Daily Donations (30-D Moving Average)"</span>, xlabel<span class="op">=</span><span class="st">"Date"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> (</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>    party_donations_pl</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    .pivot(</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>        index<span class="op">=</span><span class="st">"TRANSACTION_DT"</span>, columns<span class="op">=</span><span class="st">"CMTE_PTY_AFFILIATION"</span>, values<span class="op">=</span><span class="st">"TRANSACTION_AMT"</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    )[<span class="dv">1</span>:, :]</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>    .select(</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>        [pl.col(<span class="st">"TRANSACTION_DT"</span>), pl.col(pl.Int32).rolling_mean(<span class="dv">30</span>, min_periods<span class="op">=</span><span class="dv">0</span>)]</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>    .to_pandas()</span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>    .set_index(<span class="st">"TRANSACTION_DT"</span>)</span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>    [[<span class="st">"DEM"</span>, <span class="st">"REP"</span>]]</span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>    .plot(color<span class="op">=</span>[<span class="st">"C0"</span>, <span class="st">"C3"</span>], figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">6</span>), linewidth<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(title<span class="op">=</span><span class="st">"Daily Donations (30-D Moving Average)"</span>, xlabel<span class="op">=</span><span class="st">"Date"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="27">
 <pre><code>[Text(0.5, 1.0, 'Daily Donations (30-D Moving Average)'), Text(0.5, 0, 'Date')]</code></pre>
 </div>
@@ -1472,16 +1469,16 @@ null
 </div>
 <div id="tabset-13-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-13-2-tab">
 <div class="cell" data-execution_count="28">
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> (</span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>    party_donations_dd</span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    .unstack(<span class="st">"CMTE_PTY_AFFILIATION"</span>)</span>
-<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    .iloc[<span class="dv">1</span>:]</span>
-<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>    .rolling(<span class="st">"30D"</span>)</span>
-<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>    .mean()</span>
-<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>    [[<span class="st">"DEM"</span>, <span class="st">"REP"</span>]]</span>
-<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>    .plot(color<span class="op">=</span>[<span class="st">"C0"</span>, <span class="st">"C3"</span>], figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">6</span>), linewidth<span class="op">=</span><span class="dv">3</span>)</span>
-<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(title<span class="op">=</span><span class="st">"Daily Donations (30-D Moving Average)"</span>, xlabel<span class="op">=</span><span class="st">"Date"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> (</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    party_donations_dd</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    .unstack(<span class="st">"CMTE_PTY_AFFILIATION"</span>)</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    .iloc[<span class="dv">1</span>:]</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>    .rolling(<span class="st">"30D"</span>)</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>    .mean()</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>    [[<span class="st">"DEM"</span>, <span class="st">"REP"</span>]]</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>    .plot(color<span class="op">=</span>[<span class="st">"C0"</span>, <span class="st">"C3"</span>], figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">6</span>), linewidth<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(title<span class="op">=</span><span class="st">"Daily Donations (30-D Moving Average)"</span>, xlabel<span class="op">=</span><span class="st">"Date"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="28">
 <pre><code>[Text(0.5, 1.0, 'Daily Donations (30-D Moving Average)'), Text(0.5, 0, 'Date')]</code></pre>
 </div>
