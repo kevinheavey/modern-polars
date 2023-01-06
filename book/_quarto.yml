@@ -5,7 +5,6 @@ book:
   title: "Modern Polars"
   author: "Kevin Heavey"
   favicon: polar-bear-airpods-no-background.png
-  cover-image-alt: A drawing of a polar bear wearing airpods
   sidebar: 
     background: "#F5F5F5"
     logo: polar-bear-airpods-no-background.png
@@ -15,8 +14,7 @@ book:
   repo-branch: master
   repo-actions: [edit, issue, source]
   sharing: [twitter, facebook, linkedin]
-  twitter-card:
-    image: "https://kevinheavey.github.io/modern-polars/polar-bear-airpods-no-background.png"
+  image: "https://kevinheavey.github.io/modern-polars/polar-bear-airpods-no-background.png"
   comments:
     giscus:
       repo: kevinheavey/modern-polars
