@@ -166,11 +166,15 @@ tidy_pl = (
         value_name="team",
     )
     .sort("game_id")
-    .with_column(pl.col("date").alias("rest").diff().over("team").dt.days() - 1)
+    .with_column((
+        pl.col("date")
+        .alias("rest")
+        .diff().over("team")
+        .dt.days() - 1).cast(pl.Int8))
     .drop_nulls("rest")
     .collect()
 )
-tidy_pl.head()
+tidy_pl
 ```
 
 ## Pandas
@@ -184,10 +188,18 @@ tidy_pd = (
     )
     .sort_values("game_id")
     .assign(
-        rest=lambda df: df.sort_values("date").groupby("team")["date"].diff().dt.days
-        - 1
+        rest=lambda df: (
+            df
+            .sort_values("date")
+            .groupby("team")
+            ["date"]
+            .diff()
+            .dt.days
+            .sub(1)
+        )
     )
     .dropna(subset=["rest"])
+    .astype({"rest": pd.Int8Dtype()})
 )
 tidy_pd
 ```
@@ -210,12 +222,10 @@ by_game_pl = (
 joined_pl = (
     by_game_pl
     .join(games_pl, on=["game_id", "date"])
-    .with_columns(
-    [
+    .with_columns([
         pl.col("home_points").alias("home_win") > pl.col("away_points"),
         pl.col("home_rest").alias("rest_spread") - pl.col("away_rest"),
-    ]
-    )
+    ])
 )
 joined_pl
 ```
@@ -259,7 +269,6 @@ sns.catplot(
     height=1.5,
 )
 ```
-
 
 Plotting the distribution of `rest_spread`:
 
@@ -332,7 +341,7 @@ Pandas has special methods `stack` and `unstack` for reshaping data with a Multi
 ``` {python}
 rest_pl = (
     tidy_pl
-    .groupby(["date", "variable"])
+    .groupby(["date", "variable"], maintain_order=True)
     .agg(pl.col("rest").mean())
 )
 rest_pl
@@ -420,8 +429,9 @@ wins_pl = (
             win_col.mean().alias("win_pct"),
         ]
     )
+    .sort(["team", "is_home"])
 )
-wins_pl.head()
+wins_pl
 ```
 ## Pandas
 ``` {python}
@@ -443,7 +453,7 @@ wins_pd = (
         "mean": 'win_pct'
     })
 )
-wins_pd.head()
+wins_pd
 ```
 :::
 
@@ -477,11 +487,11 @@ Now we calculate the win percent by team, regardless of whether they're home or 
 ## Polars
 ``` {python}
 win_percent_pl = (
-    wins_pl.groupby("team").agg(
+    wins_pl.groupby("team", maintain_order=True).agg(
         pl.col("n_wins").sum().alias("win_pct") / pl.col("n_games").sum()
     )
 )
-win_percent_pl.head()
+win_percent_pl
 ```
 ## Pandas
 ``` {python}
@@ -490,7 +500,7 @@ win_percent_pd = (
     .groupby(level="team", as_index=True)
     .apply(lambda x: x["n_wins"].sum() / x["n_games"].sum())
 )
-win_percent_pd.head()
+win_percent_pd
 ```
 :::
 

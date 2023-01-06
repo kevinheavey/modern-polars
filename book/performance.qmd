@@ -26,12 +26,12 @@ Now for some comparisons between the performance of idiomatic Pandas and Polars.
 
 Here we'll clean up a messy dataset, kindly [provided](https://www.kaggle.com/datasets/yagunnersya/fifa-21-messy-raw-dataset-for-cleaning-exploring?resource=download) by Kaggle user Rachit Toshniwal as a deliberate example of a really crap CSV. Most of the cleanup involves extracting numeric data from awkward strings.
 
-Also, the data is too small so I've concatenated it to itself 20 times. We're not doing anything that will care about the duplication. Here's how the raw data looks:
+Also, the data is too small so I've concatenated it to itself 20 times. We're not doing anything that will care about the duplication. Here's how the raw table looks:
 
 ``` {python}
 #| code-fold: true
 import pandas as pd
-pd.read_csv("data/fifa21_raw_big.csv", dtype="string", nrows=2)
+pd.read_csv("../data/fifa21_raw_big.csv", dtype="string", nrows=2)
 ```
 
 For this exercise we'll assume we want to make use of all the columns. First some boilerplate where we map out the different data types:
@@ -338,7 +338,7 @@ In this example, **Polars is ~150x faster than Pandas**:
 ## Polars
 
 ``` {python}
-%%timeit
+%%time
 new_cols_pl = ([
     pl.col("Club").str.strip().cast(pl.Categorical),
     parse_suffixed_num_pl(pl.col("Hits")).cast(pl.UInt32),
@@ -365,7 +365,7 @@ fifa_pl = (
 ## Pandas
 
 ``` {python}
-%%timeit
+%%time
 fifa_pd = (
     pd.read_csv("../data/fifa21_raw_big.csv", dtype=dtypes_pd)
     .assign(Club=lambda df: df["Club"].cat.rename_categories(lambda c: c.strip()),
