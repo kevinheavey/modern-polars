@@ -78,10 +78,11 @@ games_pl = (
             exprs=pl.all(),
         )
     )
-    .with_row_count("game_id")
     .with_column(
         pl.col("date").str.strptime(pl.Date, "%a, %b %d, %Y"),
     )
+    .sort("date")
+    .with_row_count("game_id")
 )
 games_pl.head().collect()
 ```
@@ -94,6 +95,8 @@ games_pd = (
     .to_pandas()
     .dropna(thresh=4)
     .assign(date=lambda x: pd.to_datetime(x["date"], format="%a, %b %d, %Y"))
+    .sort_values("date")
+    .reset_index(drop=True)
     .set_index("date", append=True)
     .rename_axis(["game_id", "date"])
     .sort_index()
@@ -156,7 +159,8 @@ Suppose we want to calculate the days of rest each team had before each game. In
 
 ``` {python}
 tidy_pl = (
-    games_pl.melt(
+    games_pl
+    .melt(
         id_vars=["game_id", "date"],
         value_vars=["away_team", "home_team"],
         value_name="team",
@@ -178,6 +182,7 @@ tidy_pd = (
         value_vars=["away_team", "home_team"],
         value_name="team",
     )
+    .sort_values("game_id")
     .assign(
         rest=lambda df: df.sort_values("date").groupby("team")["date"].diff().dt.days
         - 1
