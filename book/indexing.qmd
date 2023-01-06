@@ -5,7 +5,6 @@ This chapter is about indexes, which are the source of much confusion in Pandas 
 ## Fetch Data (No Dataframes Here)
 
 First we fetch some flight delay data. This part isn't about dataframes so feel free to skip the code.
-It'll probably break one day too, so the output is saved in this book's repository under `data/flights.csv.zip`.
 
 ``` {python}
 #| code-fold: true
