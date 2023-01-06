@@ -9,7 +9,7 @@ Here are some tips that are almost always a good idea:
 
 - Use the lazy API.
 - Use `Expr`s, and don't use `.apply` unless you really have to.
-- Use the smallest necessary numeric types (so if you have an integer between 0 and 255, use `pl.UInt8`, not `pl.Int64`). This likely won't speed things up but will use less memory.
+- Use the smallest necessary numeric types (so if you have an integer between 0 and 255, use `pl.UInt8`, not `pl.Int64`). This will save both time and space.
 - Use efficient storage (if you're dumping stuff in files, Parquet is a good choice).
 - Use categoricals for recurring strings (but note that it may not be worth it if there's not much repetition).
 - Only select the columns you need.
