@@ -2,11 +2,11 @@
 
 By now you should have a good idea of what Polars can do and how it compares to Pandas.
 
-## Reaons to use Polars
+## Reasons to use Polars
 
 - It's really fast.
 - It has a nice API.
-- It does most of the things Pandas does (the biggest missing things are plotting and some I/O methods).
+- It does most of the things Pandas does. The biggest missing things are plotting and some I/O methods.
 - It's available in Python, Rust, NodeJS and Ruby. This is partly because most of the code is written in Rust, and calling Rust in other languages works much better than calling Python.
 - The lead dev is **very** productive and quick to fix bugs.
 
