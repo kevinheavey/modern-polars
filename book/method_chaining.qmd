@@ -9,7 +9,7 @@ nasty nested function calls or declaring intermediate variables like `min_thing`
 It's not always easy for libraries to accommodate method chaining - in fancy terms, to be [fluent interfaces](https://en.wikipedia.org/wiki/Fluent_interface). Even Pandas used to be much less fluent:
 when *Modern Pandas* was released, methods like `assign` and `pipe` were quite recent.
 
-Fortunately Polars is very fluent. The expression API provides a very elegant way to do a bunch of stuff to a dataframe in one fell swoop, and Polars mostly doesn't mutate dataframes in-place (method chaining with side effects is usually a bad idea).
+Fortunately Polars is very fluent. The expression API provides a very elegant way to do a bunch of stuff to a dataframe in one fell swoop, and Polars mostly doesn't mutate dataframes in-place (method chaining with side effects is often a bad idea).
 
 Let's see how this looks in practice by cleaning up the flight data we gathered in @sec-indexing.
 
@@ -59,7 +59,7 @@ def extract_city_name_pd(df: pd.DataFrame) -> pl.DataFrame:
 
 :::
 
-Some things to note:
+Some items to note:
 
 1. Our Pandas function adds columns to a dataframe, while our Polars function simply generates a Polars *expression*.
 You'll find it's often easier to pass around `Expr`s than dataframes because: 
@@ -70,7 +70,7 @@ You'll find it's often easier to pass around `Expr`s than dataframes because:
 
     Meanwhile in Pandas we have to loop through the columns to create a dictionary of kwargs for `.assign`. This is not parallelized. (We could use `.apply` with `axis=0` instead but this would still take place sequentially and isn't any easier to read, in my opinion).
 3.  Calling `.str.split` in Polars creates a column where every element is a list. This kind of data is annoying in Pandas
-    because it's slow and awkward to work with - notice how the most convenient way to get the first element of a list column in Pandas is to call `.str[0]`, even though this is a list, not a string 🤯
+    because it's slow and awkward to work with - notice how the most convenient way to get the first element of a list column in Pandas is to call `.str[0]`, even though this is a list, not a string 🤔
     
     I'm not sure if that's even supposed to work. In contrast, Polars actually has first class support for list columns, and they are fast **as long as they don't have mixed types.**
 
@@ -127,7 +127,7 @@ def time_to_datetime_pd(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
 
 The Pandas version concatenates the date and time strings then parses the datetime string.
 We could do the same in Polars but I wanted to show you the `pl.Date` and `pl.Time` dtypes, which Pandas lacks.
-It turns out that combining `pl.Date` and `pl.Time` isn't that straightforward: I had to convert them both to microseconds, add them and then cast as `pl.Datetime`.
+It turns out that combining `pl.Date` and `pl.Time` isn't that straightforward: we have to convert them both to microseconds, add them and then cast as `pl.Datetime`.
 
 
 ## Brining It All Back Home
@@ -200,9 +200,9 @@ Differences between the two approaches:
 2. Polars does have a `.pipe` method, but we don't use it in this case since it's easier to work with expressions.
 
 ::: {.callout-tip}
-Q: The `.with_columns` method is for adding new columns or overwriting existing ones. But `.select` can also do those things, so what's the difference?
+The `.with_columns` method is for adding new columns or overwriting existing ones. But `.select` can also do those things, so you may be wondering: what's the difference?
 
-A: `.with_columns` is just convenient for when you don't want to reselect all the columns you're not modifying.
+Basically the `.with_columns` method is just convenient for when you don't want to reselect all the columns you're not modifying.
 :::
 
 
@@ -210,7 +210,7 @@ A: `.with_columns` is just convenient for when you don't want to reselect all th
 
 ### Daily Flights
 
-Here's how plotting the number of daily flights looks in Pandas and Polars:
+Here's how plotting the number of daily flights looks in Polars and Pandas:
 
 ::: {.callout-note}
 Polars works fine with Matplotlib and Plotly, but it doesn't work with Seaborn, nor does it have its own `.plot` method. The latter two are very convenient
@@ -291,7 +291,7 @@ filter_expr = pl.col("IATA_CODE_Reporting_Airline").is_in(
 
 Differences between Polars and Pandas:
 
-1. To group by a time window and another value, we use `.groupby_dynamic`. In Pandas we use .`groupby` with this `pd.Grouper` helper.
+1. To group by a time window and another value, we use `.groupby_dynamic`. In Pandas we use .`groupby` with the `pd.Grouper` helper.
 2. Instead of `.rolling(n).sum()`, Polars has `.rolling_sum(n)`.
 3. If you see Pandas code using `.unstack`, the corresponding Polars code probably needs `.pivot`.
 4. In Polars, `.value_counts` returns a `pl.Struct` column containing the value and the value count. In Pandas it returns a series where the elements are the value counts and the index contains the values themselves.
@@ -383,7 +383,7 @@ plt.figure(figsize=(10, 5))
         )
     )
     .drop_nulls()
-    .filter(pl.col("DepDelay").is_between(5, 600))
+    .filter(pl.col("DepDelay").is_between(5, 600, closed="none"))
     .with_column(pl.col("DepTime").dt.hour().alias("hour"))
     .to_pandas()
     .pipe((sns.boxplot, "data"), x="hour", y="DepDelay")
@@ -405,7 +405,6 @@ plt.figure(figsize=(10, 5))
 
 :::
 
-It's worth noting that Polars has an `is_between` method that's similar to Pandas `between`, but the Polars one excludes the boundaries by default while Pandas includes them.
 
 
 ## How much is too much?
@@ -421,5 +420,5 @@ In this case, it would probably be enough to just move those long lists to their
 ## Summary
 
 - Method chaining is great but use it with care.
-- The Polars code looks pretty good here next to Pandas. It's less clunky and more conducive to fluent programming. I've noticed some people are under the impression that you should only use Polars when you need it, but I would argue the above examples show that it's better for small data too.
+- The Polars code looks pretty good here next to Pandas. It's less clunky and more conducive to fluent programming. I've noticed some people are under the impression that you should only use Polars when you need it (implying you need it less often than Pandas), but I would argue the above examples show that it's better for small data too.
 - If you want to translate Pandas code to Polars, pay attention to the examples above and the accompanying notes on the API differences.

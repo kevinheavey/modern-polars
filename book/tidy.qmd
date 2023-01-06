@@ -300,7 +300,7 @@ fig, ax = plt.subplots(figsize=(9, 6))
 sns.barplot(
     x="rest_spread",
     y="home_win",
-    data=joined_pl.filter(pl.col("rest_spread").is_between(-3, 3)).to_pandas(),
+    data=joined_pl.filter(pl.col("rest_spread").is_between(-3, 3, closed="both")).to_pandas(),
     color="#4c72b0",
     ax=ax,
 )
@@ -342,6 +342,7 @@ rest_pd = (
 )
 rest_pd
 ```
+:::
 
 In Polars we use `.pivot` to do what in Pandas would require `.unstack`:
 
@@ -560,6 +561,7 @@ reg_df_pd = (
 )
 reg_df_pd.head()
 ```
+:::
 
 ``` {python}
 import statsmodels.formula.api as sm
@@ -572,7 +574,7 @@ res = mod.fit()
 res.summary()
 ```
 
-You can play around with the regressions yourself but we'll end them here since they're not great.
+You can play around with the regressions yourself but we'll end them here.
 
 ## Summary
 

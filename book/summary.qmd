@@ -1,4 +1,4 @@
-# Summary
+# Summary {.unnumbered}
 
 By now you should have a good idea of what Polars can do and how it compares to Pandas.
 
@@ -18,7 +18,7 @@ By my count I ran into [11 bugs](https://github.com/pola-rs/polars/issues?q=is%3
 
 ### If it ain't broke, don't fix it
 
-Suppose you have a bunch of important stuff in another library that works fine, even if it's a bit slow. Maybe it doesn't have good tests. Switching to another library is tricky may not be worth it here. Even if Polars is bug-free, various default behaviours might differ from your expectations.
+Suppose you have a bunch of important stuff in another library that works fine, even if it's a bit slow. Maybe it doesn't have good tests. Switching library is tricky and may not be worth it here. Even if Polars is bug-free, various default behaviours might differ from your expectations.
 
 ### API stability
 

@@ -16,7 +16,7 @@ Here are some tips that are almost always a good idea:
 
 ::: {.callout-tip}
 If your colleagues are happy with CSVs and can't be convinced to use something else,
-tell them that the Modern Polars book says they should feel bad.
+tell them that the *Modern Polars* book says they should feel bad.
 :::
 
 These are basically the same rules you'd follow when using Pandas, except for the one about the lazy API.
@@ -385,7 +385,7 @@ You could play around with the timings here and even try the [`.profile`](https:
 
 ## NumPy can make Polars faster
 
-Polars gets along well with NumPy [ufuncs](https://numpy.org/doc/stable/reference/ufuncs.html), even in lazy mode (which is weird because NumPy has no lazy API). Let's see how this looks by calculating the [great-circle distance](http://www.johndcook.com/blog/python_longitude_latitude/) between a bunch of coordinates.
+Polars gets along well with NumPy [ufuncs](https://numpy.org/doc/stable/reference/ufuncs.html), even in lazy mode (which is interesting because NumPy has no lazy API). Let's see how this looks by calculating the [great-circle distance](http://www.johndcook.com/blog/python_longitude_latitude/) between a bunch of coordinates.
 
 ### Get the data
 

@@ -2,9 +2,9 @@
 
 This is a side-by-side comparison of the [Polars](https://www.pola.rs/)
 and [Pandas](https://pandas.pydata.org/) dataframe libraries,
-based on the series [Modern Pandas](https://tomaugspurger.github.io/posts/modern-8-scaling/) by Tom Augsburger.
+based on [Modern Pandas](https://tomaugspurger.github.io/posts/modern-8-scaling/) by Tom Augsburger.
 
-(In case you haven't heard, Polars is a very fast and elegant dataframe libary that does most of the things Pandas does.)
+(In case you haven't heard, Polars is a very fast and elegant dataframe libary that does the same kinds of things Pandas does.)
 
 The bulk of this book is structured examples of idiomatic Polars and Pandas code, with commentary on the API and performance of both.
 
@@ -14,7 +14,7 @@ For the most part, I argue that Polars is "better" than Pandas, though I do try 
 
 This is not a beginner's introduction to data programming, though you certainly don't need to be an expert to read it. If you have some familiarity with any dataframe library, most of the examples should make sense, but if you're familiar with Pandas they'll make even more sense because all the Polars code is accompanied by the equivalent Pandas code.
 
-You don't need to have read **Modern Pandas**, though I of course think it's a great read.
+You don't need to have read *Modern Pandas*, though I of course think it's a great read.
 
 ## Why?
 
@@ -43,7 +43,7 @@ Meanwhile the text content and the Polars examples are from me.
 
 ## Running the code yourself
 
-If you want to replicate the results in this book, you can install the same package versions using the [env.yml](https://github.com/kevinheavey/modern-polars/blob/master/env.yml) file:
+You can install the exact packages that the book uses with the [env.yml](https://github.com/kevinheavey/modern-polars/blob/master/env.yml) file:
 
 ```shell
 mamba env create -f env.yml
@@ -52,7 +52,7 @@ mamba env create -f env.yml
 If you're not using mamba/conda you can install the following package versions and it should work:
 
 ```
-polars: 0.15.12
+polars: 0.15.13
 pyarrow: 10.0.1
 pandas: 1.5.2
 numpy: 1.23.5
@@ -64,4 +64,4 @@ filprofiler: 2022.11.0
 
 ## Contributing
 
-This book is free and open source, so please do [raise an issue](https://github.com/kevinheavey/modern-polars/issues/new) if you notice a problem!
+This book is free and open source, so please do [open an issue](https://github.com/kevinheavey/modern-polars/issues/new) if you notice a problem!

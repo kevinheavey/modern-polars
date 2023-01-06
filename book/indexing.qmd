@@ -68,17 +68,11 @@ columns but is also very complicated. To quote *Modern Pandas*:
 > The complexity of pandas' indexing is a microcosm for the complexity of the pandas API in general. There's a reason for the complexity (well, most of it), but that's not much consolation while you're learning. Still, all of these ways of indexing really are useful enough to justify their inclusion in the library.
 
 It's true that Pandas indexing is quite useful,
-but it's also true that I always forget how do to anything non-trivial with it. The benefits of being able to put
+but it's also true that everyone always forgets how do to anything non-trivial with it. The benefits of being able to put
 `df.loc[pd.IndexSlice[:, 'B0':'B1'], :]]` in your code base are somewhat dubious.
 
 Polars avoids this complexity by simply **not having an index.** 
 It just has ordinary methods like `.select`, `.filter` and `.head` for accessing a subset of rows or columns.
-
-:::{.callout-tip}
-The examples in this book use the [lazy evaluation](https://pola-rs.github.io/polars-book/user-guide/coming_from_pandas.html?highlight=lazy#be-lazy)
-feature of Polars less than you should.
-It's just inconvenient to use the lazy API when displaying dozens of intermediate results for educational purposes.
-:::
 
 ## Slicing vs Selecting
 
@@ -97,8 +91,16 @@ Here are some examples:
 ::: {.panel-tabset}
 ## Polars (recommended)
 
+Using `head` and `tail`:
+
 ``` {python}
 df_pl.select(["Dest", "Tail_Number"]).head(15).tail(3)
+```
+
+Or using `take`:
+
+``` {python}
+df_pl.select(["Dest", "Tail_Number"]).take(list(range(12, 16)))
 ```
 
 ## Polars (antipattern)
@@ -119,7 +121,7 @@ df_pd.loc[12:15, ["Dest", "Tail_Number"]]
 ### Rows by string index, columns by name
 
 Since there's no such thing as an index in Polars,
-we just use `.filter`:
+so we just use `.filter`:
 
 ::: {.panel-tabset}
 ## Polars
@@ -175,7 +177,7 @@ Polars is not yet popular enough to attact the same crowd, but when it does it s
 ## Polars
 
 ``` {python}
-f = pl.DataFrame({'a':[1,2,3,4,5], 'b':[10,20,30,40,50]})
+f = pl.DataFrame({'a': [1,2,3,4,5], 'b': [10,20,30,40,50]})
 f.with_column(
     pl.when(pl.col("a") <= 3)
     .then(pl.col("b") // 10)

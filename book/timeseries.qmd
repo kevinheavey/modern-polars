@@ -65,8 +65,9 @@ Pandas has special methods for filtering data with a DatetimeIndex. Since Polars
 ``` {python}
 ohlcv_pl.filter(
     pl.col("time").is_between(
-        date(2021, 1, 31),
-        date(2021, 3, 1)
+        date(2021, 2, 1),
+        date(2021, 3, 1),
+        closed="left"
     )
 )
 

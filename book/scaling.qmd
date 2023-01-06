@@ -189,14 +189,13 @@ avg_transaction_dd, total_by_employer_dd, avg_by_occupation_dd = compute(
 )
 
 ```
-
+:::
 The Polars code above tends to be ~3.5x faster than Dask on my machine, which if anything is a smaller speedup than I expected. 
 
 We should also profile memory usage, since it could be the case that Polars is just running faster because it's reading in bigger chunks. According to the [`fil`](https://pythonspeed.com/fil/docs/index.html)
 profiler, the Dask example's memory usage peaks at 1450 MiB, while Polars uses ~10% more than that.
 
 Before I forget, here are the results of our computations:
-:::
 
 ### avg_transaction
 ::: {.panel-tabset}
@@ -243,6 +242,7 @@ avg_by_occupation_dd
 Let's filter for only the 10 most common occupations and compute some summary statistics:
 
 ### avg_by_occupation
+Getting the most common occupations:
 ::: {.panel-tabset}
 ## Polars
 ``` {python}
@@ -261,6 +261,7 @@ top_occupations_pl
 ## Dask
 ``` {python}
 top_occupations_dd = occupation_counts_dd.head(10).index
+top_occupations_dd
 ```
 :::
 
@@ -339,7 +340,7 @@ daily_pl = (
     .agg(pl.col("TRANSACTION_AMT").sum())
     .filter(
         pl.col("TRANSACTION_DT")
-        .is_between(date(2011, 1, 1), date(2017, 1, 1))
+        .is_between(date(2011, 1, 1), date(2017, 1, 1), closed="left")
     )
     .with_column(pl.col("TRANSACTION_AMT") / 1000)
     .collect()
@@ -413,7 +414,7 @@ Merging:
 ``` {python}
 indiv_filtered_pl = indiv_pl.filter(
     pl.col("TRANSACTION_DT").is_between(
-        date(2007, 1, 1), date(2017, 1, 1), include_bounds=True
+        date(2007, 1, 1), date(2017, 1, 1), closed="both"
     )
 )
 merged_pl = indiv_filtered_pl.join(cm_pl.lazy(), on="CMTE_ID")
