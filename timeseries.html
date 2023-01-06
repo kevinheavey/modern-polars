@@ -1,0 +1,2248 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.280">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Modern Polars - 5&nbsp; Timeseries</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./scaling.html" rel="next">
+<link href="./tidy.html" rel="prev">
+<link href="./polar-bear-airpods-no-background.png" rel="icon" type="image/png">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="custom.css">
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Timeseries</span></h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      <img src="./polar-bear-airpods-no-background.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Modern Polars</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/kevinheavey/modern-polars/tree/master/book/" title="Source Code" class="sidebar-tool px-1"><i class="bi bi-github"></i></a>
+    <a href="" title="Share" id="sidebar-tool-dropdown-0" class="sidebar-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-share"></i></a>
+    <ul class="dropdown-menu" aria-labelledby="sidebar-tool-dropdown-0">
+        <li>
+          <a class="dropdown-item sidebar-tools-main-item" href="https://twitter.com/intent/tweet?url=|url|">
+            <i class="bi bi-bi-twitter pe-1"></i>
+          Twitter
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item sidebar-tools-main-item" href="https://www.facebook.com/sharer/sharer.php?u=|url|">
+            <i class="bi bi-bi-facebook pe-1"></i>
+          Facebook
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item sidebar-tools-main-item" href="https://www.linkedin.com/sharing/share-offsite/?url=|url|">
+            <i class="bi bi-bi-linkedin pe-1"></i>
+          LinkedIn
+          </a>
+        </li>
+    </ul>
+</div>
+    </div>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">Preface</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./indexing.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Indexing (Or Lack Thereof)</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./method_chaining.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Method Chaining</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./performance.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Performance</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tidy.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Reshaping and Tidy Data</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./timeseries.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Timeseries</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./scaling.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Scaling</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./summary.html" class="sidebar-item-text sidebar-link">Summary</a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#get-the-data" id="toc-get-the-data" class="nav-link active" data-scroll-target="#get-the-data"><span class="toc-section-number">5.1</span>  Get the data</a></li>
+  <li><a href="#filtering" id="toc-filtering" class="nav-link" data-scroll-target="#filtering"><span class="toc-section-number">5.2</span>  Filtering</a></li>
+  <li><a href="#resampling" id="toc-resampling" class="nav-link" data-scroll-target="#resampling"><span class="toc-section-number">5.3</span>  Resampling</a>
+  <ul class="collapse">
+  <li><a href="#downsampling" id="toc-downsampling" class="nav-link" data-scroll-target="#downsampling"><span class="toc-section-number">5.3.1</span>  Downsampling</a></li>
+  <li><a href="#upsampling" id="toc-upsampling" class="nav-link" data-scroll-target="#upsampling"><span class="toc-section-number">5.3.2</span>  Upsampling</a></li>
+  </ul></li>
+  <li><a href="#rolling-expanding-ew" id="toc-rolling-expanding-ew" class="nav-link" data-scroll-target="#rolling-expanding-ew"><span class="toc-section-number">5.4</span>  Rolling / Expanding / EW</a>
+  <ul class="collapse">
+  <li><a href="#combining-rolling-aggregations" id="toc-combining-rolling-aggregations" class="nav-link" data-scroll-target="#combining-rolling-aggregations"><span class="toc-section-number">5.4.1</span>  Combining rolling aggregations</a></li>
+  </ul></li>
+  <li><a href="#grab-bag" id="toc-grab-bag" class="nav-link" data-scroll-target="#grab-bag"><span class="toc-section-number">5.5</span>  Grab Bag</a>
+  <ul class="collapse">
+  <li><a href="#offsets" id="toc-offsets" class="nav-link" data-scroll-target="#offsets"><span class="toc-section-number">5.5.1</span>  Offsets</a></li>
+  <li><a href="#holiday-calendars" id="toc-holiday-calendars" class="nav-link" data-scroll-target="#holiday-calendars"><span class="toc-section-number">5.5.2</span>  Holiday calendars</a></li>
+  <li><a href="#timezones" id="toc-timezones" class="nav-link" data-scroll-target="#timezones"><span class="toc-section-number">5.5.3</span>  Timezones</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="toc-section-number">5.6</span>  Conclusion</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/kevinheavey/modern-polars/edit/master/book/timeseries.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/kevinheavey/modern-polars/issues/new" class="toc-action">Report an issue</a></p><p><a href="https://github.com/kevinheavey/modern-polars/blob/master/book/timeseries.qmd" class="toc-action">View source</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Timeseries</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<p>Temporal data is an area in which Pandas actually far outshines R’s dataframe libraries. Things like resampling and rolling calculations are baked into the dataframe library and work quite well. Fortunately this is also true of Polars!</p>
+<section id="get-the-data" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="get-the-data"><span class="header-section-number">5.1</span> Get the data</h2>
+<p>We’ll download a year’s worth of daily price and volume data for Bitcoin:</p>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> io <span class="im">import</span> StringIO</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime, date</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> requests</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>pl.Config.set_tbl_rows(<span class="dv">5</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>pd.options.display.max_rows <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>data_path <span class="op">=</span> Path(<span class="st">"../data/ohlcv.pq"</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> epoch_ms(dt: datetime) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">int</span>(dt.timestamp()) <span class="op">*</span> <span class="dv">1000</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> data_path.exists():</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    ohlcv_pl <span class="op">=</span> pl.read_parquet(data_path)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    start <span class="op">=</span> epoch_ms(datetime(<span class="dv">2021</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    end <span class="op">=</span> epoch_ms(datetime(<span class="dv">2022</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    url <span class="op">=</span> (</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        <span class="st">"https://api.binance.com/api/v3/klines?symbol=BTCUSDT&amp;"</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"interval=1d&amp;startTime=</span><span class="sc">{</span>start<span class="sc">}</span><span class="ss">&amp;endTime=</span><span class="sc">{</span>end<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    resp <span class="op">=</span> requests.get(url)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    time_col <span class="op">=</span> <span class="st">"time"</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    ohlcv_cols <span class="op">=</span> [</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>        <span class="st">"open"</span>,</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>        <span class="st">"high"</span>,</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>        <span class="st">"low"</span>,</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        <span class="st">"close"</span>,</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>        <span class="st">"volume"</span>,</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    cols_to_use <span class="op">=</span> [time_col, <span class="op">*</span>ohlcv_cols] </span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    cols <span class="op">=</span> cols_to_use <span class="op">+</span> [<span class="ss">f"ignore_</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">6</span>)]</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    ohlcv_pl <span class="op">=</span> pl.from_records(resp.json(), orient<span class="op">=</span><span class="st">"row"</span>, columns<span class="op">=</span>cols).select(</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>            pl.col(time_col).cast(pl.Datetime).dt.with_time_unit(<span class="st">"ms"</span>).cast(pl.Date),</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>            pl.col(ohlcv_cols).cast(pl.Float64),</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>    ohlcv_pl.write_parquet(data_path)</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>ohlcv_pd <span class="op">=</span> ohlcv_pl.to_pandas().set_index(<span class="st">"time"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="filtering" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="filtering"><span class="header-section-number">5.2</span> Filtering</h2>
+<p>Pandas has special methods for filtering data with a DatetimeIndex. Since Polars doesn’t have an index, we just use <code>.filter</code>. I will admit the Pandas code is more convenient for things like filtering for a specific month:</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pl.<span class="bu">filter</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">"time"</span>).is_between(</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        date(<span class="dv">2021</span>, <span class="dv">2</span>, <span class="dv">1</span>),</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        date(<span class="dv">2021</span>, <span class="dv">3</span>, <span class="dv">1</span>),</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        closed<span class="op">=</span><span class="st">"left"</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+
+    .dataframe td {
+        white-space: pre;
+    }
+
+    .dataframe td {
+        padding-top: 0;
+    }
+
+    .dataframe td {
+        padding-bottom: 0;
+    }
+
+    .dataframe td {
+        line-height: 95%;
+    }
+</style>
+<small>shape: (28, 6)</small><table class="dataframe table table-sm table-striped">
+
+<thead>
+<tr>
+<th>
+time
+</th>
+<th>
+open
+</th>
+<th>
+high
+</th>
+<th>
+low
+</th>
+<th>
+close
+</th>
+<th>
+volume
+</th>
+</tr>
+<tr>
+<td>
+date
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+2021-02-01
+</td>
+<td>
+33092.97
+</td>
+<td>
+34717.27
+</td>
+<td>
+32296.16
+</td>
+<td>
+33526.37
+</td>
+<td>
+82718.276882
+</td>
+</tr>
+<tr>
+<td>
+2021-02-02
+</td>
+<td>
+33517.09
+</td>
+<td>
+35984.33
+</td>
+<td>
+33418.0
+</td>
+<td>
+35466.24
+</td>
+<td>
+78056.65988
+</td>
+</tr>
+<tr>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+</tr>
+<tr>
+<td>
+2021-02-27
+</td>
+<td>
+46276.88
+</td>
+<td>
+48394.0
+</td>
+<td>
+45000.0
+</td>
+<td>
+46106.43
+</td>
+<td>
+66060.834292
+</td>
+</tr>
+<tr>
+<td>
+2021-02-28
+</td>
+<td>
+46103.67
+</td>
+<td>
+46638.46
+</td>
+<td>
+43000.0
+</td>
+<td>
+45135.66
+</td>
+<td>
+83055.369042
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pd.loc[<span class="st">"2021-02"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>open</th>
+      <th>high</th>
+      <th>low</th>
+      <th>close</th>
+      <th>volume</th>
+    </tr>
+    <tr>
+      <th>time</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2021-02-01</th>
+      <td>33092.97</td>
+      <td>34717.27</td>
+      <td>32296.16</td>
+      <td>33526.37</td>
+      <td>82718.276882</td>
+    </tr>
+    <tr>
+      <th>2021-02-02</th>
+      <td>33517.09</td>
+      <td>35984.33</td>
+      <td>33418.00</td>
+      <td>35466.24</td>
+      <td>78056.659880</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>2021-02-27</th>
+      <td>46276.88</td>
+      <td>48394.00</td>
+      <td>45000.00</td>
+      <td>46106.43</td>
+      <td>66060.834292</td>
+    </tr>
+    <tr>
+      <th>2021-02-28</th>
+      <td>46103.67</td>
+      <td>46638.46</td>
+      <td>43000.00</td>
+      <td>45135.66</td>
+      <td>83055.369042</td>
+    </tr>
+  </tbody>
+</table>
+<p>28 rows × 5 columns</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="resampling" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="resampling"><span class="header-section-number">5.3</span> Resampling</h2>
+<p>Resampling is like a special case of <code>groupby</code> for a time column. You can of course use regular <code>.groupby</code> with a time column, but it won’t be as powerful because it doesn’t understand time like resampling methods do.</p>
+<p>There are two kinds of resampling: <em>downsampling</em> and <em>upsampling</em>.</p>
+<section id="downsampling" class="level3" data-number="5.3.1">
+<h3 data-number="5.3.1" class="anchored" data-anchor-id="downsampling"><span class="header-section-number">5.3.1</span> Downsampling</h3>
+<p>Downsampling moves from a higher time frequency to a lower time frequency. This requires some aggregation or subsetting, since we’re reducing the number of rows in our data.</p>
+<p>In Polars we use the <a href="https://pola-rs.github.io/polars/py-polars/html/reference/dataframe/api/polars.DataFrame.groupby_dynamic.html#polars.DataFrame.groupby_dynamic"><code>.groupby_dynamic</code></a> method for downsampling (we also use <code>groupby_dynamic</code> when we want to combine resampling with regular groupby logic).</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    ohlcv_pl</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    .groupby_dynamic(<span class="st">"time"</span>, every<span class="op">=</span><span class="st">"5d"</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    .agg(pl.col(pl.Float64).mean())</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+
+    .dataframe td {
+        white-space: pre;
+    }
+
+    .dataframe td {
+        padding-top: 0;
+    }
+
+    .dataframe td {
+        padding-bottom: 0;
+    }
+
+    .dataframe td {
+        line-height: 95%;
+    }
+</style>
+<small>shape: (74, 6)</small><table class="dataframe table table-sm table-striped">
+
+<thead>
+<tr>
+<th>
+time
+</th>
+<th>
+open
+</th>
+<th>
+high
+</th>
+<th>
+low
+</th>
+<th>
+close
+</th>
+<th>
+volume
+</th>
+</tr>
+<tr>
+<td>
+date
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+2021-01-01
+</td>
+<td>
+31084.316
+</td>
+<td>
+33127.622
+</td>
+<td>
+29512.818
+</td>
+<td>
+32089.662
+</td>
+<td>
+112416.84957
+</td>
+</tr>
+<tr>
+<td>
+2021-01-06
+</td>
+<td>
+38165.31
+</td>
+<td>
+40396.842
+</td>
+<td>
+35983.822
+</td>
+<td>
+39004.538
+</td>
+<td>
+118750.076685
+</td>
+</tr>
+<tr>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+</tr>
+<tr>
+<td>
+2021-12-27
+</td>
+<td>
+48521.24
+</td>
+<td>
+49475.878
+</td>
+<td>
+47087.4
+</td>
+<td>
+47609.528
+</td>
+<td>
+35886.94371
+</td>
+</tr>
+<tr>
+<td>
+2022-01-01
+</td>
+<td>
+46216.93
+</td>
+<td>
+47954.63
+</td>
+<td>
+46208.37
+</td>
+<td>
+47722.65
+</td>
+<td>
+19604.46325
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pd.resample(<span class="st">"5d"</span>).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>open</th>
+      <th>high</th>
+      <th>low</th>
+      <th>close</th>
+      <th>volume</th>
+    </tr>
+    <tr>
+      <th>time</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2021-01-01</th>
+      <td>31084.316</td>
+      <td>33127.622</td>
+      <td>29512.818</td>
+      <td>32089.662</td>
+      <td>112416.849570</td>
+    </tr>
+    <tr>
+      <th>2021-01-06</th>
+      <td>38165.310</td>
+      <td>40396.842</td>
+      <td>35983.822</td>
+      <td>39004.538</td>
+      <td>118750.076685</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>2021-12-27</th>
+      <td>48521.240</td>
+      <td>49475.878</td>
+      <td>47087.400</td>
+      <td>47609.528</td>
+      <td>35886.943710</td>
+    </tr>
+    <tr>
+      <th>2022-01-01</th>
+      <td>46216.930</td>
+      <td>47954.630</td>
+      <td>46208.370</td>
+      <td>47722.650</td>
+      <td>19604.463250</td>
+    </tr>
+  </tbody>
+</table>
+<p>74 rows × 5 columns</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>Resampling and performing multiple aggregations to each column:</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pl.groupby_dynamic(<span class="st">"time"</span>, every<span class="op">=</span><span class="st">"1w"</span>).agg(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>        pl.col(pl.Float64).mean().suffix(<span class="st">"_mean"</span>),</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        pl.col(pl.Float64).<span class="bu">sum</span>().suffix(<span class="st">"_sum"</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+
+    .dataframe td {
+        white-space: pre;
+    }
+
+    .dataframe td {
+        padding-top: 0;
+    }
+
+    .dataframe td {
+        padding-bottom: 0;
+    }
+
+    .dataframe td {
+        line-height: 95%;
+    }
+</style>
+<small>shape: (53, 11)</small><table class="dataframe table table-sm table-striped">
+
+<thead>
+<tr>
+<th>
+time
+</th>
+<th>
+open_mean
+</th>
+<th>
+high_mean
+</th>
+<th>
+low_mean
+</th>
+<th>
+close_mean
+</th>
+<th>
+volume_mean
+</th>
+<th>
+open_sum
+</th>
+<th>
+high_sum
+</th>
+<th>
+low_sum
+</th>
+<th>
+close_sum
+</th>
+<th>
+volume_sum
+</th>
+</tr>
+<tr>
+<td>
+date
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+2021-01-01
+</td>
+<td>
+32305.781429
+</td>
+<td>
+34706.045714
+</td>
+<td>
+31021.727143
+</td>
+<td>
+33807.135714
+</td>
+<td>
+117435.5928
+</td>
+<td>
+226140.47
+</td>
+<td>
+242942.32
+</td>
+<td>
+217152.09
+</td>
+<td>
+236649.95
+</td>
+<td>
+822049.149598
+</td>
+</tr>
+<tr>
+<td>
+2021-01-08
+</td>
+<td>
+37869.797143
+</td>
+<td>
+39646.105714
+</td>
+<td>
+34623.334286
+</td>
+<td>
+37827.52
+</td>
+<td>
+135188.296617
+</td>
+<td>
+265088.58
+</td>
+<td>
+277522.74
+</td>
+<td>
+242363.34
+</td>
+<td>
+264792.64
+</td>
+<td>
+946318.076319
+</td>
+</tr>
+<tr>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+</tr>
+<tr>
+<td>
+2021-12-24
+</td>
+<td>
+49649.114286
+</td>
+<td>
+50439.622857
+</td>
+<td>
+48528.25
+</td>
+<td>
+49117.98
+</td>
+<td>
+31126.709793
+</td>
+<td>
+347543.8
+</td>
+<td>
+353077.36
+</td>
+<td>
+339697.75
+</td>
+<td>
+343825.86
+</td>
+<td>
+217886.96855
+</td>
+</tr>
+<tr>
+<td>
+2021-12-31
+</td>
+<td>
+46668.905
+</td>
+<td>
+48251.445
+</td>
+<td>
+45943.185
+</td>
+<td>
+46969.79
+</td>
+<td>
+27271.230605
+</td>
+<td>
+93337.81
+</td>
+<td>
+96502.89
+</td>
+<td>
+91886.37
+</td>
+<td>
+93939.58
+</td>
+<td>
+54542.46121
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pd.resample(<span class="st">"W"</span>).agg([<span class="st">'mean'</span>, <span class="st">'sum'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th colspan="2" halign="left">open</th>
+      <th colspan="2" halign="left">high</th>
+      <th colspan="2" halign="left">low</th>
+      <th colspan="2" halign="left">close</th>
+      <th colspan="2" halign="left">volume</th>
+    </tr>
+    <tr>
+      <th></th>
+      <th>mean</th>
+      <th>sum</th>
+      <th>mean</th>
+      <th>sum</th>
+      <th>mean</th>
+      <th>sum</th>
+      <th>mean</th>
+      <th>sum</th>
+      <th>mean</th>
+      <th>sum</th>
+    </tr>
+    <tr>
+      <th>time</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2021-01-03</th>
+      <td>30143.926667</td>
+      <td>90431.78</td>
+      <td>32559.370000</td>
+      <td>97678.11</td>
+      <td>29844.696667</td>
+      <td>89534.09</td>
+      <td>31503.356667</td>
+      <td>94510.07</td>
+      <td>101711.455041</td>
+      <td>305134.365123</td>
+    </tr>
+    <tr>
+      <th>2021-01-10</th>
+      <td>36545.192857</td>
+      <td>255816.35</td>
+      <td>38563.458571</td>
+      <td>269944.21</td>
+      <td>33992.730000</td>
+      <td>237949.11</td>
+      <td>37280.132857</td>
+      <td>260960.93</td>
+      <td>121528.609450</td>
+      <td>850700.266152</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>2021-12-26</th>
+      <td>49018.521429</td>
+      <td>343129.65</td>
+      <td>50294.841429</td>
+      <td>352063.89</td>
+      <td>48352.841429</td>
+      <td>338469.89</td>
+      <td>49603.737143</td>
+      <td>347226.16</td>
+      <td>29878.489421</td>
+      <td>209149.425950</td>
+    </tr>
+    <tr>
+      <th>2022-01-02</th>
+      <td>48137.188333</td>
+      <td>288823.13</td>
+      <td>49222.336667</td>
+      <td>295334.02</td>
+      <td>46940.895000</td>
+      <td>281645.37</td>
+      <td>47628.381667</td>
+      <td>285770.29</td>
+      <td>33173.196967</td>
+      <td>199039.181800</td>
+    </tr>
+  </tbody>
+</table>
+<p>53 rows × 10 columns</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="upsampling" class="level3" data-number="5.3.2">
+<h3 data-number="5.3.2" class="anchored" data-anchor-id="upsampling"><span class="header-section-number">5.3.2</span> Upsampling</h3>
+<p>Upsampling moves in the opposite direction, from low-frequency data to high frequency data. Since we can’t create new data by magic, upsampling defaults to filling the new rows with nulls (which we could then interpolate, perhaps). In Polars we have a special <a href="https://pola-rs.github.io/polars/py-polars/html/reference/dataframe/api/polars.DataFrame.upsample.html#polars.DataFrame.upsample"><code>upsample</code></a> method for this, while Pandas reuses its <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.resample.html"><code>resample</code></a> method.</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-4-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-1" role="tab" aria-controls="tabset-4-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-2" role="tab" aria-controls="tabset-4-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-4-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-4-1-tab">
+<div class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pl.upsample(<span class="st">"time"</span>, every<span class="op">=</span><span class="st">"6h"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+
+    .dataframe td {
+        white-space: pre;
+    }
+
+    .dataframe td {
+        padding-top: 0;
+    }
+
+    .dataframe td {
+        padding-bottom: 0;
+    }
+
+    .dataframe td {
+        line-height: 95%;
+    }
+</style>
+<small>shape: (1461, 6)</small><table class="dataframe table table-sm table-striped">
+
+<thead>
+<tr>
+<th>
+time
+</th>
+<th>
+open
+</th>
+<th>
+high
+</th>
+<th>
+low
+</th>
+<th>
+close
+</th>
+<th>
+volume
+</th>
+</tr>
+<tr>
+<td>
+date
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+2021-01-01
+</td>
+<td>
+28923.63
+</td>
+<td>
+29600.0
+</td>
+<td>
+28624.57
+</td>
+<td>
+29331.69
+</td>
+<td>
+54182.925011
+</td>
+</tr>
+<tr>
+<td>
+2021-01-01
+</td>
+<td>
+null
+</td>
+<td>
+null
+</td>
+<td>
+null
+</td>
+<td>
+null
+</td>
+<td>
+null
+</td>
+</tr>
+<tr>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+</tr>
+<tr>
+<td>
+2021-12-31
+</td>
+<td>
+null
+</td>
+<td>
+null
+</td>
+<td>
+null
+</td>
+<td>
+null
+</td>
+<td>
+null
+</td>
+</tr>
+<tr>
+<td>
+2022-01-01
+</td>
+<td>
+46216.93
+</td>
+<td>
+47954.63
+</td>
+<td>
+46208.37
+</td>
+<td>
+47722.65
+</td>
+<td>
+19604.46325
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-4-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-2-tab">
+<div class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pd.resample(<span class="st">"6H"</span>).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>open</th>
+      <th>high</th>
+      <th>low</th>
+      <th>close</th>
+      <th>volume</th>
+    </tr>
+    <tr>
+      <th>time</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2021-01-01 00:00:00</th>
+      <td>28923.63</td>
+      <td>29600.00</td>
+      <td>28624.57</td>
+      <td>29331.69</td>
+      <td>54182.925011</td>
+    </tr>
+    <tr>
+      <th>2021-01-01 06:00:00</th>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>2021-12-31 18:00:00</th>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2022-01-01 00:00:00</th>
+      <td>46216.93</td>
+      <td>47954.63</td>
+      <td>46208.37</td>
+      <td>47722.65</td>
+      <td>19604.463250</td>
+    </tr>
+  </tbody>
+</table>
+<p>1461 rows × 5 columns</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="rolling-expanding-ew" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="rolling-expanding-ew"><span class="header-section-number">5.4</span> Rolling / Expanding / EW</h2>
+<p>Polars supports all three of these but they’re not quite as powerful as in Pandas, since they don’t have as many different methods. The <code>expanding</code> support is <a href="https://github.com/pola-rs/polars/issues/4799">more limited again</a>, though there are workarounds for this (see below):</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-5-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-1" role="tab" aria-controls="tabset-5-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-2" role="tab" aria-controls="tabset-5-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-5-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-5-1-tab">
+<div class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>close <span class="op">=</span> pl.col(<span class="st">"close"</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>ohlcv_pl.select(</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"time"</span>),</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>        close.alias(<span class="st">"Raw"</span>),</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>        close.rolling_mean(<span class="dv">28</span>).alias(<span class="st">"28D MA"</span>),</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        close.alias(<span class="st">"Expanding Average"</span>).cumsum() <span class="op">/</span> (close.cumcount() <span class="op">+</span> <span class="dv">1</span>),</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        close.ewm_mean(alpha<span class="op">=</span><span class="fl">0.03</span>).alias(<span class="st">"EWMA($</span><span class="ch">\\</span><span class="st">alpha=.03$)"</span>),</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>).to_pandas().set_index(<span class="st">"time"</span>).plot()</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Close ($)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<pre><code>Text(0, 0.5, 'Close ($)')</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="timeseries_files/figure-html/cell-11-output-2.png" width="627" height="444"></p>
+</div>
+</div>
+</div>
+<div id="tabset-5-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-2-tab">
+<div class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pd[<span class="st">"close"</span>].plot(label<span class="op">=</span><span class="st">"Raw"</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>ohlcv_pd[<span class="st">"close"</span>].rolling(<span class="dv">28</span>).mean().plot(label<span class="op">=</span><span class="st">"28D MA"</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>ohlcv_pd[<span class="st">"close"</span>].expanding().mean().plot(label<span class="op">=</span><span class="st">"Expanding Average"</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>ohlcv_pd[<span class="st">"close"</span>].ewm(alpha<span class="op">=</span><span class="fl">0.03</span>).mean().plot(label<span class="op">=</span><span class="st">"EWMA($</span><span class="ch">\\</span><span class="st">alpha=.03$)"</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>plt.legend(bbox_to_anchor<span class="op">=</span>(<span class="fl">0.63</span>, <span class="fl">0.27</span>))</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Close ($)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<pre><code>Text(0, 0.5, 'Close ($)')</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="timeseries_files/figure-html/cell-12-output-2.png" width="627" height="444"></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>Polars doesn’t have an <code>expanding_mean</code> yet so we make do by combining <code>cumsum</code> and <code>cumcount</code>.</p>
+<section id="combining-rolling-aggregations" class="level3" data-number="5.4.1">
+<h3 data-number="5.4.1" class="anchored" data-anchor-id="combining-rolling-aggregations"><span class="header-section-number">5.4.1</span> Combining rolling aggregations</h3>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-6-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-1" role="tab" aria-controls="tabset-6-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-2" role="tab" aria-controls="tabset-6-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-6-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-6-1-tab">
+<div class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>mean_std_pl <span class="op">=</span> ohlcv_pl.select(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"time"</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"close"</span>).rolling_mean(<span class="dv">30</span>, center<span class="op">=</span><span class="va">True</span>).alias(<span class="st">"mean"</span>),</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"close"</span>).rolling_std(<span class="dv">30</span>, center<span class="op">=</span><span class="va">True</span>).alias(<span class="st">"std"</span>),</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> mean_std_pl.to_pandas().set_index(<span class="st">"time"</span>)[<span class="st">"mean"</span>].plot()</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>ax.fill_between(</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    mean_std_pl[<span class="st">"time"</span>].to_numpy(),</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    mean_std_pl[<span class="st">"mean"</span>] <span class="op">-</span> mean_std_pl[<span class="st">"std"</span>],</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    mean_std_pl[<span class="st">"mean"</span>] <span class="op">+</span> mean_std_pl[<span class="st">"std"</span>],</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    alpha<span class="op">=</span><span class="fl">0.25</span>,</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Close ($)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<pre><code>Text(26.83333333333334, 0.5, 'Close ($)')</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="timeseries_files/figure-html/cell-13-output-2.png" width="681" height="467"></p>
+</div>
+</div>
+</div>
+<div id="tabset-6-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-2-tab">
+<div class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>roll_pd <span class="op">=</span> ohlcv_pd[<span class="st">"close"</span>].rolling(<span class="dv">30</span>, center<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>mean_std_pd <span class="op">=</span> roll_pd.agg([<span class="st">"mean"</span>, <span class="st">"std"</span>])</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> mean_std_pd[<span class="st">"mean"</span>].plot()</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>ax.fill_between(</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    mean_std_pd.index,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    mean_std_pd[<span class="st">"mean"</span>] <span class="op">-</span> mean_std_pd[<span class="st">"std"</span>],</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    mean_std_pd[<span class="st">"mean"</span>] <span class="op">+</span> mean_std_pd[<span class="st">"std"</span>],</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    alpha<span class="op">=</span><span class="fl">0.25</span>,</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Close ($)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<pre><code>Text(26.83333333333334, 0.5, 'Close ($)')</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="timeseries_files/figure-html/cell-14-output-2.png" width="681" height="467"></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="grab-bag" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="grab-bag"><span class="header-section-number">5.5</span> Grab Bag</h2>
+<section id="offsets" class="level3" data-number="5.5.1">
+<h3 data-number="5.5.1" class="anchored" data-anchor-id="offsets"><span class="header-section-number">5.5.1</span> Offsets</h3>
+<p>Pandas has two similar objects for datetime arithmetic: <code>DateOffset</code> which respects calendar arithmetic, and <code>Timedelta</code> which respects absolute time arithmetic. <code>DateOffset</code> understands things like daylight savings time, and can work with holidays too.</p>
+<p>Polars just has a <code>Duration</code> type which is like Pandas <code>Timedelta</code>.</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-7-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-1" role="tab" aria-controls="tabset-7-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-7-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-2" role="tab" aria-controls="tabset-7-2" aria-selected="false">Pandas (Timedelta)</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-7-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-3" role="tab" aria-controls="tabset-7-3" aria-selected="false">Pandas (DateOffset)</a></li></ul>
+<div class="tab-content">
+<div id="tabset-7-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-7-1-tab">
+<div class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pl.select(pl.col(<span class="st">"time"</span>) <span class="op">+</span> pl.duration(days<span class="op">=</span><span class="dv">80</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+
+    .dataframe td {
+        white-space: pre;
+    }
+
+    .dataframe td {
+        padding-top: 0;
+    }
+
+    .dataframe td {
+        padding-bottom: 0;
+    }
+
+    .dataframe td {
+        line-height: 95%;
+    }
+</style>
+<small>shape: (366, 1)</small><table class="dataframe table table-sm table-striped">
+
+<thead>
+<tr>
+<th>
+time
+</th>
+</tr>
+<tr>
+<td>
+date
+</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+2021-03-22
+</td>
+</tr>
+<tr>
+<td>
+2021-03-23
+</td>
+</tr>
+<tr>
+<td>
+...
+</td>
+</tr>
+<tr>
+<td>
+2022-03-21
+</td>
+</tr>
+<tr>
+<td>
+2022-03-22
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-7-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-7-2-tab">
+<div class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pd.index <span class="op">+</span> pd.Timedelta(<span class="dv">80</span>, <span class="st">"D"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="15">
+<pre><code>DatetimeIndex(['2021-03-22', '2021-03-23', '2021-03-24', '2021-03-25',
+               '2021-03-26', '2021-03-27', '2021-03-28', '2021-03-29',
+               '2021-03-30', '2021-03-31',
+               ...
+               '2022-03-13', '2022-03-14', '2022-03-15', '2022-03-16',
+               '2022-03-17', '2022-03-18', '2022-03-19', '2022-03-20',
+               '2022-03-21', '2022-03-22'],
+              dtype='datetime64[ns]', name='time', length=366, freq=None)</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-7-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-7-3-tab">
+<div class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pd.index <span class="op">+</span> pd.DateOffset(months<span class="op">=</span><span class="dv">3</span>, days<span class="op">=-</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="16">
+<pre><code>DatetimeIndex(['2021-03-22', '2021-03-23', '2021-03-24', '2021-03-25',
+               '2021-03-26', '2021-03-27', '2021-03-28', '2021-03-29',
+               '2021-03-30', '2021-03-31',
+               ...
+               '2022-03-13', '2022-03-14', '2022-03-15', '2022-03-16',
+               '2022-03-17', '2022-03-18', '2022-03-19', '2022-03-20',
+               '2022-03-21', '2022-03-22'],
+              dtype='datetime64[ns]', name='time', length=366, freq=None)</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="holiday-calendars" class="level3" data-number="5.5.2">
+<h3 data-number="5.5.2" class="anchored" data-anchor-id="holiday-calendars"><span class="header-section-number">5.5.2</span> Holiday calendars</h3>
+<p>Not many people know this, but Pandas can do some quite powerful stuff with <a href="https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html?highlight=holiday#holidays-holiday-calendars">Holiday Calendars</a>. There is an <a href="https://github.com/pola-rs/polars/issues/5713">open issue</a> to add this functionality to Polars.</p>
+</section>
+<section id="timezones" class="level3" data-number="5.5.3">
+<h3 data-number="5.5.3" class="anchored" data-anchor-id="timezones"><span class="header-section-number">5.5.3</span> Timezones</h3>
+<p>Suppose we know that our timestamps are UTC, and we want to see what time it was in <code>US/Eastern</code>:</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-8-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-1" role="tab" aria-controls="tabset-8-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-8-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-2" role="tab" aria-controls="tabset-8-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-8-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-8-1-tab">
+<div class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    ohlcv_pl</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    .with_column(</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"time"</span>)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>        .cast(pl.Datetime)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>        .dt.with_time_zone(<span class="st">"US/Eastern"</span>)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="17">
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+
+    .dataframe td {
+        white-space: pre;
+    }
+
+    .dataframe td {
+        padding-top: 0;
+    }
+
+    .dataframe td {
+        padding-bottom: 0;
+    }
+
+    .dataframe td {
+        line-height: 95%;
+    }
+</style>
+<small>shape: (366, 6)</small><table class="dataframe table table-sm table-striped">
+
+<thead>
+<tr>
+<th>
+time
+</th>
+<th>
+open
+</th>
+<th>
+high
+</th>
+<th>
+low
+</th>
+<th>
+close
+</th>
+<th>
+volume
+</th>
+</tr>
+<tr>
+<td>
+datetime[μs, US/Eastern]
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+2020-12-31 19:00:00 EST
+</td>
+<td>
+28923.63
+</td>
+<td>
+29600.0
+</td>
+<td>
+28624.57
+</td>
+<td>
+29331.69
+</td>
+<td>
+54182.925011
+</td>
+</tr>
+<tr>
+<td>
+2021-01-01 19:00:00 EST
+</td>
+<td>
+29331.7
+</td>
+<td>
+33300.0
+</td>
+<td>
+28946.53
+</td>
+<td>
+32178.33
+</td>
+<td>
+129993.873362
+</td>
+</tr>
+<tr>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+</tr>
+<tr>
+<td>
+2021-12-30 19:00:00 EST
+</td>
+<td>
+47120.88
+</td>
+<td>
+48548.26
+</td>
+<td>
+45678.0
+</td>
+<td>
+46216.93
+</td>
+<td>
+34937.99796
+</td>
+</tr>
+<tr>
+<td>
+2021-12-31 19:00:00 EST
+</td>
+<td>
+46216.93
+</td>
+<td>
+47954.63
+</td>
+<td>
+46208.37
+</td>
+<td>
+47722.65
+</td>
+<td>
+19604.46325
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-8-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-8-2-tab">
+<div class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    ohlcv_pd</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    .tz_localize(<span class="st">'UTC'</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    .tz_convert(<span class="st">'US/Eastern'</span>)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="18">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>open</th>
+      <th>high</th>
+      <th>low</th>
+      <th>close</th>
+      <th>volume</th>
+    </tr>
+    <tr>
+      <th>time</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2020-12-31 19:00:00-05:00</th>
+      <td>28923.63</td>
+      <td>29600.00</td>
+      <td>28624.57</td>
+      <td>29331.69</td>
+      <td>54182.925011</td>
+    </tr>
+    <tr>
+      <th>2021-01-01 19:00:00-05:00</th>
+      <td>29331.70</td>
+      <td>33300.00</td>
+      <td>28946.53</td>
+      <td>32178.33</td>
+      <td>129993.873362</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>2021-12-30 19:00:00-05:00</th>
+      <td>47120.88</td>
+      <td>48548.26</td>
+      <td>45678.00</td>
+      <td>46216.93</td>
+      <td>34937.997960</td>
+    </tr>
+    <tr>
+      <th>2021-12-31 19:00:00-05:00</th>
+      <td>46216.93</td>
+      <td>47954.63</td>
+      <td>46208.37</td>
+      <td>47722.65</td>
+      <td>19604.463250</td>
+    </tr>
+  </tbody>
+</table>
+<p>366 rows × 5 columns</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="conclusion" class="level2" data-number="5.6">
+<h2 data-number="5.6" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">5.6</span> Conclusion</h2>
+<p>Polars has really good time series support, though expanding aggregations and holiday calendars are niches in which it is lacking. Pandas <code>DateTimeIndex</code>es are quite cool too, even if they do bring some pain.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<script src="https://giscus.app/client.js" data-repo="kevinheavey/modern-polars" data-repo-id="R_kgDOIqAHAQ" data-category="General" data-category-id="DIC_kwDOIqAHAc4CTW4n" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="en" crossorigin="anonymous" async="">
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./tidy.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Reshaping and Tidy Data</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./scaling.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Scaling</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>

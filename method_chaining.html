@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.280">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Modern Polars - 2&nbsp; Method Chaining</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./performance.html" rel="next">
+<link href="./indexing.html" rel="prev">
+<link href="./polar-bear-airpods-no-background.png" rel="icon" type="image/png">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="custom.css">
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Method Chaining</span></h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      <img src="./polar-bear-airpods-no-background.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Modern Polars</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/kevinheavey/modern-polars/tree/master/book/" title="Source Code" class="sidebar-tool px-1"><i class="bi bi-github"></i></a>
+    <a href="" title="Share" id="sidebar-tool-dropdown-0" class="sidebar-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-share"></i></a>
+    <ul class="dropdown-menu" aria-labelledby="sidebar-tool-dropdown-0">
+        <li>
+          <a class="dropdown-item sidebar-tools-main-item" href="https://twitter.com/intent/tweet?url=|url|">
+            <i class="bi bi-bi-twitter pe-1"></i>
+          Twitter
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item sidebar-tools-main-item" href="https://www.facebook.com/sharer/sharer.php?u=|url|">
+            <i class="bi bi-bi-facebook pe-1"></i>
+          Facebook
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item sidebar-tools-main-item" href="https://www.linkedin.com/sharing/share-offsite/?url=|url|">
+            <i class="bi bi-bi-linkedin pe-1"></i>
+          LinkedIn
+          </a>
+        </li>
+    </ul>
+</div>
+    </div>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">Preface</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./indexing.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Indexing (Or Lack Thereof)</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./method_chaining.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Method Chaining</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./performance.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Performance</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tidy.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Reshaping and Tidy Data</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./timeseries.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Timeseries</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./scaling.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Scaling</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./summary.html" class="sidebar-item-text sidebar-link">Summary</a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#setup" id="toc-setup" class="nav-link active" data-scroll-target="#setup"><span class="toc-section-number">2.1</span>  Setup</a></li>
+  <li><a href="#extract-city-names" id="toc-extract-city-names" class="nav-link" data-scroll-target="#extract-city-names"><span class="toc-section-number">2.2</span>  Extract city names</a></li>
+  <li><a href="#brining-it-all-back-home" id="toc-brining-it-all-back-home" class="nav-link" data-scroll-target="#brining-it-all-back-home"><span class="toc-section-number">2.3</span>  Brining It All Back Home</a></li>
+  <li><a href="#example-plots" id="toc-example-plots" class="nav-link" data-scroll-target="#example-plots"><span class="toc-section-number">2.4</span>  Example plots</a>
+  <ul class="collapse">
+  <li><a href="#daily-flights" id="toc-daily-flights" class="nav-link" data-scroll-target="#daily-flights"><span class="toc-section-number">2.4.1</span>  Daily Flights</a></li>
+  <li><a href="#planes-with-multiple-daily-flights" id="toc-planes-with-multiple-daily-flights" class="nav-link" data-scroll-target="#planes-with-multiple-daily-flights"><span class="toc-section-number">2.4.2</span>  Planes With Multiple Daily Flights</a></li>
+  <li><a href="#delay-by-hour-of-the-day" id="toc-delay-by-hour-of-the-day" class="nav-link" data-scroll-target="#delay-by-hour-of-the-day"><span class="toc-section-number">2.4.3</span>  Delay by hour of the day</a></li>
+  </ul></li>
+  <li><a href="#how-much-is-too-much" id="toc-how-much-is-too-much" class="nav-link" data-scroll-target="#how-much-is-too-much"><span class="toc-section-number">2.5</span>  How much is too much?</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="toc-section-number">2.6</span>  Summary</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/kevinheavey/modern-polars/edit/master/book/method_chaining.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/kevinheavey/modern-polars/issues/new" class="toc-action">Report an issue</a></p><p><a href="https://github.com/kevinheavey/modern-polars/blob/master/book/method_chaining.qmd" class="toc-action">View source</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Method Chaining</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<p>Many people don’t need to be told why method chaining is nice. Many languages make it easy to write <code>thing.min().abs().str()</code> instead of <code>str(abs(min(thing)))</code>.</p>
+<p>But the Python standard library tends to prefer the ugly way, so if you’ve spent a lot of time doing vanilla Python stuff, you may have become accustomed to writing nasty nested function calls or declaring intermediate variables like <code>min_thing</code>. This is sad because a sensible degree of method chaining can make code a lot easier to read.</p>
+<p>It’s not always easy for libraries to accommodate method chaining - in fancy terms, to be <a href="https://en.wikipedia.org/wiki/Fluent_interface">fluent interfaces</a>. Even Pandas used to be much less fluent: when <em>Modern Pandas</em> was released, methods like <code>assign</code> and <code>pipe</code> were quite recent.</p>
+<p>Fortunately Polars is very fluent. The expression API provides a very elegant way to do a bunch of stuff to a dataframe in one fell swoop, and Polars mostly doesn’t mutate dataframes in-place (method chaining with side effects is often a bad idea).</p>
+<p>Let’s see how this looks in practice by cleaning up the flight data we gathered in <a href="indexing.html"><span>Chapter&nbsp;1</span></a>.</p>
+<section id="setup" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="setup"><span class="header-section-number">2.1</span> Setup</h2>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>pl.Config.set_tbl_rows(<span class="dv">5</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>pd.options.display.max_rows <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>data_dir <span class="op">=</span> Path(<span class="st">"../data"</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>extracted <span class="op">=</span> data_dir <span class="op">/</span> <span class="st">"On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="extract-city-names" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="extract-city-names"><span class="header-section-number">2.2</span> Extract city names</h2>
+<p>The dataset has two columns that look like <code>$city, $state</code>. Let’s define a function that removes the state part from these columns. There’s no method chaining yet but we do have a few things to talk about while we’re here:</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> extract_city_name_pl() <span class="op">-&gt;</span> pl.Expr:</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Chicago, IL -&gt; Chicago for OriginCityName and DestCityName</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    cols <span class="op">=</span> [<span class="st">"OriginCityName"</span>, <span class="st">"DestCityName"</span>]</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pl.col(cols).<span class="bu">str</span>.split(<span class="st">","</span>).arr.get(<span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> extract_city_name_pd(df: pd.DataFrame) <span class="op">-&gt;</span> pl.DataFrame:</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Chicago, IL -&gt; Chicago for OriginCityName and DestCityName</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    cols <span class="op">=</span> [<span class="st">"OriginCityName"</span>, <span class="st">"DestCityName"</span>]</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df.assign(<span class="op">**</span>{col: df[col].<span class="bu">str</span>.split(<span class="st">","</span>, regex<span class="op">=</span><span class="va">False</span>).<span class="bu">str</span>[<span class="dv">0</span>] <span class="cf">for</span> col <span class="kw">in</span> cols})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</div>
+<p>Some items to note:</p>
+<ol type="1">
+<li><p>Our Pandas function adds columns to a dataframe, while our Polars function simply generates a Polars <em>expression</em>. You’ll find it’s often easier to pass around <code>Expr</code>s than dataframes because:</p>
+<ol type="i">
+<li>They work on both <code>DataFrame</code> and <code>LazyFrame</code>, and they aren’t bound to any particular data.</li>
+<li>Polars performs better if you put everything in one <code>.select</code> or <code>.with_columns</code> call, rather than calling <code>.select</code> multiple times. If you pass around expressions, this pattern is easy.</li>
+</ol></li>
+<li><p>Polars is fast and convenient for doing the same thing to multiple columns. We can pass a list of columns to <code>pl.col</code> and then call a method on that <code>pl.col</code> as if it were one column. When the expression gets executed it will be parallelized by Polars.</p>
+<p>Meanwhile in Pandas we have to loop through the columns to create a dictionary of kwargs for <code>.assign</code>. This is not parallelized. (We could use <code>.apply</code> with <code>axis=0</code> instead but this would still take place sequentially and isn’t any easier to read, in my opinion).</p></li>
+<li><p>Calling <code>.str.split</code> in Polars creates a column where every element is a list. This kind of data is annoying in Pandas because it’s slow and awkward to work with - notice how the most convenient way to get the first element of a list column in Pandas is to call <code>.str[0]</code>, even though this is a list, not a string 🤔</p>
+<p>I’m not sure if that’s even supposed to work. In contrast, Polars actually has first class support for list columns, and they are fast <strong>as long as they don’t have mixed types.</strong></p></li>
+</ol>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> time_col_pl(col: <span class="bu">str</span>) <span class="op">-&gt;</span> pl.Expr:</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    col_expr <span class="op">=</span> pl.col(col)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        pl.when(col_expr <span class="op">==</span> <span class="st">"2400"</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        .then(<span class="st">"0000"</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        .otherwise(col_expr)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        .<span class="bu">str</span>.strptime(pl.Time, <span class="st">"%H%M"</span>, strict<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        .alias(col)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> time_to_datetime_pl(columns: <span class="bu">list</span>[<span class="bu">str</span>]) <span class="op">-&gt;</span> <span class="bu">list</span>[pl.Expr]:</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">    Combine all time items into datetimes.</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">    2014-01-01,0914 -&gt; 2014-01-01 09:14:00</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    date_val <span class="op">=</span> pl.col(<span class="st">"FlightDate"</span>).dt.epoch(<span class="st">"us"</span>)</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        (date_val <span class="op">+</span> time_col_pl(col).to_physical() <span class="op">//</span> <span class="dv">1000</span>)</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        .cast(pl.Datetime)</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        .alias(col)</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> col <span class="kw">in</span> columns</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> time_col_pd(col: <span class="bu">str</span>, df: pd.DataFrame) <span class="op">-&gt;</span> pd.Series:</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    timepart <span class="op">=</span> df[col].replace(<span class="st">"2400"</span>, <span class="st">"0000"</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pd.to_datetime(df[<span class="st">"FlightDate"</span>] <span class="op">+</span> <span class="st">' '</span> <span class="op">+</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>                            timepart.<span class="bu">str</span>.<span class="bu">slice</span>(<span class="dv">0</span>, <span class="dv">2</span>) <span class="op">+</span> <span class="st">':'</span> <span class="op">+</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>                            timepart.<span class="bu">str</span>.<span class="bu">slice</span>(<span class="dv">2</span>, <span class="dv">4</span>),</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>                            errors<span class="op">=</span><span class="st">'coerce'</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> time_to_datetime_pd(df: pd.DataFrame, columns: <span class="bu">list</span>[<span class="bu">str</span>]) <span class="op">-&gt;</span> pd.DataFrame:</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">'''</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">    Combine all time items into datetimes.</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co">    2014-01-01,0914 -&gt; 2014-01-01 09:14:00</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">    '''</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df.assign(<span class="op">**</span>{col: time_col_pd(col, df) <span class="cf">for</span> col <span class="kw">in</span> columns})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</div>
+<p>The Pandas version concatenates the date and time strings then parses the datetime string. We could do the same in Polars but I wanted to show you the <code>pl.Date</code> and <code>pl.Time</code> dtypes, which Pandas lacks. It turns out that combining <code>pl.Date</code> and <code>pl.Time</code> isn’t that straightforward: we have to convert them both to microseconds, add them and then cast as <code>pl.Datetime</code>.</p>
+</section>
+<section id="brining-it-all-back-home" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="brining-it-all-back-home"><span class="header-section-number">2.3</span> Brining It All Back Home</h2>
+<p>It’s time for some method chaining. First, some common variables for both the Polars and Pandas code:</p>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>category_cols <span class="op">=</span> [</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Dest"</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Tail_Number"</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"IATA_CODE_Reporting_Airline"</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"CancellationCode"</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>time_cols <span class="op">=</span> [<span class="st">"DepTime"</span>, <span class="st">"ArrTime"</span>, <span class="st">"CRSArrTime"</span>, <span class="st">"CRSDepTime"</span>]</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>cols <span class="op">=</span> (</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    category_cols</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> time_cols</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> [</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"FlightDate"</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Flight_Number_Reporting_Airline"</span>,</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"OriginCityName"</span>,</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">"DestCityName"</span>,</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Origin"</span>,</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"DepDelay"</span>,</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now to read the CSVs and use the functions we defined above:</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>dtypes_pl <span class="op">=</span> (</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    {col: pl.Categorical <span class="cf">for</span> col <span class="kw">in</span> category_cols}</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> {<span class="st">"FlightDate"</span>: pl.Date}</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> {col: pl.Utf8 <span class="cf">for</span> col <span class="kw">in</span> time_cols}</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>df_pl <span class="op">=</span> (</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    pl.scan_csv(extracted, dtypes<span class="op">=</span>dtypes_pl, null_values<span class="op">=</span><span class="st">""</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    .select(cols)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    .with_columns([extract_city_name_pl(), <span class="op">*</span>time_to_datetime_pl(time_cols)])</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    .collect()</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>df_pl.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+
+    .dataframe td {
+        white-space: pre;
+    }
+
+    .dataframe td {
+        padding-top: 0;
+    }
+
+    .dataframe td {
+        padding-bottom: 0;
+    }
+
+    .dataframe td {
+        line-height: 95%;
+    }
+</style>
+<small>shape: (5, 14)</small><table class="dataframe table table-sm table-striped">
+
+<thead>
+<tr>
+<th>
+Dest
+</th>
+<th>
+Tail_Number
+</th>
+<th>
+IATA_CODE_Reporting_Airline
+</th>
+<th>
+CancellationCode
+</th>
+<th>
+DepTime
+</th>
+<th>
+ArrTime
+</th>
+<th>
+CRSArrTime
+</th>
+<th>
+CRSDepTime
+</th>
+<th>
+FlightDate
+</th>
+<th>
+Flight_Number_Reporting_Airline
+</th>
+<th>
+OriginCityName
+</th>
+<th>
+DestCityName
+</th>
+<th>
+Origin
+</th>
+<th>
+DepDelay
+</th>
+</tr>
+<tr>
+<td>
+cat
+</td>
+<td>
+cat
+</td>
+<td>
+cat
+</td>
+<td>
+cat
+</td>
+<td>
+datetime[μs]
+</td>
+<td>
+datetime[μs]
+</td>
+<td>
+datetime[μs]
+</td>
+<td>
+datetime[μs]
+</td>
+<td>
+date
+</td>
+<td>
+i64
+</td>
+<td>
+str
+</td>
+<td>
+str
+</td>
+<td>
+str
+</td>
+<td>
+f64
+</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+"DCA"
+</td>
+<td>
+"N119HQ"
+</td>
+<td>
+"YX"
+</td>
+<td>
+null
+</td>
+<td>
+2022-01-14 12:21:00
+</td>
+<td>
+2022-01-14 13:56:00
+</td>
+<td>
+2022-01-14 13:52:00
+</td>
+<td>
+2022-01-14 12:24:00
+</td>
+<td>
+2022-01-14
+</td>
+<td>
+4879
+</td>
+<td>
+"Columbus"
+</td>
+<td>
+"Washington"
+</td>
+<td>
+"CMH"
+</td>
+<td>
+-3.0
+</td>
+</tr>
+<tr>
+<td>
+"DCA"
+</td>
+<td>
+"N122HQ"
+</td>
+<td>
+"YX"
+</td>
+<td>
+null
+</td>
+<td>
+2022-01-15 12:14:00
+</td>
+<td>
+2022-01-15 13:28:00
+</td>
+<td>
+2022-01-15 13:52:00
+</td>
+<td>
+2022-01-15 12:24:00
+</td>
+<td>
+2022-01-15
+</td>
+<td>
+4879
+</td>
+<td>
+"Columbus"
+</td>
+<td>
+"Washington"
+</td>
+<td>
+"CMH"
+</td>
+<td>
+-10.0
+</td>
+</tr>
+<tr>
+<td>
+"DCA"
+</td>
+<td>
+"N412YX"
+</td>
+<td>
+"YX"
+</td>
+<td>
+null
+</td>
+<td>
+2022-01-16 12:18:00
+</td>
+<td>
+2022-01-16 13:39:00
+</td>
+<td>
+2022-01-16 13:52:00
+</td>
+<td>
+2022-01-16 12:24:00
+</td>
+<td>
+2022-01-16
+</td>
+<td>
+4879
+</td>
+<td>
+"Columbus"
+</td>
+<td>
+"Washington"
+</td>
+<td>
+"CMH"
+</td>
+<td>
+-6.0
+</td>
+</tr>
+<tr>
+<td>
+"DCA"
+</td>
+<td>
+"N405YX"
+</td>
+<td>
+"YX"
+</td>
+<td>
+null
+</td>
+<td>
+2022-01-17 12:17:00
+</td>
+<td>
+2022-01-17 14:01:00
+</td>
+<td>
+2022-01-17 13:52:00
+</td>
+<td>
+2022-01-17 12:24:00
+</td>
+<td>
+2022-01-17
+</td>
+<td>
+4879
+</td>
+<td>
+"Columbus"
+</td>
+<td>
+"Washington"
+</td>
+<td>
+"CMH"
+</td>
+<td>
+-7.0
+</td>
+</tr>
+<tr>
+<td>
+"DCA"
+</td>
+<td>
+"N420YX"
+</td>
+<td>
+"YX"
+</td>
+<td>
+null
+</td>
+<td>
+2022-01-18 12:18:00
+</td>
+<td>
+2022-01-18 13:23:00
+</td>
+<td>
+2022-01-18 13:52:00
+</td>
+<td>
+2022-01-18 12:24:00
+</td>
+<td>
+2022-01-18
+</td>
+<td>
+4879
+</td>
+<td>
+"Columbus"
+</td>
+<td>
+"Washington"
+</td>
+<td>
+"CMH"
+</td>
+<td>
+-6.0
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
+<div class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>dtypes_pd <span class="op">=</span> (</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    {col: pd.CategoricalDtype() <span class="cf">for</span> col <span class="kw">in</span> category_cols}</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> {col: pd.StringDtype() <span class="cf">for</span> col <span class="kw">in</span> time_cols}</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>df_pd <span class="op">=</span> (</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    pd.read_csv(extracted, dtype<span class="op">=</span>dtypes_pd, usecols<span class="op">=</span>cols, na_values<span class="op">=</span><span class="st">""</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    .pipe(extract_city_name_pd)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    .pipe(time_to_datetime_pd, time_cols)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    .assign(FlightDate<span class="op">=</span><span class="kw">lambda</span> df: pd.to_datetime(df[<span class="st">"FlightDate"</span>]))</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>df_pd[cols].head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Dest</th>
+      <th>Tail_Number</th>
+      <th>IATA_CODE_Reporting_Airline</th>
+      <th>CancellationCode</th>
+      <th>DepTime</th>
+      <th>ArrTime</th>
+      <th>CRSArrTime</th>
+      <th>CRSDepTime</th>
+      <th>FlightDate</th>
+      <th>Flight_Number_Reporting_Airline</th>
+      <th>OriginCityName</th>
+      <th>DestCityName</th>
+      <th>Origin</th>
+      <th>DepDelay</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>DCA</td>
+      <td>N119HQ</td>
+      <td>YX</td>
+      <td>NaN</td>
+      <td>2022-01-14 12:21:00</td>
+      <td>2022-01-14 13:56:00</td>
+      <td>2022-01-14 13:52:00</td>
+      <td>2022-01-14 12:24:00</td>
+      <td>2022-01-14</td>
+      <td>4879</td>
+      <td>Columbus</td>
+      <td>Washington</td>
+      <td>CMH</td>
+      <td>-3.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>DCA</td>
+      <td>N122HQ</td>
+      <td>YX</td>
+      <td>NaN</td>
+      <td>2022-01-15 12:14:00</td>
+      <td>2022-01-15 13:28:00</td>
+      <td>2022-01-15 13:52:00</td>
+      <td>2022-01-15 12:24:00</td>
+      <td>2022-01-15</td>
+      <td>4879</td>
+      <td>Columbus</td>
+      <td>Washington</td>
+      <td>CMH</td>
+      <td>-10.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>DCA</td>
+      <td>N412YX</td>
+      <td>YX</td>
+      <td>NaN</td>
+      <td>2022-01-16 12:18:00</td>
+      <td>2022-01-16 13:39:00</td>
+      <td>2022-01-16 13:52:00</td>
+      <td>2022-01-16 12:24:00</td>
+      <td>2022-01-16</td>
+      <td>4879</td>
+      <td>Columbus</td>
+      <td>Washington</td>
+      <td>CMH</td>
+      <td>-6.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>DCA</td>
+      <td>N405YX</td>
+      <td>YX</td>
+      <td>NaN</td>
+      <td>2022-01-17 12:17:00</td>
+      <td>2022-01-17 14:01:00</td>
+      <td>2022-01-17 13:52:00</td>
+      <td>2022-01-17 12:24:00</td>
+      <td>2022-01-17</td>
+      <td>4879</td>
+      <td>Columbus</td>
+      <td>Washington</td>
+      <td>CMH</td>
+      <td>-7.0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>DCA</td>
+      <td>N420YX</td>
+      <td>YX</td>
+      <td>NaN</td>
+      <td>2022-01-18 12:18:00</td>
+      <td>2022-01-18 13:23:00</td>
+      <td>2022-01-18 13:52:00</td>
+      <td>2022-01-18 12:24:00</td>
+      <td>2022-01-18</td>
+      <td>4879</td>
+      <td>Columbus</td>
+      <td>Washington</td>
+      <td>CMH</td>
+      <td>-6.0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>Differences between the two approaches:</p>
+<ol type="1">
+<li>Since <code>scan_csv</code> is lazy, using <code>scan_csv</code> followed by <code>.select</code>ing a subset of columns is equivalent to <code>usecols</code> in <code>pd.read_csv</code>. This is why <code>pl.scan_csv</code> itself doesn’t have a parameter for choosing a subset of columns to read.</li>
+<li>Polars does have a <code>.pipe</code> method, but we don’t use it in this case since it’s easier to work with expressions.</li>
+</ol>
+<div class="callout-tip callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The <code>.with_columns</code> method is for adding new columns or overwriting existing ones. But <code>.select</code> can also do those things, so you may be wondering: what’s the difference?</p>
+<p>Basically the <code>.with_columns</code> method is just convenient for when you don’t want to reselect all the columns you’re not modifying.</p>
+</div>
+</div>
+</section>
+<section id="example-plots" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="example-plots"><span class="header-section-number">2.4</span> Example plots</h2>
+<section id="daily-flights" class="level3" data-number="2.4.1">
+<h3 data-number="2.4.1" class="anchored" data-anchor-id="daily-flights"><span class="header-section-number">2.4.1</span> Daily Flights</h3>
+<p>Here’s how plotting the number of daily flights looks in Polars and Pandas:</p>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Polars works fine with Matplotlib and Plotly, but it doesn’t work with Seaborn, nor does it have its own <code>.plot</code> method. The latter two are very convenient for exploratory data analysis, so for these examples we’ll just use <code>to_pandas</code> followed by <code>plot</code> or a Seaborn function after doing all the data manipulation in Polars.</p>
+</div>
+</div>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-4-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-1" role="tab" aria-controls="tabset-4-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-2" role="tab" aria-controls="tabset-4-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-4-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-4-1-tab">
+<div class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># filter for the busiest airlines</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>filter_expr <span class="op">=</span> pl.col(<span class="st">"IATA_CODE_Reporting_Airline"</span>).is_in(</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">"IATA_CODE_Reporting_Airline"</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    .value_counts(sort<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    .struct.field(<span class="st">"IATA_CODE_Reporting_Airline"</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    .head(<span class="dv">5</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    df_pl</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    .drop_nulls(subset<span class="op">=</span>[<span class="st">"DepTime"</span>, <span class="st">"IATA_CODE_Reporting_Airline"</span>])</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(filter_expr)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">"DepTime"</span>)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    .groupby_dynamic(</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"DepTime"</span>,</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>        every<span class="op">=</span><span class="st">"1h"</span>,</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>        by<span class="op">=</span><span class="st">"IATA_CODE_Reporting_Airline"</span>)</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    .agg(pl.col(<span class="st">"Flight_Number_Reporting_Airline"</span>).count())</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    .pivot(</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>        index<span class="op">=</span><span class="st">"DepTime"</span>,</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>        columns<span class="op">=</span><span class="st">"IATA_CODE_Reporting_Airline"</span>,</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>        values<span class="op">=</span><span class="st">"Flight_Number_Reporting_Airline"</span>,</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">"DepTime"</span>)</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># fill every missing hour with 0 so the plot looks better</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    .upsample(time_column<span class="op">=</span><span class="st">"DepTime"</span>, every<span class="op">=</span><span class="st">"1h"</span>)</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    .fill_null(<span class="dv">0</span>)</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    .select([pl.col(<span class="st">"DepTime"</span>), pl.col(pl.UInt32).rolling_sum(<span class="dv">24</span>)])</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    .to_pandas()</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    .set_index(<span class="st">"DepTime"</span>)</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    .rename_axis(<span class="st">"Flights per Day"</span>, axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    .plot()</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<pre><code>&lt;AxesSubplot: xlabel='DepTime'&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="method_chaining_files/figure-html/cell-10-output-2.png" width="583" height="474"></p>
+</div>
+</div>
+</div>
+<div id="tabset-4-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-2-tab">
+<div class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    df_pd</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    .dropna(subset<span class="op">=</span>[<span class="st">"DepTime"</span>, <span class="st">"IATA_CODE_Reporting_Airline"</span>])</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># filter for the busiest airlines</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    .loc[</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">lambda</span> x: x[<span class="st">"IATA_CODE_Reporting_Airline"</span>].isin(</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>            x[<span class="st">"IATA_CODE_Reporting_Airline"</span>].value_counts().index[:<span class="dv">5</span>]</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    .assign(</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>        IATA_CODE_Reporting_Airline<span class="op">=</span><span class="kw">lambda</span> x: x[</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>            <span class="st">"IATA_CODE_Reporting_Airline"</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>        ].cat.remove_unused_categories()  <span class="co">#  annoying pandas behaviour</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    .set_index(<span class="st">"DepTime"</span>)</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># TimeGrouper to resample &amp; groupby at once</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    .groupby([<span class="st">"IATA_CODE_Reporting_Airline"</span>, pd.Grouper(freq<span class="op">=</span><span class="st">"H"</span>)])[</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Flight_Number_Reporting_Airline"</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    .count()</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># the .pivot takes care of this in the Polars code.</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    .unstack(<span class="dv">0</span>)</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    .fillna(<span class="dv">0</span>)</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>    .rolling(<span class="dv">24</span>)</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">sum</span>()</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>    .rename_axis(<span class="st">"Flights per Day"</span>, axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>    .plot()</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<pre><code>&lt;AxesSubplot: xlabel='DepTime'&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="method_chaining_files/figure-html/cell-11-output-2.png" width="583" height="474"></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>Differences between Polars and Pandas:</p>
+<ol type="1">
+<li>To group by a time window and another value, we use <code>.groupby_dynamic</code>. In Pandas we use .<code>groupby</code> with the <code>pd.Grouper</code> helper.</li>
+<li>Instead of <code>.rolling(n).sum()</code>, Polars has <code>.rolling_sum(n)</code>.</li>
+<li>If you see Pandas code using <code>.unstack</code>, the corresponding Polars code probably needs <code>.pivot</code>.</li>
+<li>In Polars, <code>.value_counts</code> returns a <code>pl.Struct</code> column containing the value and the value count. In Pandas it returns a series where the elements are the value counts and the index contains the values themselves.</li>
+<li>In Polars we need to select all the UInt32 cols at one point using pl.col(pl.UInt32). In Pandas, the way <code>.rolling</code> works means we don’t need to select these cols explicitly, but if we did it would look like <code>df.select_dtypes("uint32")</code>.</li>
+</ol>
+</section>
+<section id="planes-with-multiple-daily-flights" class="level3" data-number="2.4.2">
+<h3 data-number="2.4.2" class="anchored" data-anchor-id="planes-with-multiple-daily-flights"><span class="header-section-number">2.4.2</span> Planes With Multiple Daily Flights</h3>
+<p>Now let’s see if planes with multiple flights per day tend to get delayed as the day goes on:</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-5-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-1" role="tab" aria-controls="tabset-5-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-2" role="tab" aria-controls="tabset-5-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-5-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-5-1-tab">
+<div class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>flights_pl <span class="op">=</span> (</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    df_pl.select(</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>        pl.col([</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>            <span class="st">"FlightDate"</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Tail_Number"</span>,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">"DepTime"</span>,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"DepDelay"</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>        ])</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    .drop_nulls()</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">"DepTime"</span>)</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"DepDelay"</span>) <span class="op">&lt;</span> <span class="dv">500</span>)</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    .with_column(</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"DepTime"</span>)</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>        .rank()</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>        .over([<span class="st">"FlightDate"</span>, <span class="st">"Tail_Number"</span>])</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>        .alias(<span class="st">"turn"</span>)</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">5</span>))</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>sns.boxplot(x<span class="op">=</span><span class="st">"turn"</span>, y<span class="op">=</span><span class="st">"DepDelay"</span>, data<span class="op">=</span>flights_pl.to_pandas(), ax<span class="op">=</span>ax)</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="op">-</span><span class="dv">50</span>, <span class="dv">50</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<pre><code>(-50.0, 50.0)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="method_chaining_files/figure-html/cell-12-output-2.png" width="819" height="429"></p>
+</div>
+</div>
+</div>
+<div id="tabset-5-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-2-tab">
+<div class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>flights_pd <span class="op">=</span> (</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    df_pd[[</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"FlightDate"</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Tail_Number"</span>,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"DepTime"</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"DepDelay"</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    ]]</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    .dropna()</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    .sort_values(<span class="st">'DepTime'</span>)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    .loc[<span class="kw">lambda</span> x: x[<span class="st">"DepDelay"</span>] <span class="op">&lt;</span> <span class="dv">500</span>]</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    .assign(turn <span class="op">=</span> <span class="kw">lambda</span> x:</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>        x.groupby([<span class="st">"FlightDate"</span>, <span class="st">"Tail_Number"</span>])</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>        [<span class="st">"DepTime"</span>].transform(<span class="st">'rank'</span>)</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>        .astype(<span class="bu">int</span>)</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">5</span>))</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>sns.boxplot(x<span class="op">=</span><span class="st">"turn"</span>, y<span class="op">=</span><span class="st">"DepDelay"</span>, data<span class="op">=</span>flights_pd, ax<span class="op">=</span>ax)</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="op">-</span><span class="dv">50</span>, <span class="dv">50</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<pre><code>(-50.0, 50.0)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="method_chaining_files/figure-html/cell-13-output-2.png" width="819" height="429"></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>One new thing here: <a href="https://pola-rs.github.io/polars-book/user-guide/dsl/window_functions.html">window functions</a>. When Pandas code looks like:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>.groupby(<span class="st">"country"</span>)[<span class="st">"population"</span>].transform(<span class="st">"sum"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>the equivalent Polars code will look like:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>pl.col(<span class="st">"population"</span>).<span class="bu">sum</span>().over(<span class="st">"country"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="delay-by-hour-of-the-day" class="level3" data-number="2.4.3">
+<h3 data-number="2.4.3" class="anchored" data-anchor-id="delay-by-hour-of-the-day"><span class="header-section-number">2.4.3</span> Delay by hour of the day</h3>
+<p>Maybe later flights have longer delays:</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-6-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-1" role="tab" aria-controls="tabset-6-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-2" role="tab" aria-controls="tabset-6-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-6-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-6-1-tab">
+<div class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">5</span>))</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    df_pl.select(</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>        pl.col(</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>            [<span class="st">"FlightDate"</span>, <span class="st">"Tail_Number"</span>, <span class="st">"DepTime"</span>, <span class="st">"DepDelay"</span>],</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    .drop_nulls()</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"DepDelay"</span>).is_between(<span class="dv">5</span>, <span class="dv">600</span>, closed<span class="op">=</span><span class="st">"none"</span>))</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    .with_column(pl.col(<span class="st">"DepTime"</span>).dt.hour().alias(<span class="st">"hour"</span>))</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    .to_pandas()</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    .pipe((sns.boxplot, <span class="st">"data"</span>), x<span class="op">=</span><span class="st">"hour"</span>, y<span class="op">=</span><span class="st">"DepDelay"</span>)</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<pre><code>&lt;AxesSubplot: xlabel='hour', ylabel='DepDelay'&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="method_chaining_files/figure-html/cell-14-output-2.png" width="816" height="429"></p>
+</div>
+</div>
+</div>
+<div id="tabset-6-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-2-tab">
+<div class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">5</span>))</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    df_pd[[<span class="st">"FlightDate"</span>, <span class="st">"Tail_Number"</span>, <span class="st">"DepTime"</span>, <span class="st">"DepDelay"</span>]]</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    .dropna()</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    .loc[<span class="kw">lambda</span> df: df[<span class="st">"DepDelay"</span>].between(<span class="dv">5</span>, <span class="dv">600</span>, inclusive<span class="op">=</span><span class="st">"neither"</span>)]</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    .assign(hour<span class="op">=</span><span class="kw">lambda</span> df: df[<span class="st">"DepTime"</span>].dt.hour)</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    .pipe((sns.boxplot, <span class="st">"data"</span>), x<span class="op">=</span><span class="st">"hour"</span>, y<span class="op">=</span><span class="st">"DepDelay"</span>)</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<pre><code>&lt;AxesSubplot: xlabel='hour', ylabel='DepDelay'&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="method_chaining_files/figure-html/cell-15-output-2.png" width="816" height="429"></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="how-much-is-too-much" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="how-much-is-too-much"><span class="header-section-number">2.5</span> How much is too much?</h2>
+<p>The above examples have some fairly long method chains that could perhaps be split up. That said, if I saw them in a PR I probably wouldn’t mind. Here’s a chain that’s too long:</p>
+<p><img src="pandas_chain_tweet.png" class="img-fluid" alt="A tweet with a code screenshot containing a very long method chain, and an angry reply."></p>
+<p>I would argue this code is not hard to follow, but empirically it provokes disgust in people. I think it’s just visually shocking, which is often a hallmark of terrible code. That’s enough reason to avoid doing this. You don’t want folks assuming you’ve lost your mind.</p>
+<p>In the above example, it would probably be enough to just move those long lists to their own variables. That would make it more obvious that the code is really doing simple, menial things.</p>
+</section>
+<section id="summary" class="level2" data-number="2.6">
+<h2 data-number="2.6" class="anchored" data-anchor-id="summary"><span class="header-section-number">2.6</span> Summary</h2>
+<ul>
+<li>Method chaining is great but use it with care.</li>
+<li>The Polars code looks pretty good here next to Pandas. It’s less clunky and more conducive to fluent programming. I’ve noticed some people are under the impression that you should only use Polars when you need the performance, but I would argue the above examples show that it’s better for small data too.</li>
+<li>If you want to translate Pandas code to Polars, pay attention to the examples above and the accompanying notes on the API differences.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<script src="https://giscus.app/client.js" data-repo="kevinheavey/modern-polars" data-repo-id="R_kgDOIqAHAQ" data-category="General" data-category-id="DIC_kwDOIqAHAc4CTW4n" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="en" crossorigin="anonymous" async="">
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./indexing.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Indexing (Or Lack Thereof)</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./performance.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Performance</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>

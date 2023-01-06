@@ -1,0 +1,2890 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.280">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Modern Polars - 3&nbsp; Performance</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./tidy.html" rel="next">
+<link href="./method_chaining.html" rel="prev">
+<link href="./polar-bear-airpods-no-background.png" rel="icon" type="image/png">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="custom.css">
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Performance</span></h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      <img src="./polar-bear-airpods-no-background.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Modern Polars</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/kevinheavey/modern-polars/tree/master/book/" title="Source Code" class="sidebar-tool px-1"><i class="bi bi-github"></i></a>
+    <a href="" title="Share" id="sidebar-tool-dropdown-0" class="sidebar-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-share"></i></a>
+    <ul class="dropdown-menu" aria-labelledby="sidebar-tool-dropdown-0">
+        <li>
+          <a class="dropdown-item sidebar-tools-main-item" href="https://twitter.com/intent/tweet?url=|url|">
+            <i class="bi bi-bi-twitter pe-1"></i>
+          Twitter
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item sidebar-tools-main-item" href="https://www.facebook.com/sharer/sharer.php?u=|url|">
+            <i class="bi bi-bi-facebook pe-1"></i>
+          Facebook
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item sidebar-tools-main-item" href="https://www.linkedin.com/sharing/share-offsite/?url=|url|">
+            <i class="bi bi-bi-linkedin pe-1"></i>
+          LinkedIn
+          </a>
+        </li>
+    </ul>
+</div>
+    </div>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">Preface</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./indexing.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Indexing (Or Lack Thereof)</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./method_chaining.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Method Chaining</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./performance.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Performance</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tidy.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Reshaping and Tidy Data</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./timeseries.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Timeseries</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./scaling.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Scaling</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./summary.html" class="sidebar-item-text sidebar-link">Summary</a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#six-fairly-obvious-performance-rules" id="toc-six-fairly-obvious-performance-rules" class="nav-link active" data-scroll-target="#six-fairly-obvious-performance-rules"><span class="toc-section-number">3.1</span>  Six fairly obvious performance rules</a></li>
+  <li><a href="#polars-is-faster-at-the-boring-stuff" id="toc-polars-is-faster-at-the-boring-stuff" class="nav-link" data-scroll-target="#polars-is-faster-at-the-boring-stuff"><span class="toc-section-number">3.2</span>  Polars is faster at the boring stuff</a>
+  <ul class="collapse">
+  <li><a href="#dtypes" id="toc-dtypes" class="nav-link" data-scroll-target="#dtypes"><span class="toc-section-number">3.2.1</span>  Dtypes</a></li>
+  <li><a href="#data-cleaning" id="toc-data-cleaning" class="nav-link" data-scroll-target="#data-cleaning"><span class="toc-section-number">3.2.2</span>  Data cleaning</a></li>
+  <li><a href="#performance-comparison" id="toc-performance-comparison" class="nav-link" data-scroll-target="#performance-comparison"><span class="toc-section-number">3.2.3</span>  Performance comparison</a></li>
+  </ul></li>
+  <li><a href="#numpy-can-make-polars-faster" id="toc-numpy-can-make-polars-faster" class="nav-link" data-scroll-target="#numpy-can-make-polars-faster"><span class="toc-section-number">3.3</span>  NumPy can make Polars faster</a>
+  <ul class="collapse">
+  <li><a href="#get-the-data" id="toc-get-the-data" class="nav-link" data-scroll-target="#get-the-data"><span class="toc-section-number">3.3.1</span>  Get the data</a></li>
+  <li><a href="#calculate-great-circle-distance" id="toc-calculate-great-circle-distance" class="nav-link" data-scroll-target="#calculate-great-circle-distance"><span class="toc-section-number">3.3.2</span>  Calculate great-circle distance</a></li>
+  </ul></li>
+  <li><a href="#polars-can-be-slower-than-pandas-sometimes-maybe" id="toc-polars-can-be-slower-than-pandas-sometimes-maybe" class="nav-link" data-scroll-target="#polars-can-be-slower-than-pandas-sometimes-maybe"><span class="toc-section-number">3.4</span>  Polars can be slower than Pandas sometimes, maybe</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="toc-section-number">3.5</span>  Summary</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/kevinheavey/modern-polars/edit/master/book/performance.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/kevinheavey/modern-polars/issues/new" class="toc-action">Report an issue</a></p><p><a href="https://github.com/kevinheavey/modern-polars/blob/master/book/performance.qmd" class="toc-action">View source</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Performance</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<p>As you’ve probably heard by now, <a href="https://www.pola.rs/benchmarks.html">Polars is very very fast</a>. Well-written Polars is quicker than well-written Pandas, and it’s easier to write Polars well. With that in mind…</p>
+<section id="six-fairly-obvious-performance-rules" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="six-fairly-obvious-performance-rules"><span class="header-section-number">3.1</span> Six fairly obvious performance rules</h2>
+<p>Here are some tips that are almost always a good idea:</p>
+<ul>
+<li>Use the lazy API.</li>
+<li>Use <code>Expr</code>s, and don’t use <code>.apply</code> unless you really have to.</li>
+<li>Use the smallest necessary numeric types (so if you have an integer between 0 and 255, use <code>pl.UInt8</code>, not <code>pl.Int64</code>). This likely won’t speed things up but will use less memory.</li>
+<li>Use efficient storage (if you’re dumping stuff in files, Parquet is a good choice).</li>
+<li>Use categoricals for recurring strings (but note that it may not be worth it if there’s not much repetition).</li>
+<li>Only select the columns you need.</li>
+</ul>
+<div class="callout-tip callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>If your colleagues are happy with CSVs and can’t be convinced to use something else, tell them that the <em>Modern Polars</em> book says they should feel bad.</p>
+</div>
+</div>
+<p>These are basically the same rules you’d follow when using Pandas, except for the one about the lazy API. Now for some comparisons between the performance of idiomatic Pandas and Polars.</p>
+</section>
+<section id="polars-is-faster-at-the-boring-stuff" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="polars-is-faster-at-the-boring-stuff"><span class="header-section-number">3.2</span> Polars is faster at the boring stuff</h2>
+<p>Here we’ll clean up a messy dataset, kindly <a href="https://www.kaggle.com/datasets/yagunnersya/fifa-21-messy-raw-dataset-for-cleaning-exploring?resource=download">provided</a> by Kaggle user Rachit Toshniwal as a deliberate example of a really crap CSV. Most of the cleanup involves extracting numeric data from awkward strings.</p>
+<p>Also, the data is too small so I’ve concatenated it to itself 20 times. We’re not doing anything that will care about the duplication. Here’s how the raw table looks:</p>
+<div class="cell" data-execution_count="1">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>pd.read_csv(<span class="st">"../data/fifa21_raw_big.csv"</span>, dtype<span class="op">=</span><span class="st">"string"</span>, nrows<span class="op">=</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="1">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>ID</th>
+      <th>Name</th>
+      <th>LongName</th>
+      <th>photoUrl</th>
+      <th>playerUrl</th>
+      <th>Nationality</th>
+      <th>Age</th>
+      <th>↓OVA</th>
+      <th>POT</th>
+      <th>Club</th>
+      <th>...</th>
+      <th>A/W</th>
+      <th>D/W</th>
+      <th>IR</th>
+      <th>PAC</th>
+      <th>SHO</th>
+      <th>PAS</th>
+      <th>DRI</th>
+      <th>DEF</th>
+      <th>PHY</th>
+      <th>Hits</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>158023</td>
+      <td>L. Messi</td>
+      <td>Lionel Messi</td>
+      <td>https://cdn.sofifa.com/players/158/023/21_60.png</td>
+      <td>http://sofifa.com/player/158023/lionel-messi/2...</td>
+      <td>Argentina</td>
+      <td>33</td>
+      <td>93</td>
+      <td>93</td>
+      <td>FC Barcelona</td>
+      <td>...</td>
+      <td>Medium</td>
+      <td>Low</td>
+      <td>5 ★</td>
+      <td>85</td>
+      <td>92</td>
+      <td>91</td>
+      <td>95</td>
+      <td>38</td>
+      <td>65</td>
+      <td>771</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>20801</td>
+      <td>Cristiano Ronaldo</td>
+      <td>C. Ronaldo dos Santos Aveiro</td>
+      <td>https://cdn.sofifa.com/players/020/801/21_60.png</td>
+      <td>http://sofifa.com/player/20801/c-ronaldo-dos-s...</td>
+      <td>Portugal</td>
+      <td>35</td>
+      <td>92</td>
+      <td>92</td>
+      <td>Juventus</td>
+      <td>...</td>
+      <td>High</td>
+      <td>Low</td>
+      <td>5 ★</td>
+      <td>89</td>
+      <td>93</td>
+      <td>81</td>
+      <td>89</td>
+      <td>35</td>
+      <td>77</td>
+      <td>562</td>
+    </tr>
+  </tbody>
+</table>
+<p>2 rows × 77 columns</p>
+</div>
+</div>
+</div>
+<p>For this exercise we’ll assume we want to make use of all the columns. First some boilerplate where we map out the different data types:</p>
+<div class="cell" data-execution_count="2">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>str_cols <span class="op">=</span> [</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Name"</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"LongName"</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"playerUrl"</span>,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"photoUrl"</span>,</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>initial_category_cols_pl <span class="op">=</span> [</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Nationality"</span>,</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Preferred Foot"</span>,</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Best Position"</span>,</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"A/W"</span>,</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">"D/W"</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>category_cols <span class="op">=</span> [<span class="op">*</span>initial_category_cols_pl, <span class="st">"Club"</span>]</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>date_cols <span class="op">=</span> [</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Joined"</span>,</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Loan Date End"</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="co"># these all start with the euro symbol and end with 0, M or K</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>money_cols <span class="op">=</span> [</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Value"</span>,</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Wage"</span>,</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Release Clause"</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>star_cols <span class="op">=</span> [</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="st">"W/F"</span>,</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="st">"SM"</span>,</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    <span class="st">"IR"</span>,</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Contract col is a range of years</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Positions is a list of positions</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Height is in cm</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="co"># Weight is in kg</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="co"># Hits is numbers with K and M </span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>messy_cols <span class="op">=</span> [</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Contract"</span>,</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Positions"</span>,</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Height"</span>,</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Weight"</span>,</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Hits"</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>initially_str_cols <span class="op">=</span> str_cols <span class="op">+</span> date_cols <span class="op">+</span> money_cols <span class="op">+</span> star_cols <span class="op">+</span> messy_cols</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>initially_str_cols_pl <span class="op">=</span> [<span class="op">*</span>initially_str_cols, <span class="st">"Club"</span>]</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>u32_cols <span class="op">=</span> [</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ID"</span>,</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Total Stats"</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>u8_cols <span class="op">=</span> [</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Age'</span>,</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>    <span class="st">'↓OVA'</span>,</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>    <span class="st">'POT'</span>,</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>    <span class="st">'BOV'</span>,</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Crossing'</span>,</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Finishing'</span>,</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Heading Accuracy'</span>,</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Short Passing'</span>,</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Volleys'</span>,</span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Dribbling'</span>,</span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Curve'</span>,</span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>    <span class="st">'FK Accuracy'</span>,</span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Long Passing'</span>,</span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Ball Control'</span>,</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Acceleration'</span>,</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Sprint Speed'</span>,</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Agility'</span>,</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Reactions'</span>,</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Balance'</span>,</span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Shot Power'</span>,</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Jumping'</span>,</span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Stamina'</span>,</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Strength'</span>,</span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Long Shots'</span>,</span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Aggression'</span>,</span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Interceptions'</span>,</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Positioning'</span>,</span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Vision'</span>,</span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Penalties'</span>,</span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Composure'</span>,</span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Marking'</span>,</span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Standing Tackle'</span>,</span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Sliding Tackle'</span>,</span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>    <span class="st">'GK Diving'</span>,</span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>    <span class="st">'GK Handling'</span>,</span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>    <span class="st">'GK Kicking'</span>,</span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>    <span class="st">'GK Positioning'</span>,</span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>    <span class="st">'GK Reflexes'</span>,</span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>    <span class="st">'PAC'</span>,</span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>    <span class="st">'SHO'</span>,</span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a>    <span class="st">'PAS'</span>,</span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>    <span class="st">'DRI'</span>,</span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>    <span class="st">'DEF'</span>,</span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>    <span class="st">'PHY'</span></span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>u16_cols <span class="op">=</span> [</span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Attacking'</span>,</span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Skill'</span>,</span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Movement'</span>,</span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Power'</span>,</span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Mentality'</span>,</span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Defending'</span>,</span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Goalkeeping'</span>,</span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Total Stats'</span>,</span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Base Stats'</span></span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="dtypes" class="level3" data-number="3.2.1">
+<h3 data-number="3.2.1" class="anchored" data-anchor-id="dtypes"><span class="header-section-number">3.2.1</span> Dtypes</h3>
+<p>Here are the initial dtypes for the two dataframes:</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># can't use UInt8/16 in scan_csv</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>dtypes_pl <span class="op">=</span> (</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    {col: pl.Utf8 <span class="cf">for</span> col <span class="kw">in</span> initially_str_cols_pl}</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> {col: pl.Categorical <span class="cf">for</span> col <span class="kw">in</span> initial_category_cols_pl}</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> {col: pl.UInt32 <span class="cf">for</span> col <span class="kw">in</span> [<span class="op">*</span>u32_cols, <span class="op">*</span>u16_cols, <span class="op">*</span>u8_cols]}</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>dtypes_pd <span class="op">=</span> (</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    {col: pd.StringDtype() <span class="cf">for</span> col <span class="kw">in</span> initially_str_cols}</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> {col: pd.CategoricalDtype() <span class="cf">for</span> col <span class="kw">in</span> category_cols}</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> {col: <span class="st">"uint32"</span> <span class="cf">for</span> col <span class="kw">in</span> u32_cols}</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> {col: <span class="st">"uint8"</span> <span class="cf">for</span> col <span class="kw">in</span> u8_cols}</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> {col: <span class="st">"uint16"</span> <span class="cf">for</span> col <span class="kw">in</span> u16_cols}</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</div>
+<p>One thing I’ll note here is that Pandas numeric types are somewhat confusing: <code>"uint32"</code> means <code>np.uint32</code> which is not the same thing as <code>pd.UInt32Dtype()</code>. Only the latter is nullable. On the other hand, Polars has just one unsigned 32-bit integer type, and it’s nullable.</p>
+<div class="callout-tip callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Polars expressions have a <a href="https://pola-rs.github.io/polars/py-polars/html/reference/expressions/api/polars.Expr.shrink_dtype.html#polars-expr-shrink-dtype"><code>shrink_dtype</code></a> method that can be more convenient than manually specifying the dtypes yourself. It’s not magic though, and it has to spend time finding the min and max of the column.</p>
+</div>
+</div>
+</section>
+<section id="data-cleaning" class="level3" data-number="3.2.2">
+<h3 data-number="3.2.2" class="anchored" data-anchor-id="data-cleaning"><span class="header-section-number">3.2.2</span> Data cleaning</h3>
+<p>There’s not much that you haven’t seen here already, so we won’t explain the code line by line. The main new thing here is <a href="https://pola-rs.github.io/polars/py-polars/html/reference/expressions/api/polars.when.html#polars.when"><code>pl.when</code></a> for ternary expressions.</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parse_date_pl(col: pl.Expr) <span class="op">-&gt;</span> pl.Expr:</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> col.<span class="bu">str</span>.strptime(pl.Date, fmt<span class="op">=</span><span class="st">"%b </span><span class="sc">%d</span><span class="st">, %Y"</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parse_suffixed_num_pl(col: pl.Expr) <span class="op">-&gt;</span> pl.Expr:</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    suffix <span class="op">=</span> col.<span class="bu">str</span>.<span class="bu">slice</span>(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    suffix_value <span class="op">=</span> (</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        pl.when(suffix <span class="op">==</span> <span class="st">"K"</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        .then(<span class="dv">1_000</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        .when(suffix <span class="op">==</span> <span class="st">"M"</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        .then(<span class="dv">1_000_000</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        .otherwise(<span class="dv">1</span>)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        .cast(pl.UInt32)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    without_suffix <span class="op">=</span> (</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        col</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        .<span class="bu">str</span>.replace(<span class="st">"K"</span>, <span class="st">""</span>, literal<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        .<span class="bu">str</span>.replace(<span class="st">"M"</span>, <span class="st">""</span>, literal<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>        .cast(pl.Float32)</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    original_name <span class="op">=</span> col.meta.output_name()</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (suffix_value <span class="op">*</span> without_suffix).alias(original_name)</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parse_money_pl(col: pl.Expr) <span class="op">-&gt;</span> pl.Expr:</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> parse_suffixed_num_pl(col.<span class="bu">str</span>.<span class="bu">slice</span>(<span class="dv">1</span>)).cast(pl.UInt32)</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parse_star_pl(col: pl.Expr) <span class="op">-&gt;</span> pl.Expr:</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> col.<span class="bu">str</span>.<span class="bu">slice</span>(<span class="dv">0</span>, <span class="dv">1</span>).cast(pl.UInt8)</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> feet_to_cm_pl(col: pl.Expr) <span class="op">-&gt;</span> pl.Expr:</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>    feet_inches_split <span class="op">=</span> col.<span class="bu">str</span>.split_exact(<span class="st">"'"</span>, <span class="dv">1</span>)</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    total_inches <span class="op">=</span> (</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>        (feet_inches_split.struct.field(<span class="st">"field_0"</span>).cast(pl.UInt8, strict<span class="op">=</span><span class="va">False</span>) <span class="op">*</span> <span class="dv">12</span>)</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> feet_inches_split.struct.field(<span class="st">"field_1"</span>).<span class="bu">str</span>.rstrip(<span class="st">'"'</span>).cast(pl.UInt8, strict<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (total_inches <span class="op">*</span> <span class="fl">2.54</span>).<span class="bu">round</span>(<span class="dv">0</span>).cast(pl.UInt8)</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parse_height_pl(col: pl.Expr) <span class="op">-&gt;</span> pl.Expr:</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>    is_cm <span class="op">=</span> col.<span class="bu">str</span>.ends_with(<span class="st">"cm"</span>)</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>        pl.when(is_cm)</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>        .then(col.<span class="bu">str</span>.<span class="bu">slice</span>(<span class="dv">0</span>, <span class="dv">3</span>).cast(pl.UInt8, strict<span class="op">=</span><span class="va">False</span>))</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>        .otherwise(feet_to_cm_pl(col))</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parse_weight_pl(col: pl.Expr) <span class="op">-&gt;</span> pl.Expr:</span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>    is_kg <span class="op">=</span> col.<span class="bu">str</span>.ends_with(<span class="st">"kg"</span>)</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>    without_unit <span class="op">=</span> col.<span class="bu">str</span>.extract(<span class="vs">r"(\d+)"</span>).cast(pl.UInt8)</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>        pl.when(is_kg)</span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>        .then(without_unit)</span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>        .otherwise((without_unit <span class="op">*</span> <span class="fl">0.453592</span>).<span class="bu">round</span>(<span class="dv">0</span>).cast(pl.UInt8))</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parse_contract_pl(col: pl.Expr) <span class="op">-&gt;</span> <span class="bu">list</span>[pl.Expr]:</span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>    contains_tilde <span class="op">=</span> col.<span class="bu">str</span>.contains(<span class="st">" ~ "</span>, literal<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>    loan_str <span class="op">=</span> <span class="st">" On Loan"</span></span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>    loan_col <span class="op">=</span> col.<span class="bu">str</span>.ends_with(loan_str)</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>    split <span class="op">=</span> (</span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>        pl.when(contains_tilde)</span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>        .then(col)</span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>        .otherwise(<span class="va">None</span>)</span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>        .<span class="bu">str</span>.split_exact(<span class="st">" ~ "</span>, <span class="dv">1</span>)</span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>    start <span class="op">=</span> split.struct.field(<span class="st">"field_0"</span>).cast(pl.UInt16).alias(<span class="st">"contract_start"</span>)</span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>    end <span class="op">=</span> split.struct.field(<span class="st">"field_1"</span>).cast(pl.UInt16).alias(<span class="st">"contract_end"</span>)</span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>    free_agent <span class="op">=</span> (col <span class="op">==</span> <span class="st">"Free"</span>).alias(<span class="st">"free_agent"</span>).fill_null(<span class="va">False</span>)</span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>    loan_date <span class="op">=</span> (</span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>        pl.when(loan_col)</span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a>        .then(col)</span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a>        .otherwise(<span class="va">None</span>)</span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a>        .<span class="bu">str</span>.split_exact(<span class="st">" On Loan"</span>, <span class="dv">1</span>)</span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a>        .struct.field(<span class="st">"field_0"</span>)</span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a>        .alias(<span class="st">"loan_date_start"</span>)</span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [start, end, free_agent, parse_date_pl(loan_date)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parse_date_pd(col: pd.Series) <span class="op">-&gt;</span> pd.Series:</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pd.to_datetime(col, <span class="bu">format</span><span class="op">=</span><span class="st">"%b </span><span class="sc">%d</span><span class="st">, %Y"</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parse_suffixed_num_pd(col: pd.Series) <span class="op">-&gt;</span> pd.Series:</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    suffix_value <span class="op">=</span> (</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        col</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        .<span class="bu">str</span>[<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        .<span class="bu">map</span>({<span class="st">"K"</span>: <span class="dv">1_000</span>, <span class="st">"M"</span>: <span class="dv">1_000_000</span>})</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        .fillna(<span class="dv">1</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        .astype(<span class="st">"uint32"</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    without_suffix <span class="op">=</span> (</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        col</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        .<span class="bu">str</span>.replace(<span class="st">"K"</span>, <span class="st">""</span>, regex<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        .<span class="bu">str</span>.replace(<span class="st">"M"</span>, <span class="st">""</span>, regex<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>        .astype(<span class="st">"float"</span>)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> suffix_value <span class="op">*</span> without_suffix</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parse_money_pd(col: pd.Series) <span class="op">-&gt;</span> pd.Series:</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> parse_suffixed_num_pd(col.<span class="bu">str</span>[<span class="dv">1</span>:]).astype(<span class="st">"uint32"</span>)</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parse_star_pd(col: pd.Series) <span class="op">-&gt;</span> pd.Series:</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> col.<span class="bu">str</span>[<span class="dv">0</span>].astype(<span class="st">"uint8"</span>)</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> feet_to_cm_pd(col: pd.Series) <span class="op">-&gt;</span> pd.Series:</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    feet_inches_split <span class="op">=</span> col.<span class="bu">str</span>.split(<span class="st">"'"</span>, expand<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    total_inches <span class="op">=</span> (</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>        feet_inches_split[<span class="dv">0</span>].astype(<span class="st">"uint8"</span>).mul(<span class="dv">12</span>)</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> feet_inches_split[<span class="dv">1</span>].<span class="bu">str</span>[:<span class="op">-</span><span class="dv">1</span>].astype(<span class="st">"uint8"</span>)</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> total_inches.mul(<span class="fl">2.54</span>).<span class="bu">round</span>().astype(<span class="st">"uint8"</span>)</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parse_height_pd(col: pd.Series) <span class="op">-&gt;</span> pd.Series:</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>    is_cm <span class="op">=</span> col.<span class="bu">str</span>.endswith(<span class="st">"cm"</span>)</span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    cm_values <span class="op">=</span> col.loc[is_cm].<span class="bu">str</span>[:<span class="op">-</span><span class="dv">2</span>].astype(<span class="st">"uint8"</span>)</span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>    inches_as_cm <span class="op">=</span> feet_to_cm_pd(col.loc[<span class="op">~</span>is_cm])</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pd.concat([cm_values, inches_as_cm])</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parse_weight_pd(col: pd.Series) <span class="op">-&gt;</span> pd.Series:</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>    is_kg <span class="op">=</span> col.<span class="bu">str</span>.endswith(<span class="st">"kg"</span>)</span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>    without_unit <span class="op">=</span> col.where(is_kg, col.<span class="bu">str</span>[:<span class="op">-</span><span class="dv">3</span>]).mask(is_kg, col.<span class="bu">str</span>[:<span class="op">-</span><span class="dv">2</span>]).astype(<span class="st">"uint8"</span>)</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> without_unit.where(is_kg, without_unit.mul(<span class="fl">0.453592</span>).<span class="bu">round</span>().astype(<span class="st">"uint8"</span>))</span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parse_contract_pd(df: pd.DataFrame) <span class="op">-&gt;</span> pd.DataFrame:</span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>    contract_col <span class="op">=</span> df[<span class="st">"Contract"</span>]</span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>    contains_tilde <span class="op">=</span> contract_col.<span class="bu">str</span>.contains(<span class="st">" ~ "</span>, regex<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>    split <span class="op">=</span> (</span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>        contract_col.loc[contains_tilde].<span class="bu">str</span>.split(<span class="st">" ~ "</span>, expand<span class="op">=</span><span class="va">True</span>).astype(pd.UInt16Dtype())</span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>    split.columns <span class="op">=</span> [<span class="st">"contract_start"</span>, <span class="st">"contract_end"</span>]</span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>    not_tilde <span class="op">=</span> contract_col.loc[<span class="op">~</span>contains_tilde]</span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>    free_agent <span class="op">=</span> (contract_col <span class="op">==</span> <span class="st">"Free"</span>).rename(<span class="st">"free_agent"</span>).fillna(<span class="va">False</span>)</span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>    loan_date <span class="op">=</span> parse_date_pd(not_tilde.loc[<span class="op">~</span>free_agent].<span class="bu">str</span>[:<span class="op">-</span><span class="dv">8</span>]).rename(<span class="st">"loan_date_start"</span>)</span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pd.concat([df.drop(<span class="st">"Contract"</span>, axis<span class="op">=</span><span class="dv">1</span>), split, free_agent, loan_date], axis<span class="op">=</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="performance-comparison" class="level3" data-number="3.2.3">
+<h3 data-number="3.2.3" class="anchored" data-anchor-id="performance-comparison"><span class="header-section-number">3.2.3</span> Performance comparison</h3>
+<p>In this example, <strong>Polars is ~150x faster than Pandas</strong>:</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>new_cols_pl <span class="op">=</span> ([</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">"Club"</span>).<span class="bu">str</span>.strip().cast(pl.Categorical),</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    parse_suffixed_num_pl(pl.col(<span class="st">"Hits"</span>)).cast(pl.UInt32),</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">"Positions"</span>).<span class="bu">str</span>.split(<span class="st">","</span>),</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    parse_height_pl(pl.col(<span class="st">"Height"</span>)),</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    parse_weight_pl(pl.col(<span class="st">"Weight"</span>)),</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="op">+</span> [parse_date_pl(pl.col(col)) <span class="cf">for</span> col <span class="kw">in</span> date_cols]</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="op">+</span> [parse_money_pl(pl.col(col)) <span class="cf">for</span> col <span class="kw">in</span> money_cols]</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="op">+</span> [parse_star_pl(pl.col(col)) <span class="cf">for</span> col <span class="kw">in</span> star_cols]</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="op">+</span> parse_contract_pl(pl.col(<span class="st">"Contract"</span>))</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="op">+</span> [pl.col(col).cast(pl.UInt16) <span class="cf">for</span> col <span class="kw">in</span> u16_cols]</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="op">+</span> [pl.col(col).cast(pl.UInt8) <span class="cf">for</span> col <span class="kw">in</span> u8_cols]</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>fifa_pl <span class="op">=</span> (</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    pl.scan_csv(<span class="st">"../data/fifa21_raw_v2.csv"</span>, dtypes<span class="op">=</span>dtypes_pl)</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    .with_columns(new_cols_pl)</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    .drop(<span class="st">"Contract"</span>)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">"↓OVA"</span>: <span class="st">"OVA"</span>})</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    .collect()</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 129 ms, sys: 44.3 ms, total: 173 ms
+Wall time: 43.5 ms</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
+<div class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>fifa_pd <span class="op">=</span> (</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    pd.read_csv(<span class="st">"../data/fifa21_raw_big.csv"</span>, dtype<span class="op">=</span>dtypes_pd)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    .assign(Club<span class="op">=</span><span class="kw">lambda</span> df: df[<span class="st">"Club"</span>].cat.rename_categories(<span class="kw">lambda</span> c: c.strip()),</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        <span class="op">**</span>{col: <span class="kw">lambda</span> df: parse_date_pd(df[col]) <span class="cf">for</span> col <span class="kw">in</span> date_cols},</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">**</span>{col: <span class="kw">lambda</span> df: parse_money_pd(df[col]) <span class="cf">for</span> col <span class="kw">in</span> money_cols},</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">**</span>{col: <span class="kw">lambda</span> df: parse_star_pd(df[col]) <span class="cf">for</span> col <span class="kw">in</span> star_cols},</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>        Hits<span class="op">=</span><span class="kw">lambda</span> df: parse_suffixed_num_pd(df[<span class="st">"Hits"</span>]).astype(pd.UInt32Dtype()),</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>        Positions<span class="op">=</span><span class="kw">lambda</span> df: df[<span class="st">"Positions"</span>].<span class="bu">str</span>.split(<span class="st">","</span>),</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>        Height<span class="op">=</span><span class="kw">lambda</span> df: parse_height_pd(df[<span class="st">"Height"</span>]),</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>        Weight<span class="op">=</span><span class="kw">lambda</span> df: parse_weight_pd(df[<span class="st">"Weight"</span>])</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    .pipe(parse_contract_pd)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    .rename(columns<span class="op">=</span>{<span class="st">"↓OVA"</span>: <span class="st">"OVA"</span>})</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CPU times: user 6.11 s, sys: 354 ms, total: 6.46 s
+Wall time: 6.46 s</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>Output:</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-4-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-1" role="tab" aria-controls="tabset-4-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-2" role="tab" aria-controls="tabset-4-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-4-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-4-1-tab">
+<div class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>fifa_pl.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+
+    .dataframe td {
+        white-space: pre;
+    }
+
+    .dataframe td {
+        padding-top: 0;
+    }
+
+    .dataframe td {
+        padding-bottom: 0;
+    }
+
+    .dataframe td {
+        line-height: 95%;
+    }
+</style>
+<small>shape: (5, 80)</small><table class="dataframe table table-sm table-striped">
+
+<thead>
+<tr>
+<th>
+ID
+</th>
+<th>
+Name
+</th>
+<th>
+LongName
+</th>
+<th>
+photoUrl
+</th>
+<th>
+playerUrl
+</th>
+<th>
+Nationality
+</th>
+<th>
+Age
+</th>
+<th>
+OVA
+</th>
+<th>
+POT
+</th>
+<th>
+Club
+</th>
+<th>
+Positions
+</th>
+<th>
+Height
+</th>
+<th>
+Weight
+</th>
+<th>
+Preferred Foot
+</th>
+<th>
+BOV
+</th>
+<th>
+Best Position
+</th>
+<th>
+Joined
+</th>
+<th>
+Loan Date End
+</th>
+<th>
+Value
+</th>
+<th>
+Wage
+</th>
+<th>
+Release Clause
+</th>
+<th>
+Attacking
+</th>
+<th>
+Crossing
+</th>
+<th>
+Finishing
+</th>
+<th>
+Heading Accuracy
+</th>
+<th>
+Short Passing
+</th>
+<th>
+Volleys
+</th>
+<th>
+Skill
+</th>
+<th>
+Dribbling
+</th>
+<th>
+Curve
+</th>
+<th>
+FK Accuracy
+</th>
+<th>
+Long Passing
+</th>
+<th>
+Ball Control
+</th>
+<th>
+Movement
+</th>
+<th>
+Acceleration
+</th>
+<th>
+Sprint Speed
+</th>
+<th>
+Agility
+</th>
+<th>
+...
+</th>
+<th>
+Strength
+</th>
+<th>
+Long Shots
+</th>
+<th>
+Mentality
+</th>
+<th>
+Aggression
+</th>
+<th>
+Interceptions
+</th>
+<th>
+Positioning
+</th>
+<th>
+Vision
+</th>
+<th>
+Penalties
+</th>
+<th>
+Composure
+</th>
+<th>
+Defending
+</th>
+<th>
+Marking
+</th>
+<th>
+Standing Tackle
+</th>
+<th>
+Sliding Tackle
+</th>
+<th>
+Goalkeeping
+</th>
+<th>
+GK Diving
+</th>
+<th>
+GK Handling
+</th>
+<th>
+GK Kicking
+</th>
+<th>
+GK Positioning
+</th>
+<th>
+GK Reflexes
+</th>
+<th>
+Total Stats
+</th>
+<th>
+Base Stats
+</th>
+<th>
+W/F
+</th>
+<th>
+SM
+</th>
+<th>
+A/W
+</th>
+<th>
+D/W
+</th>
+<th>
+IR
+</th>
+<th>
+PAC
+</th>
+<th>
+SHO
+</th>
+<th>
+PAS
+</th>
+<th>
+DRI
+</th>
+<th>
+DEF
+</th>
+<th>
+PHY
+</th>
+<th>
+Hits
+</th>
+<th>
+contract_start
+</th>
+<th>
+contract_end
+</th>
+<th>
+free_agent
+</th>
+<th>
+loan_date_start
+</th>
+</tr>
+<tr>
+<td>
+u32
+</td>
+<td>
+str
+</td>
+<td>
+str
+</td>
+<td>
+str
+</td>
+<td>
+str
+</td>
+<td>
+cat
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+cat
+</td>
+<td>
+list[str]
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+cat
+</td>
+<td>
+u8
+</td>
+<td>
+cat
+</td>
+<td>
+date
+</td>
+<td>
+date
+</td>
+<td>
+u32
+</td>
+<td>
+u32
+</td>
+<td>
+u32
+</td>
+<td>
+u16
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u16
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u16
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+...
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u16
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u16
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u16
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u16
+</td>
+<td>
+u16
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+cat
+</td>
+<td>
+cat
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u8
+</td>
+<td>
+u32
+</td>
+<td>
+u16
+</td>
+<td>
+u16
+</td>
+<td>
+bool
+</td>
+<td>
+date
+</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+158023
+</td>
+<td>
+"L. Messi"
+</td>
+<td>
+"Lionel Messi"
+</td>
+<td>
+"https://cdn.so...
+</td>
+<td>
+"http://sofifa....
+</td>
+<td>
+"Argentina"
+</td>
+<td>
+33
+</td>
+<td>
+93
+</td>
+<td>
+93
+</td>
+<td>
+"FC Barcelona"
+</td>
+<td>
+["RW", " ST", " CF"]
+</td>
+<td>
+170
+</td>
+<td>
+72
+</td>
+<td>
+"Left"
+</td>
+<td>
+93
+</td>
+<td>
+"RW"
+</td>
+<td>
+2004-07-01
+</td>
+<td>
+null
+</td>
+<td>
+103500000
+</td>
+<td>
+560000
+</td>
+<td>
+138399993
+</td>
+<td>
+429
+</td>
+<td>
+85
+</td>
+<td>
+95
+</td>
+<td>
+70
+</td>
+<td>
+91
+</td>
+<td>
+88
+</td>
+<td>
+470
+</td>
+<td>
+96
+</td>
+<td>
+93
+</td>
+<td>
+94
+</td>
+<td>
+91
+</td>
+<td>
+96
+</td>
+<td>
+451
+</td>
+<td>
+91
+</td>
+<td>
+80
+</td>
+<td>
+91
+</td>
+<td>
+...
+</td>
+<td>
+69
+</td>
+<td>
+94
+</td>
+<td>
+347
+</td>
+<td>
+44
+</td>
+<td>
+40
+</td>
+<td>
+93
+</td>
+<td>
+95
+</td>
+<td>
+75
+</td>
+<td>
+96
+</td>
+<td>
+91
+</td>
+<td>
+32
+</td>
+<td>
+35
+</td>
+<td>
+24
+</td>
+<td>
+54
+</td>
+<td>
+6
+</td>
+<td>
+11
+</td>
+<td>
+15
+</td>
+<td>
+14
+</td>
+<td>
+8
+</td>
+<td>
+2231
+</td>
+<td>
+466
+</td>
+<td>
+4
+</td>
+<td>
+4
+</td>
+<td>
+"Medium"
+</td>
+<td>
+"Low"
+</td>
+<td>
+5
+</td>
+<td>
+85
+</td>
+<td>
+92
+</td>
+<td>
+91
+</td>
+<td>
+95
+</td>
+<td>
+38
+</td>
+<td>
+65
+</td>
+<td>
+771
+</td>
+<td>
+2004
+</td>
+<td>
+2021
+</td>
+<td>
+false
+</td>
+<td>
+null
+</td>
+</tr>
+<tr>
+<td>
+20801
+</td>
+<td>
+"Cristiano Rona...
+</td>
+<td>
+"C. Ronaldo dos...
+</td>
+<td>
+"https://cdn.so...
+</td>
+<td>
+"http://sofifa....
+</td>
+<td>
+"Portugal"
+</td>
+<td>
+35
+</td>
+<td>
+92
+</td>
+<td>
+92
+</td>
+<td>
+"Juventus"
+</td>
+<td>
+["ST", " LW"]
+</td>
+<td>
+187
+</td>
+<td>
+83
+</td>
+<td>
+"Right"
+</td>
+<td>
+92
+</td>
+<td>
+"ST"
+</td>
+<td>
+2018-07-10
+</td>
+<td>
+null
+</td>
+<td>
+63000000
+</td>
+<td>
+220000
+</td>
+<td>
+75900001
+</td>
+<td>
+437
+</td>
+<td>
+84
+</td>
+<td>
+95
+</td>
+<td>
+90
+</td>
+<td>
+82
+</td>
+<td>
+86
+</td>
+<td>
+414
+</td>
+<td>
+88
+</td>
+<td>
+81
+</td>
+<td>
+76
+</td>
+<td>
+77
+</td>
+<td>
+92
+</td>
+<td>
+431
+</td>
+<td>
+87
+</td>
+<td>
+91
+</td>
+<td>
+87
+</td>
+<td>
+...
+</td>
+<td>
+78
+</td>
+<td>
+93
+</td>
+<td>
+353
+</td>
+<td>
+63
+</td>
+<td>
+29
+</td>
+<td>
+95
+</td>
+<td>
+82
+</td>
+<td>
+84
+</td>
+<td>
+95
+</td>
+<td>
+84
+</td>
+<td>
+28
+</td>
+<td>
+32
+</td>
+<td>
+24
+</td>
+<td>
+58
+</td>
+<td>
+7
+</td>
+<td>
+11
+</td>
+<td>
+15
+</td>
+<td>
+14
+</td>
+<td>
+11
+</td>
+<td>
+2221
+</td>
+<td>
+464
+</td>
+<td>
+4
+</td>
+<td>
+5
+</td>
+<td>
+"High"
+</td>
+<td>
+"Low"
+</td>
+<td>
+5
+</td>
+<td>
+89
+</td>
+<td>
+93
+</td>
+<td>
+81
+</td>
+<td>
+89
+</td>
+<td>
+35
+</td>
+<td>
+77
+</td>
+<td>
+562
+</td>
+<td>
+2018
+</td>
+<td>
+2022
+</td>
+<td>
+false
+</td>
+<td>
+null
+</td>
+</tr>
+<tr>
+<td>
+200389
+</td>
+<td>
+"J. Oblak"
+</td>
+<td>
+"Jan Oblak"
+</td>
+<td>
+"https://cdn.so...
+</td>
+<td>
+"http://sofifa....
+</td>
+<td>
+"Slovenia"
+</td>
+<td>
+27
+</td>
+<td>
+91
+</td>
+<td>
+93
+</td>
+<td>
+"Atlético Madri...
+</td>
+<td>
+["GK"]
+</td>
+<td>
+188
+</td>
+<td>
+87
+</td>
+<td>
+"Right"
+</td>
+<td>
+91
+</td>
+<td>
+"GK"
+</td>
+<td>
+2014-07-16
+</td>
+<td>
+null
+</td>
+<td>
+120000000
+</td>
+<td>
+125000
+</td>
+<td>
+159399993
+</td>
+<td>
+95
+</td>
+<td>
+13
+</td>
+<td>
+11
+</td>
+<td>
+15
+</td>
+<td>
+43
+</td>
+<td>
+13
+</td>
+<td>
+109
+</td>
+<td>
+12
+</td>
+<td>
+13
+</td>
+<td>
+14
+</td>
+<td>
+40
+</td>
+<td>
+30
+</td>
+<td>
+307
+</td>
+<td>
+43
+</td>
+<td>
+60
+</td>
+<td>
+67
+</td>
+<td>
+...
+</td>
+<td>
+78
+</td>
+<td>
+12
+</td>
+<td>
+140
+</td>
+<td>
+34
+</td>
+<td>
+19
+</td>
+<td>
+11
+</td>
+<td>
+65
+</td>
+<td>
+11
+</td>
+<td>
+68
+</td>
+<td>
+57
+</td>
+<td>
+27
+</td>
+<td>
+12
+</td>
+<td>
+18
+</td>
+<td>
+437
+</td>
+<td>
+87
+</td>
+<td>
+92
+</td>
+<td>
+78
+</td>
+<td>
+90
+</td>
+<td>
+90
+</td>
+<td>
+1413
+</td>
+<td>
+489
+</td>
+<td>
+3
+</td>
+<td>
+1
+</td>
+<td>
+"Medium"
+</td>
+<td>
+"Medium"
+</td>
+<td>
+3
+</td>
+<td>
+87
+</td>
+<td>
+92
+</td>
+<td>
+78
+</td>
+<td>
+90
+</td>
+<td>
+52
+</td>
+<td>
+90
+</td>
+<td>
+150
+</td>
+<td>
+2014
+</td>
+<td>
+2023
+</td>
+<td>
+false
+</td>
+<td>
+null
+</td>
+</tr>
+<tr>
+<td>
+192985
+</td>
+<td>
+"K. De Bruyne"
+</td>
+<td>
+"Kevin De Bruyn...
+</td>
+<td>
+"https://cdn.so...
+</td>
+<td>
+"http://sofifa....
+</td>
+<td>
+"Belgium"
+</td>
+<td>
+29
+</td>
+<td>
+91
+</td>
+<td>
+91
+</td>
+<td>
+"Manchester Cit...
+</td>
+<td>
+["CAM", " CM"]
+</td>
+<td>
+181
+</td>
+<td>
+70
+</td>
+<td>
+"Right"
+</td>
+<td>
+91
+</td>
+<td>
+"CAM"
+</td>
+<td>
+2015-08-30
+</td>
+<td>
+null
+</td>
+<td>
+129000000
+</td>
+<td>
+370000
+</td>
+<td>
+161000000
+</td>
+<td>
+407
+</td>
+<td>
+94
+</td>
+<td>
+82
+</td>
+<td>
+55
+</td>
+<td>
+94
+</td>
+<td>
+82
+</td>
+<td>
+441
+</td>
+<td>
+88
+</td>
+<td>
+85
+</td>
+<td>
+83
+</td>
+<td>
+93
+</td>
+<td>
+92
+</td>
+<td>
+398
+</td>
+<td>
+77
+</td>
+<td>
+76
+</td>
+<td>
+78
+</td>
+<td>
+...
+</td>
+<td>
+74
+</td>
+<td>
+91
+</td>
+<td>
+408
+</td>
+<td>
+76
+</td>
+<td>
+66
+</td>
+<td>
+88
+</td>
+<td>
+94
+</td>
+<td>
+84
+</td>
+<td>
+91
+</td>
+<td>
+186
+</td>
+<td>
+68
+</td>
+<td>
+65
+</td>
+<td>
+53
+</td>
+<td>
+56
+</td>
+<td>
+15
+</td>
+<td>
+13
+</td>
+<td>
+5
+</td>
+<td>
+10
+</td>
+<td>
+13
+</td>
+<td>
+2304
+</td>
+<td>
+485
+</td>
+<td>
+5
+</td>
+<td>
+4
+</td>
+<td>
+"High"
+</td>
+<td>
+"High"
+</td>
+<td>
+4
+</td>
+<td>
+76
+</td>
+<td>
+86
+</td>
+<td>
+93
+</td>
+<td>
+88
+</td>
+<td>
+64
+</td>
+<td>
+78
+</td>
+<td>
+207
+</td>
+<td>
+2015
+</td>
+<td>
+2023
+</td>
+<td>
+false
+</td>
+<td>
+null
+</td>
+</tr>
+<tr>
+<td>
+190871
+</td>
+<td>
+"Neymar Jr"
+</td>
+<td>
+"Neymar da Silv...
+</td>
+<td>
+"https://cdn.so...
+</td>
+<td>
+"http://sofifa....
+</td>
+<td>
+"Brazil"
+</td>
+<td>
+28
+</td>
+<td>
+91
+</td>
+<td>
+91
+</td>
+<td>
+"Paris Saint-Ge...
+</td>
+<td>
+["LW", " CAM"]
+</td>
+<td>
+175
+</td>
+<td>
+68
+</td>
+<td>
+"Right"
+</td>
+<td>
+91
+</td>
+<td>
+"LW"
+</td>
+<td>
+2017-08-03
+</td>
+<td>
+null
+</td>
+<td>
+132000000
+</td>
+<td>
+270000
+</td>
+<td>
+166500000
+</td>
+<td>
+408
+</td>
+<td>
+85
+</td>
+<td>
+87
+</td>
+<td>
+62
+</td>
+<td>
+87
+</td>
+<td>
+87
+</td>
+<td>
+448
+</td>
+<td>
+95
+</td>
+<td>
+88
+</td>
+<td>
+89
+</td>
+<td>
+81
+</td>
+<td>
+95
+</td>
+<td>
+453
+</td>
+<td>
+94
+</td>
+<td>
+89
+</td>
+<td>
+96
+</td>
+<td>
+...
+</td>
+<td>
+50
+</td>
+<td>
+84
+</td>
+<td>
+356
+</td>
+<td>
+51
+</td>
+<td>
+36
+</td>
+<td>
+87
+</td>
+<td>
+90
+</td>
+<td>
+92
+</td>
+<td>
+93
+</td>
+<td>
+94
+</td>
+<td>
+35
+</td>
+<td>
+30
+</td>
+<td>
+29
+</td>
+<td>
+59
+</td>
+<td>
+9
+</td>
+<td>
+9
+</td>
+<td>
+15
+</td>
+<td>
+15
+</td>
+<td>
+11
+</td>
+<td>
+2175
+</td>
+<td>
+451
+</td>
+<td>
+5
+</td>
+<td>
+5
+</td>
+<td>
+"High"
+</td>
+<td>
+"Medium"
+</td>
+<td>
+5
+</td>
+<td>
+91
+</td>
+<td>
+85
+</td>
+<td>
+86
+</td>
+<td>
+94
+</td>
+<td>
+36
+</td>
+<td>
+59
+</td>
+<td>
+595
+</td>
+<td>
+2017
+</td>
+<td>
+2022
+</td>
+<td>
+false
+</td>
+<td>
+null
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-4-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-2-tab">
+<div class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fifa_pd.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>ID</th>
+      <th>Name</th>
+      <th>LongName</th>
+      <th>photoUrl</th>
+      <th>playerUrl</th>
+      <th>Nationality</th>
+      <th>Age</th>
+      <th>OVA</th>
+      <th>POT</th>
+      <th>Club</th>
+      <th>...</th>
+      <th>SHO</th>
+      <th>PAS</th>
+      <th>DRI</th>
+      <th>DEF</th>
+      <th>PHY</th>
+      <th>Hits</th>
+      <th>contract_start</th>
+      <th>contract_end</th>
+      <th>free_agent</th>
+      <th>loan_date_start</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>158023</td>
+      <td>L. Messi</td>
+      <td>Lionel Messi</td>
+      <td>https://cdn.sofifa.com/players/158/023/21_60.png</td>
+      <td>http://sofifa.com/player/158023/lionel-messi/2...</td>
+      <td>Argentina</td>
+      <td>33</td>
+      <td>93</td>
+      <td>93</td>
+      <td>FC Barcelona</td>
+      <td>...</td>
+      <td>92</td>
+      <td>91</td>
+      <td>95</td>
+      <td>38</td>
+      <td>65</td>
+      <td>771</td>
+      <td>2004</td>
+      <td>2021</td>
+      <td>False</td>
+      <td>NaT</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>20801</td>
+      <td>Cristiano Ronaldo</td>
+      <td>C. Ronaldo dos Santos Aveiro</td>
+      <td>https://cdn.sofifa.com/players/020/801/21_60.png</td>
+      <td>http://sofifa.com/player/20801/c-ronaldo-dos-s...</td>
+      <td>Portugal</td>
+      <td>35</td>
+      <td>92</td>
+      <td>92</td>
+      <td>Juventus</td>
+      <td>...</td>
+      <td>93</td>
+      <td>81</td>
+      <td>89</td>
+      <td>35</td>
+      <td>77</td>
+      <td>562</td>
+      <td>2018</td>
+      <td>2022</td>
+      <td>False</td>
+      <td>NaT</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>200389</td>
+      <td>J. Oblak</td>
+      <td>Jan Oblak</td>
+      <td>https://cdn.sofifa.com/players/200/389/21_60.png</td>
+      <td>http://sofifa.com/player/200389/jan-oblak/210006/</td>
+      <td>Slovenia</td>
+      <td>27</td>
+      <td>91</td>
+      <td>93</td>
+      <td>Atlético Madrid</td>
+      <td>...</td>
+      <td>92</td>
+      <td>78</td>
+      <td>90</td>
+      <td>52</td>
+      <td>90</td>
+      <td>150</td>
+      <td>2014</td>
+      <td>2023</td>
+      <td>False</td>
+      <td>NaT</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>192985</td>
+      <td>K. De Bruyne</td>
+      <td>Kevin De Bruyne</td>
+      <td>https://cdn.sofifa.com/players/192/985/21_60.png</td>
+      <td>http://sofifa.com/player/192985/kevin-de-bruyn...</td>
+      <td>Belgium</td>
+      <td>29</td>
+      <td>91</td>
+      <td>91</td>
+      <td>Manchester City</td>
+      <td>...</td>
+      <td>86</td>
+      <td>93</td>
+      <td>88</td>
+      <td>64</td>
+      <td>78</td>
+      <td>207</td>
+      <td>2015</td>
+      <td>2023</td>
+      <td>False</td>
+      <td>NaT</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>190871</td>
+      <td>Neymar Jr</td>
+      <td>Neymar da Silva Santos Jr.</td>
+      <td>https://cdn.sofifa.com/players/190/871/21_60.png</td>
+      <td>http://sofifa.com/player/190871/neymar-da-silv...</td>
+      <td>Brazil</td>
+      <td>28</td>
+      <td>91</td>
+      <td>91</td>
+      <td>Paris Saint-Germain</td>
+      <td>...</td>
+      <td>85</td>
+      <td>86</td>
+      <td>94</td>
+      <td>36</td>
+      <td>59</td>
+      <td>595</td>
+      <td>2017</td>
+      <td>2022</td>
+      <td>False</td>
+      <td>NaT</td>
+    </tr>
+  </tbody>
+</table>
+<p>5 rows × 80 columns</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>You could play around with the timings here and even try the <a href="https://pola-rs.github.io/polars/py-polars/html/reference/lazyframe/api/polars.LazyFrame.profile.html"><code>.profile</code></a> method to see what Polars spends its time on. In this scenario the speed advantage of Polars likely comes down to three things:</p>
+<ol type="1">
+<li>It is much faster at reading CSVs.</li>
+<li>It is much faster at processing strings.</li>
+<li>It can select/assign columns in parallel.</li>
+</ol>
+</section>
+</section>
+<section id="numpy-can-make-polars-faster" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="numpy-can-make-polars-faster"><span class="header-section-number">3.3</span> NumPy can make Polars faster</h2>
+<p>Polars gets along well with NumPy <a href="https://numpy.org/doc/stable/reference/ufuncs.html">ufuncs</a>, even in lazy mode (which is interesting because NumPy has no lazy API). Let’s see how this looks by calculating the <a href="http://www.johndcook.com/blog/python_longitude_latitude/">great-circle distance</a> between a bunch of coordinates.</p>
+<section id="get-the-data" class="level3" data-number="3.3.1">
+<h3 data-number="3.3.1" class="anchored" data-anchor-id="get-the-data"><span class="header-section-number">3.3.1</span> Get the data</h3>
+<p>We create a lazy dataframe containing pairs of airports and their coordinates:</p>
+<div class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>airports <span class="op">=</span> pl.scan_csv(<span class="st">"../data/airports.csv"</span>).drop_nulls().unique(subset<span class="op">=</span>[<span class="st">"AIRPORT"</span>])</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>pairs <span class="op">=</span> airports.join(airports, on<span class="op">=</span><span class="st">"AIRPORT"</span>, how<span class="op">=</span><span class="st">"cross"</span>).<span class="bu">filter</span>(</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    (pl.col(<span class="st">"AIRPORT"</span>) <span class="op">!=</span> pl.col(<span class="st">"AIRPORT_right"</span>))</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">&amp;</span> (pl.col(<span class="st">"LATITUDE"</span>) <span class="op">!=</span> pl.col(<span class="st">"LATITUDE_right"</span>))</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">&amp;</span> (pl.col(<span class="st">"LONGITUDE"</span>) <span class="op">!=</span> pl.col(<span class="st">"LONGITUDE_right"</span>))</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="calculate-great-circle-distance" class="level3" data-number="3.3.2">
+<h3 data-number="3.3.2" class="anchored" data-anchor-id="calculate-great-circle-distance"><span class="header-section-number">3.3.2</span> Calculate great-circle distance</h3>
+<p>One use case for NumPy ufuncs is doing computations that Polars expressions don’t support. In this example Polars can do everything we need, though the ufunc version ends up being slightly faster:</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-5-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-1" role="tab" aria-controls="tabset-5-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-2" role="tab" aria-controls="tabset-5-2" aria-selected="false">NumPy</a></li></ul>
+<div class="tab-content">
+<div id="tabset-5-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-5-1-tab">
+<div class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> deg2rad_pl(degrees: pl.Expr) <span class="op">-&gt;</span> pl.Expr:</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> degrees <span class="op">*</span> math.pi <span class="op">/</span> <span class="dv">180</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gcd_pl(lat1: pl.Expr, lng1: pl.Expr, lat2: pl.Expr, lng2: pl.Expr):</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    ϕ<span class="dv">1</span> <span class="op">=</span> deg2rad_pl(<span class="dv">90</span> <span class="op">-</span> lat1)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    ϕ<span class="dv">2</span> <span class="op">=</span> deg2rad_pl(<span class="dv">90</span> <span class="op">-</span> lat2)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    θ<span class="dv">1</span> <span class="op">=</span> deg2rad_pl(lng1)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    θ<span class="dv">2</span> <span class="op">=</span> deg2rad_pl(lng2)</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    cos <span class="op">=</span> ϕ<span class="fl">1.</span><span class="er">sin</span>() <span class="op">*</span> ϕ<span class="fl">2.</span><span class="er">sin</span>() <span class="op">*</span> (θ<span class="dv">1</span> <span class="op">-</span> θ<span class="dv">2</span>).cos() <span class="op">+</span> ϕ<span class="fl">1.</span><span class="er">cos</span>() <span class="op">*</span> ϕ<span class="fl">2.</span><span class="er">cos</span>()</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    arc <span class="op">=</span> cos.arccos()</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> arc <span class="op">*</span> <span class="dv">6373</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-5-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-2-tab">
+<div class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gcd_np(lat1, lng1, lat2, lng2):</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    ϕ<span class="dv">1</span> <span class="op">=</span> np.deg2rad(<span class="dv">90</span> <span class="op">-</span> lat1)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    ϕ<span class="dv">2</span> <span class="op">=</span> np.deg2rad(<span class="dv">90</span> <span class="op">-</span> lat2)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    θ<span class="dv">1</span> <span class="op">=</span> np.deg2rad(lng1)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    θ<span class="dv">2</span> <span class="op">=</span> np.deg2rad(lng2)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    cos <span class="op">=</span> np.sin(ϕ<span class="dv">1</span>) <span class="op">*</span> np.sin(ϕ<span class="dv">2</span>) <span class="op">*</span> np.cos(θ<span class="dv">1</span> <span class="op">-</span> θ<span class="dv">2</span>) <span class="op">+</span> np.cos(ϕ<span class="dv">1</span>) <span class="op">*</span> np.cos(ϕ<span class="dv">2</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    arc <span class="op">=</span> np.arccos(cos)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> arc <span class="op">*</span> <span class="dv">6373</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</div>
+<p>We can pass Polars expressions directly to our <code>gcd_np</code> function, which is pretty nice since these things don’t even store the data themselves:</p>
+<div class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>timeit</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>pairs.select(</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    gcd_np(</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"LATITUDE"</span>),</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"LONGITUDE"</span>),</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"LATITUDE_right"</span>),</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"LONGITUDE_right"</span>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>).collect()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>3.87 s ± 64.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
+</div>
+</div>
+<p>On my machine the NumPy version tends to be 5-20% faster than the pure Polars version:</p>
+<div class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>timeit</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>pairs.select(</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    gcd_pl(</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"LATITUDE"</span>),</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"LONGITUDE"</span>),</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"LATITUDE_right"</span>),</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"LONGITUDE_right"</span>)</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>).collect()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>4.17 s ± 31.4 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
+</div>
+</div>
+<p>This may not be a huge performance difference, but it at least means you don’t sacrifice speed when relying on NumPy. There are some <a href="https://pola-rs.github.io/polars-book/user-guide/howcani/interop/numpy.html">gotchas</a> though so watch out for those.</p>
+<p>Also watch out for <code>.to_numpy()</code> - you don’t always need to call this and it can slow things down:</p>
+<div class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>timeit</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>collected <span class="op">=</span> pairs.collect()</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>gcd_np(</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    collected[<span class="st">"LATITUDE"</span>].to_numpy(),</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    collected[<span class="st">"LONGITUDE"</span>].to_numpy(),</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    collected[<span class="st">"LATITUDE_right"</span>].to_numpy(),</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    collected[<span class="st">"LONGITUDE_right"</span>].to_numpy()</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>5.5 s ± 172 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="polars-can-be-slower-than-pandas-sometimes-maybe" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="polars-can-be-slower-than-pandas-sometimes-maybe"><span class="header-section-number">3.4</span> Polars can be slower than Pandas sometimes, maybe</h2>
+<p>Here’s an example where we calculate z-scores, using window functions in Polars and using groupby-transform in Pandas:</p>
+<div class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_frame(n, n_groups):</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pl.DataFrame(</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"name"</span>: np.random.randint(<span class="dv">0</span>, n_groups, size<span class="op">=</span>n), <span class="st">"value2"</span>: np.random.randn(n)}</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> pandas_transform(df: pd.DataFrame) <span class="op">-&gt;</span> pd.DataFrame:</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    g <span class="op">=</span> df.groupby(<span class="st">"name"</span>)[<span class="st">"value2"</span>]</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    v <span class="op">=</span> df[<span class="st">"value2"</span>]</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (v <span class="op">-</span> g.transform(np.mean)) <span class="op">/</span> g.transform(np.std)</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> polars_transform() <span class="op">-&gt;</span> pl.Expr:</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    v <span class="op">=</span> pl.col(<span class="st">"value2"</span>)</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (v <span class="op">-</span> v.mean().over(<span class="st">"name"</span>)) <span class="op">/</span> v.std().over(<span class="st">"name"</span>)</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>rand_df_pl <span class="op">=</span> create_frame(<span class="dv">50_000_000</span>, <span class="dv">50_000</span>)</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>rand_df_pd <span class="op">=</span> rand_df_pl.to_pandas()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The Pandas version tends to be 10-60% faster on my machine:</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-6-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-1" role="tab" aria-controls="tabset-6-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-2" role="tab" aria-controls="tabset-6-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-6-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-6-1-tab">
+<div class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>timeit rand_df_pl.select(polars_transform())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>2.2 s ± 137 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-6-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-2-tab">
+<div class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>timeit pandas_transform(rand_df_pd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>1.72 s ± 200 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>This example isn’t telling you to use Pandas in this specific situation. Once you add in the time spent reading a file, Polars likely wins.</p>
+<p>And even here, if you sort by the <code>name</code> col, Polars wins again. It has fast-track algorithms for sorted data.</p>
+</section>
+<section id="summary" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="summary"><span class="header-section-number">3.5</span> Summary</h2>
+<ul>
+<li>Polars is really fast. Pandas was already respectably fast and Polars wipes the floor with it.</li>
+<li>You can still make Polars slow if you do silly things with it, but compared to Pandas it’s easier to do the right thing in the first place.</li>
+<li>Polars works well with NumPy ufuncs.</li>
+<li>There are still some situations where Pandas can be faster. They are probably not compelling, but we shouldn’t pretend they don’t exist.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<script src="https://giscus.app/client.js" data-repo="kevinheavey/modern-polars" data-repo-id="R_kgDOIqAHAQ" data-category="General" data-category-id="DIC_kwDOIqAHAc4CTW4n" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="en" crossorigin="anonymous" async="">
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./method_chaining.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Method Chaining</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./tidy.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Reshaping and Tidy Data</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>

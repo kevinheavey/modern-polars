@@ -1,0 +1,3619 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.280">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Modern Polars - 4&nbsp; Reshaping and Tidy Data</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./timeseries.html" rel="next">
+<link href="./performance.html" rel="prev">
+<link href="./polar-bear-airpods-no-background.png" rel="icon" type="image/png">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="custom.css">
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Reshaping and Tidy Data</span></h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      <img src="./polar-bear-airpods-no-background.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Modern Polars</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/kevinheavey/modern-polars/tree/master/book/" title="Source Code" class="sidebar-tool px-1"><i class="bi bi-github"></i></a>
+    <a href="" title="Share" id="sidebar-tool-dropdown-0" class="sidebar-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-share"></i></a>
+    <ul class="dropdown-menu" aria-labelledby="sidebar-tool-dropdown-0">
+        <li>
+          <a class="dropdown-item sidebar-tools-main-item" href="https://twitter.com/intent/tweet?url=|url|">
+            <i class="bi bi-bi-twitter pe-1"></i>
+          Twitter
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item sidebar-tools-main-item" href="https://www.facebook.com/sharer/sharer.php?u=|url|">
+            <i class="bi bi-bi-facebook pe-1"></i>
+          Facebook
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item sidebar-tools-main-item" href="https://www.linkedin.com/sharing/share-offsite/?url=|url|">
+            <i class="bi bi-bi-linkedin pe-1"></i>
+          LinkedIn
+          </a>
+        </li>
+    </ul>
+</div>
+    </div>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">Preface</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./indexing.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Indexing (Or Lack Thereof)</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./method_chaining.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Method Chaining</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./performance.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Performance</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tidy.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Reshaping and Tidy Data</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./timeseries.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Timeseries</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./scaling.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Scaling</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./summary.html" class="sidebar-item-text sidebar-link">Summary</a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#get-the-data" id="toc-get-the-data" class="nav-link active" data-scroll-target="#get-the-data"><span class="toc-section-number">4.1</span>  Get the data</a></li>
+  <li><a href="#cleaning" id="toc-cleaning" class="nav-link" data-scroll-target="#cleaning"><span class="toc-section-number">4.2</span>  Cleaning 🧹</a></li>
+  <li><a href="#pivot-and-melt" id="toc-pivot-and-melt" class="nav-link" data-scroll-target="#pivot-and-melt"><span class="toc-section-number">4.3</span>  Pivot and Melt</a>
+  <ul class="collapse">
+  <li><a href="#pivot" id="toc-pivot" class="nav-link" data-scroll-target="#pivot"><span class="toc-section-number">4.3.1</span>  Pivot</a></li>
+  <li><a href="#melt" id="toc-melt" class="nav-link" data-scroll-target="#melt"><span class="toc-section-number">4.3.2</span>  Melt</a></li>
+  </ul></li>
+  <li><a href="#tidy-nba-data" id="toc-tidy-nba-data" class="nav-link" data-scroll-target="#tidy-nba-data"><span class="toc-section-number">4.4</span>  Tidy NBA data</a></li>
+  <li><a href="#stack-unstack-vs-melt-pivot" id="toc-stack-unstack-vs-melt-pivot" class="nav-link" data-scroll-target="#stack-unstack-vs-melt-pivot"><span class="toc-section-number">4.5</span>  Stack / Unstack vs Melt / Pivot</a></li>
+  <li><a href="#mini-project-home-court-advantage" id="toc-mini-project-home-court-advantage" class="nav-link" data-scroll-target="#mini-project-home-court-advantage"><span class="toc-section-number">4.6</span>  Mini Project: Home Court Advantage?</a>
+  <ul class="collapse">
+  <li><a href="#find-the-win-percent-for-each-team" id="toc-find-the-win-percent-for-each-team" class="nav-link" data-scroll-target="#find-the-win-percent-for-each-team"><span class="toc-section-number">4.6.1</span>  Find the win percent for each team</a></li>
+  </ul></li>
+  <li><a href="#some-visualisations" id="toc-some-visualisations" class="nav-link" data-scroll-target="#some-visualisations"><span class="toc-section-number">4.7</span>  Some visualisations</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="toc-section-number">4.8</span>  Summary</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/kevinheavey/modern-polars/edit/master/book/tidy.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/kevinheavey/modern-polars/issues/new" class="toc-action">Report an issue</a></p><p><a href="https://github.com/kevinheavey/modern-polars/blob/master/book/tidy.qmd" class="toc-action">View source</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Reshaping and Tidy Data</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<p>There’s a <a href="https://vita.had.co.nz/papers/tidy-data.pdf">whole paper</a> by Hadley Wickham about tidy data but it’s in a PDF so you’re probably not going to read it. Here’s the paper’s definition of tidy data:</p>
+<ol type="1">
+<li>Each variable forms a column.</li>
+<li>Each observation forms a row.</li>
+<li>Each type of observational unit forms a table.</li>
+</ol>
+<p>As Dr Wickham notes, this is <a href="https://en.wikipedia.org/wiki/Third_normal_form">Codd’s 3rd Normal Form</a> but in statspeak rather than databasespeak.</p>
+<p>The meaning of “variable” and “observation” depend on what we’re studying, so tidy data is a concept that you mostly learn through experience and ✨vibes✨.</p>
+<p>Now we’ll explore what tidy data looks like for an NBA results dataset.</p>
+<section id="get-the-data" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="get-the-data"><span class="header-section-number">4.1</span> Get the data</h2>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>pl.Config.set_tbl_rows(<span class="dv">5</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>pd.options.display.max_rows <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>nba_dir <span class="op">=</span> Path(<span class="st">"../data/nba/"</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>column_names <span class="op">=</span> {</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Date"</span>: <span class="st">"date"</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Visitor/Neutral"</span>: <span class="st">"away_team"</span>,</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"PTS"</span>: <span class="st">"away_points"</span>,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Home/Neutral"</span>: <span class="st">"home_team"</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"PTS.1"</span>: <span class="st">"home_points"</span>,</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> nba_dir.exists():</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    nba_dir.mkdir()</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> month <span class="kw">in</span> (</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        <span class="st">"october"</span>,</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        <span class="st">"november"</span>,</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>        <span class="st">"december"</span>,</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        <span class="st">"january"</span>,</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        <span class="st">"february"</span>,</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>        <span class="st">"march"</span>,</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        <span class="st">"april"</span>,</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>        <span class="st">"may"</span>,</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>        <span class="st">"june"</span>,</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    ):</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>        <span class="co"># In practice we would do more data cleaning here, and save to parquet not CSV.</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>        <span class="co"># But we save messy data here so we can clean it later for pedagogical purposes.</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>        url <span class="op">=</span> <span class="ss">f"http://www.basketball-reference.com/leagues/NBA_2016_games-</span><span class="sc">{</span>month<span class="sc">}</span><span class="ss">.html"</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        tables <span class="op">=</span> pd.read_html(url)</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>        raw <span class="op">=</span> (</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>            pl.from_pandas(tables[<span class="dv">0</span>].query(<span class="st">"Date != 'Playoffs'"</span>))</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>            .rename(column_names)</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>            .select(column_names.values())</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>        raw.write_csv(nba_dir <span class="op">/</span> <span class="ss">f"</span><span class="sc">{</span>month<span class="sc">}</span><span class="ss">.csv"</span>)</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>nba_glob <span class="op">=</span> nba_dir <span class="op">/</span> <span class="st">"*.csv"</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>pl.scan_csv(nba_glob).head().collect()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+
+    .dataframe td {
+        white-space: pre;
+    }
+
+    .dataframe td {
+        padding-top: 0;
+    }
+
+    .dataframe td {
+        padding-bottom: 0;
+    }
+
+    .dataframe td {
+        line-height: 95%;
+    }
+</style>
+<small>shape: (5, 5)</small><table class="dataframe table table-sm table-striped">
+
+<thead>
+<tr>
+<th>
+date
+</th>
+<th>
+away_team
+</th>
+<th>
+away_points
+</th>
+<th>
+home_team
+</th>
+<th>
+home_points
+</th>
+</tr>
+<tr>
+<td>
+str
+</td>
+<td>
+str
+</td>
+<td>
+i64
+</td>
+<td>
+str
+</td>
+<td>
+i64
+</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+"Fri, Apr 1, 20...
+</td>
+<td>
+"Philadelphia 7...
+</td>
+<td>
+91
+</td>
+<td>
+"Charlotte Horn...
+</td>
+<td>
+100
+</td>
+</tr>
+<tr>
+<td>
+"Fri, Apr 1, 20...
+</td>
+<td>
+"Dallas Maveric...
+</td>
+<td>
+98
+</td>
+<td>
+"Detroit Piston...
+</td>
+<td>
+89
+</td>
+</tr>
+<tr>
+<td>
+"Fri, Apr 1, 20...
+</td>
+<td>
+"Brooklyn Nets"
+</td>
+<td>
+91
+</td>
+<td>
+"New York Knick...
+</td>
+<td>
+105
+</td>
+</tr>
+<tr>
+<td>
+"Fri, Apr 1, 20...
+</td>
+<td>
+"Cleveland Cava...
+</td>
+<td>
+110
+</td>
+<td>
+"Atlanta Hawks"
+</td>
+<td>
+108
+</td>
+</tr>
+<tr>
+<td>
+"Fri, Apr 1, 20...
+</td>
+<td>
+"Toronto Raptor...
+</td>
+<td>
+99
+</td>
+<td>
+"Memphis Grizzl...
+</td>
+<td>
+95
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="cleaning" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="cleaning"><span class="header-section-number">4.2</span> Cleaning 🧹</h2>
+<p>Nothing super interesting here:</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>games_pl <span class="op">=</span> (</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    pl.scan_csv(nba_glob)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        <span class="op">~</span>pl.fold(</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>            acc<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>            f<span class="op">=</span><span class="kw">lambda</span> acc, s: acc <span class="op">&amp;</span> s.is_null(),</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>            exprs<span class="op">=</span>pl.<span class="bu">all</span>(),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    .with_column(</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"date"</span>).<span class="bu">str</span>.strptime(pl.Date, <span class="st">"%a, %b </span><span class="sc">%d</span><span class="st">, %Y"</span>),</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">"date"</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    .with_row_count(<span class="st">"game_id"</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>games_pl.head().collect()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+
+    .dataframe td {
+        white-space: pre;
+    }
+
+    .dataframe td {
+        padding-top: 0;
+    }
+
+    .dataframe td {
+        padding-bottom: 0;
+    }
+
+    .dataframe td {
+        line-height: 95%;
+    }
+</style>
+<small>shape: (5, 6)</small><table class="dataframe table table-sm table-striped">
+
+<thead>
+<tr>
+<th>
+game_id
+</th>
+<th>
+date
+</th>
+<th>
+away_team
+</th>
+<th>
+away_points
+</th>
+<th>
+home_team
+</th>
+<th>
+home_points
+</th>
+</tr>
+<tr>
+<td>
+u32
+</td>
+<td>
+date
+</td>
+<td>
+str
+</td>
+<td>
+i64
+</td>
+<td>
+str
+</td>
+<td>
+i64
+</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+0
+</td>
+<td>
+2015-10-27
+</td>
+<td>
+"Cleveland Cava...
+</td>
+<td>
+95
+</td>
+<td>
+"Chicago Bulls"
+</td>
+<td>
+97
+</td>
+</tr>
+<tr>
+<td>
+1
+</td>
+<td>
+2015-10-27
+</td>
+<td>
+"Detroit Piston...
+</td>
+<td>
+106
+</td>
+<td>
+"Atlanta Hawks"
+</td>
+<td>
+94
+</td>
+</tr>
+<tr>
+<td>
+2
+</td>
+<td>
+2015-10-27
+</td>
+<td>
+"New Orleans Pe...
+</td>
+<td>
+95
+</td>
+<td>
+"Golden State W...
+</td>
+<td>
+111
+</td>
+</tr>
+<tr>
+<td>
+3
+</td>
+<td>
+2015-10-28
+</td>
+<td>
+"Washington Wiz...
+</td>
+<td>
+88
+</td>
+<td>
+"Orlando Magic"
+</td>
+<td>
+87
+</td>
+</tr>
+<tr>
+<td>
+4
+</td>
+<td>
+2015-10-28
+</td>
+<td>
+"Philadelphia 7...
+</td>
+<td>
+95
+</td>
+<td>
+"Boston Celtics...
+</td>
+<td>
+112
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>games_pd <span class="op">=</span> (</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    pl.read_csv(nba_glob)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    .to_pandas()</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    .dropna(thresh<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    .assign(date<span class="op">=</span><span class="kw">lambda</span> x: pd.to_datetime(x[<span class="st">"date"</span>], <span class="bu">format</span><span class="op">=</span><span class="st">"%a, %b </span><span class="sc">%d</span><span class="st">, %Y"</span>))</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    .sort_values(<span class="st">"date"</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    .reset_index(drop<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    .set_index(<span class="st">"date"</span>, append<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    .rename_axis([<span class="st">"game_id"</span>, <span class="st">"date"</span>])</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    .sort_index()</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>games_pd.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th></th>
+      <th>away_team</th>
+      <th>away_points</th>
+      <th>home_team</th>
+      <th>home_points</th>
+    </tr>
+    <tr>
+      <th>game_id</th>
+      <th>date</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <th>2015-10-27</th>
+      <td>Cleveland Cavaliers</td>
+      <td>95</td>
+      <td>Chicago Bulls</td>
+      <td>97</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <th>2015-10-27</th>
+      <td>Detroit Pistons</td>
+      <td>106</td>
+      <td>Atlanta Hawks</td>
+      <td>94</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <th>2015-10-27</th>
+      <td>New Orleans Pelicans</td>
+      <td>95</td>
+      <td>Golden State Warriors</td>
+      <td>111</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <th>2015-10-28</th>
+      <td>Philadelphia 76ers</td>
+      <td>95</td>
+      <td>Boston Celtics</td>
+      <td>112</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <th>2015-10-28</th>
+      <td>Washington Wizards</td>
+      <td>88</td>
+      <td>Orlando Magic</td>
+      <td>87</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>One thing we haven’t seen already is <a href="https://pola-rs.github.io/polars-book/user-guide/dsl/folds.html"><code>pl.fold</code></a>. This is for fast horizontal operations, and it’s what the Polars docs recommend for dropping a row where every column is null. In Pandas we do that via <code>.dropna(thresh=num_cols)</code>.</p>
+</section>
+<section id="pivot-and-melt" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="pivot-and-melt"><span class="header-section-number">4.3</span> Pivot and Melt</h2>
+<p>I recently came across someone who was doing advanced quantitative research in Python but had never heard of the Pandas <code>.pivot</code> method. I shudder to imagine the code he must have written in the absence of this knowledge, so here’s a simple explanation of <code>pivot</code>ing and <code>melt</code>ing, lest anyone else suffer in ignorance. If you already know what pivot and melt are, feel free to scroll past this bit.</p>
+<section id="pivot" class="level3" data-number="4.3.1">
+<h3 data-number="4.3.1" class="anchored" data-anchor-id="pivot"><span class="header-section-number">4.3.1</span> Pivot</h3>
+<p>Suppose you have a dataframe that looks like this:</p>
+<div class="cell" data-execution_count="4">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> date</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>prices <span class="op">=</span> pl.DataFrame({</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"date"</span>: [<span class="op">*</span>[date(<span class="dv">2020</span>, <span class="dv">1</span>, <span class="dv">1</span>)]<span class="op">*</span><span class="dv">4</span>, <span class="op">*</span>[date(<span class="dv">2020</span>, <span class="dv">1</span>, <span class="dv">2</span>)]<span class="op">*</span><span class="dv">4</span>, <span class="op">*</span>[date(<span class="dv">2020</span>, <span class="dv">1</span>, <span class="dv">3</span>)]<span class="op">*</span><span class="dv">4</span>],</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ticker"</span>: [<span class="op">*</span>[<span class="st">"AAPL"</span>, <span class="st">"TSLA"</span>, <span class="st">"MSFT"</span>, <span class="st">"NFLX"</span>]<span class="op">*</span><span class="dv">3</span>],</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"price"</span>: [<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">300</span>, <span class="dv">400</span>, <span class="dv">110</span>, <span class="dv">220</span>, <span class="dv">330</span>, <span class="dv">420</span>, <span class="dv">105</span>, <span class="dv">210</span>, <span class="dv">315</span>, <span class="dv">440</span>],</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>prices</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="4">
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+
+    .dataframe td {
+        white-space: pre;
+    }
+
+    .dataframe td {
+        padding-top: 0;
+    }
+
+    .dataframe td {
+        padding-bottom: 0;
+    }
+
+    .dataframe td {
+        line-height: 95%;
+    }
+</style>
+<small>shape: (12, 3)</small><table class="dataframe table table-sm table-striped">
+
+<thead>
+<tr>
+<th>
+date
+</th>
+<th>
+ticker
+</th>
+<th>
+price
+</th>
+</tr>
+<tr>
+<td>
+date
+</td>
+<td>
+str
+</td>
+<td>
+i64
+</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+2020-01-01
+</td>
+<td>
+"AAPL"
+</td>
+<td>
+100
+</td>
+</tr>
+<tr>
+<td>
+2020-01-01
+</td>
+<td>
+"TSLA"
+</td>
+<td>
+200
+</td>
+</tr>
+<tr>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+</tr>
+<tr>
+<td>
+2020-01-03
+</td>
+<td>
+"MSFT"
+</td>
+<td>
+315
+</td>
+</tr>
+<tr>
+<td>
+2020-01-03
+</td>
+<td>
+"NFLX"
+</td>
+<td>
+440
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>In both Polars and Pandas you can call <code>df.pivot(index="date", values="price", columns="ticker")</code> to get a dataframe that looks like this:</p>
+<div class="cell" data-execution_count="5">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>pivoted <span class="op">=</span> prices.pivot(index<span class="op">=</span><span class="st">"date"</span>, values<span class="op">=</span><span class="st">"price"</span>, columns<span class="op">=</span><span class="st">"ticker"</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>pivoted</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="5">
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+
+    .dataframe td {
+        white-space: pre;
+    }
+
+    .dataframe td {
+        padding-top: 0;
+    }
+
+    .dataframe td {
+        padding-bottom: 0;
+    }
+
+    .dataframe td {
+        line-height: 95%;
+    }
+</style>
+<small>shape: (3, 5)</small><table class="dataframe table table-sm table-striped">
+
+<thead>
+<tr>
+<th>
+date
+</th>
+<th>
+AAPL
+</th>
+<th>
+TSLA
+</th>
+<th>
+MSFT
+</th>
+<th>
+NFLX
+</th>
+</tr>
+<tr>
+<td>
+date
+</td>
+<td>
+i64
+</td>
+<td>
+i64
+</td>
+<td>
+i64
+</td>
+<td>
+i64
+</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+2020-01-01
+</td>
+<td>
+100
+</td>
+<td>
+200
+</td>
+<td>
+300
+</td>
+<td>
+400
+</td>
+</tr>
+<tr>
+<td>
+2020-01-02
+</td>
+<td>
+110
+</td>
+<td>
+220
+</td>
+<td>
+330
+</td>
+<td>
+420
+</td>
+</tr>
+<tr>
+<td>
+2020-01-03
+</td>
+<td>
+105
+</td>
+<td>
+210
+</td>
+<td>
+315
+</td>
+<td>
+440
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>As you can see, <code>.pivot</code> creates a dataframe where the columns are the unique labels from one column (“ticker”), alongside the index column (“date”). The values for the non-index columns are taken from the corresponding rows of the <code>values</code> column (“price”).</p>
+<p>If our dataframe had multiple prices for the same ticker on the same date, we would use the <code>aggregate_fn</code> parameter of the <code>.pivot</code> method, e.g.: <code>prices.pivot(..., aggregate_fn="mean")</code>. Pivoting with an aggregate function gives us similar behaviour to what Excel calls “pivot tables”.</p>
+</section>
+<section id="melt" class="level3" data-number="4.3.2">
+<h3 data-number="4.3.2" class="anchored" data-anchor-id="melt"><span class="header-section-number">4.3.2</span> Melt</h3>
+<p>Melt is the inverse of pivot. While pivot takes us from <em>long</em> data to <em>wide</em> data, melt goes from wide to long. If we call <code>.melt(id_vars="date", value_name="price")</code> on our pivoted dataframe we get our original dataframe back:</p>
+<div class="cell" data-execution_count="6">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>pivoted.melt(id_vars<span class="op">=</span><span class="st">"date"</span>, value_name<span class="op">=</span><span class="st">"price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="6">
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+
+    .dataframe td {
+        white-space: pre;
+    }
+
+    .dataframe td {
+        padding-top: 0;
+    }
+
+    .dataframe td {
+        padding-bottom: 0;
+    }
+
+    .dataframe td {
+        line-height: 95%;
+    }
+</style>
+<small>shape: (12, 3)</small><table class="dataframe table table-sm table-striped">
+
+<thead>
+<tr>
+<th>
+date
+</th>
+<th>
+variable
+</th>
+<th>
+price
+</th>
+</tr>
+<tr>
+<td>
+date
+</td>
+<td>
+str
+</td>
+<td>
+i64
+</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+2020-01-01
+</td>
+<td>
+"AAPL"
+</td>
+<td>
+100
+</td>
+</tr>
+<tr>
+<td>
+2020-01-02
+</td>
+<td>
+"AAPL"
+</td>
+<td>
+110
+</td>
+</tr>
+<tr>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+</tr>
+<tr>
+<td>
+2020-01-02
+</td>
+<td>
+"NFLX"
+</td>
+<td>
+420
+</td>
+</tr>
+<tr>
+<td>
+2020-01-03
+</td>
+<td>
+"NFLX"
+</td>
+<td>
+440
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="tidy-nba-data" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="tidy-nba-data"><span class="header-section-number">4.4</span> Tidy NBA data</h2>
+<p>Suppose we want to calculate the days of rest each team had before each game. In the current structure this is difficult because we need to track both the <code>home_team</code> and <code>away_team</code> columns. We’ll use <code>.melt</code> so that there’s a single <code>team</code> column. This makes it easier to add a <code>rest</code> column with the per-team rest days between games.</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>tidy_pl <span class="op">=</span> (</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    games_pl</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    .melt(</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        id_vars<span class="op">=</span>[<span class="st">"game_id"</span>, <span class="st">"date"</span>],</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        value_vars<span class="op">=</span>[<span class="st">"away_team"</span>, <span class="st">"home_team"</span>],</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        value_name<span class="op">=</span><span class="st">"team"</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">"game_id"</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    .with_column((</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"date"</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        .alias(<span class="st">"rest"</span>)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        .diff().over(<span class="st">"team"</span>)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        .dt.days() <span class="op">-</span> <span class="dv">1</span>).cast(pl.Int8))</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    .drop_nulls(<span class="st">"rest"</span>)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    .collect()</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>tidy_pl</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+
+    .dataframe td {
+        white-space: pre;
+    }
+
+    .dataframe td {
+        padding-top: 0;
+    }
+
+    .dataframe td {
+        padding-bottom: 0;
+    }
+
+    .dataframe td {
+        line-height: 95%;
+    }
+</style>
+<small>shape: (2602, 5)</small><table class="dataframe table table-sm table-striped">
+
+<thead>
+<tr>
+<th>
+game_id
+</th>
+<th>
+date
+</th>
+<th>
+variable
+</th>
+<th>
+team
+</th>
+<th>
+rest
+</th>
+</tr>
+<tr>
+<td>
+u32
+</td>
+<td>
+date
+</td>
+<td>
+str
+</td>
+<td>
+str
+</td>
+<td>
+i8
+</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+5
+</td>
+<td>
+2015-10-28
+</td>
+<td>
+"away_team"
+</td>
+<td>
+"Chicago Bulls"
+</td>
+<td>
+0
+</td>
+</tr>
+<tr>
+<td>
+6
+</td>
+<td>
+2015-10-28
+</td>
+<td>
+"home_team"
+</td>
+<td>
+"Detroit Piston...
+</td>
+<td>
+0
+</td>
+</tr>
+<tr>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+</tr>
+<tr>
+<td>
+1315
+</td>
+<td>
+2016-06-19
+</td>
+<td>
+"away_team"
+</td>
+<td>
+"Cleveland Cava...
+</td>
+<td>
+2
+</td>
+</tr>
+<tr>
+<td>
+1315
+</td>
+<td>
+2016-06-19
+</td>
+<td>
+"home_team"
+</td>
+<td>
+"Golden State W...
+</td>
+<td>
+2
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<div class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>tidy_pd <span class="op">=</span> (</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    games_pd.reset_index()</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    .melt(</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        id_vars<span class="op">=</span>[<span class="st">"game_id"</span>, <span class="st">"date"</span>],</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        value_vars<span class="op">=</span>[<span class="st">"away_team"</span>, <span class="st">"home_team"</span>],</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        value_name<span class="op">=</span><span class="st">"team"</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    .sort_values(<span class="st">"game_id"</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    .assign(</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        rest<span class="op">=</span><span class="kw">lambda</span> df: (</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>            df</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>            .sort_values(<span class="st">"date"</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>            .groupby(<span class="st">"team"</span>)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>            [<span class="st">"date"</span>]</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>            .diff()</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>            .dt.days</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>            .sub(<span class="dv">1</span>)</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    .dropna(subset<span class="op">=</span>[<span class="st">"rest"</span>])</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    .astype({<span class="st">"rest"</span>: pd.Int8Dtype()})</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>tidy_pd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>game_id</th>
+      <th>date</th>
+      <th>variable</th>
+      <th>team</th>
+      <th>rest</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>7</th>
+      <td>7</td>
+      <td>2015-10-28</td>
+      <td>away_team</td>
+      <td>New Orleans Pelicans</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>11</td>
+      <td>2015-10-28</td>
+      <td>away_team</td>
+      <td>Chicago Bulls</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>1315</th>
+      <td>1315</td>
+      <td>2016-06-19</td>
+      <td>away_team</td>
+      <td>Cleveland Cavaliers</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>2631</th>
+      <td>1315</td>
+      <td>2016-06-19</td>
+      <td>home_team</td>
+      <td>Golden State Warriors</td>
+      <td>2</td>
+    </tr>
+  </tbody>
+</table>
+<p>2602 rows × 5 columns</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>Now we use <code>.pivot</code> so that this days-of-rest data can be added back to the original dataframe. We’ll also add columns for the spread between the home team’s rest and away team’s rest, and a flag for whether the home team won.</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
+<div class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>by_game_pl <span class="op">=</span> (</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    tidy_pl</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    .pivot(</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        values<span class="op">=</span><span class="st">"rest"</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        index<span class="op">=</span>[<span class="st">"game_id"</span>, <span class="st">"date"</span>],</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        columns<span class="op">=</span><span class="st">"variable"</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">"away_team"</span>: <span class="st">"away_rest"</span>, <span class="st">"home_team"</span>: <span class="st">"home_rest"</span>})</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>joined_pl <span class="op">=</span> (</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    by_game_pl</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    .join(games_pl, on<span class="op">=</span>[<span class="st">"game_id"</span>, <span class="st">"date"</span>])</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    .with_columns([</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"home_points"</span>).alias(<span class="st">"home_win"</span>) <span class="op">&gt;</span> pl.col(<span class="st">"away_points"</span>),</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"home_rest"</span>).alias(<span class="st">"rest_spread"</span>) <span class="op">-</span> pl.col(<span class="st">"away_rest"</span>),</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    ])</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>joined_pl</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+
+    .dataframe td {
+        white-space: pre;
+    }
+
+    .dataframe td {
+        padding-top: 0;
+    }
+
+    .dataframe td {
+        padding-bottom: 0;
+    }
+
+    .dataframe td {
+        line-height: 95%;
+    }
+</style>
+<small>shape: (1303, 10)</small><table class="dataframe table table-sm table-striped">
+
+<thead>
+<tr>
+<th>
+game_id
+</th>
+<th>
+date
+</th>
+<th>
+away_rest
+</th>
+<th>
+home_rest
+</th>
+<th>
+away_team
+</th>
+<th>
+away_points
+</th>
+<th>
+home_team
+</th>
+<th>
+home_points
+</th>
+<th>
+home_win
+</th>
+<th>
+rest_spread
+</th>
+</tr>
+<tr>
+<td>
+u32
+</td>
+<td>
+date
+</td>
+<td>
+i8
+</td>
+<td>
+i8
+</td>
+<td>
+str
+</td>
+<td>
+i64
+</td>
+<td>
+str
+</td>
+<td>
+i64
+</td>
+<td>
+bool
+</td>
+<td>
+i8
+</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+5
+</td>
+<td>
+2015-10-28
+</td>
+<td>
+0
+</td>
+<td>
+null
+</td>
+<td>
+"Chicago Bulls"
+</td>
+<td>
+115
+</td>
+<td>
+"Brooklyn Nets"
+</td>
+<td>
+100
+</td>
+<td>
+false
+</td>
+<td>
+null
+</td>
+</tr>
+<tr>
+<td>
+6
+</td>
+<td>
+2015-10-28
+</td>
+<td>
+null
+</td>
+<td>
+0
+</td>
+<td>
+"Utah Jazz"
+</td>
+<td>
+87
+</td>
+<td>
+"Detroit Piston...
+</td>
+<td>
+92
+</td>
+<td>
+true
+</td>
+<td>
+null
+</td>
+</tr>
+<tr>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+</tr>
+<tr>
+<td>
+1314
+</td>
+<td>
+2016-06-16
+</td>
+<td>
+2
+</td>
+<td>
+2
+</td>
+<td>
+"Golden State W...
+</td>
+<td>
+101
+</td>
+<td>
+"Cleveland Cava...
+</td>
+<td>
+115
+</td>
+<td>
+true
+</td>
+<td>
+0
+</td>
+</tr>
+<tr>
+<td>
+1315
+</td>
+<td>
+2016-06-19
+</td>
+<td>
+2
+</td>
+<td>
+2
+</td>
+<td>
+"Cleveland Cava...
+</td>
+<td>
+93
+</td>
+<td>
+"Golden State W...
+</td>
+<td>
+89
+</td>
+<td>
+false
+</td>
+<td>
+0
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
+<div class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>by_game_pd <span class="op">=</span> (</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    tidy_pd</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    .pivot(</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>        values<span class="op">=</span><span class="st">"rest"</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>        index<span class="op">=</span>[<span class="st">"game_id"</span>, <span class="st">"date"</span>],</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>        columns<span class="op">=</span><span class="st">"variable"</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    .rename(</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        columns<span class="op">=</span>{<span class="st">"away_team"</span>: <span class="st">"away_rest"</span>, <span class="st">"home_team"</span>: <span class="st">"home_rest"</span>}</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>joined_pd <span class="op">=</span> by_game_pd.join(games_pd).assign(</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    home_win<span class="op">=</span><span class="kw">lambda</span> df: df[<span class="st">"home_points"</span>] <span class="op">&gt;</span> df[<span class="st">"away_points"</span>],</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    rest_spread<span class="op">=</span><span class="kw">lambda</span> df: df[<span class="st">"home_rest"</span>] <span class="op">-</span> df[<span class="st">"away_rest"</span>],</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>joined_pd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th></th>
+      <th>away_rest</th>
+      <th>home_rest</th>
+      <th>away_team</th>
+      <th>away_points</th>
+      <th>home_team</th>
+      <th>home_points</th>
+      <th>home_win</th>
+      <th>rest_spread</th>
+    </tr>
+    <tr>
+      <th>game_id</th>
+      <th>date</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>7</th>
+      <th>2015-10-28</th>
+      <td>0</td>
+      <td>&lt;NA&gt;</td>
+      <td>New Orleans Pelicans</td>
+      <td>94</td>
+      <td>Portland Trail Blazers</td>
+      <td>112</td>
+      <td>True</td>
+      <td>&lt;NA&gt;</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <th>2015-10-28</th>
+      <td>0</td>
+      <td>&lt;NA&gt;</td>
+      <td>Chicago Bulls</td>
+      <td>115</td>
+      <td>Brooklyn Nets</td>
+      <td>100</td>
+      <td>False</td>
+      <td>&lt;NA&gt;</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>1314</th>
+      <th>2016-06-16</th>
+      <td>2</td>
+      <td>2</td>
+      <td>Golden State Warriors</td>
+      <td>101</td>
+      <td>Cleveland Cavaliers</td>
+      <td>115</td>
+      <td>True</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1315</th>
+      <th>2016-06-19</th>
+      <td>2</td>
+      <td>2</td>
+      <td>Cleveland Cavaliers</td>
+      <td>93</td>
+      <td>Golden State Warriors</td>
+      <td>89</td>
+      <td>False</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+<p>1303 rows × 8 columns</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>Here’s a lightly edited quote from <em>Modern Pandas</em>:</p>
+<blockquote class="blockquote">
+<p>One somewhat subtle point: an “observation” depends on the question being asked. So really, we have two tidy datasets, <code>tidy_pl</code> for answering team-level questions, and <code>joined</code> for answering game-level questions.</p>
+</blockquote>
+<p>Let’s use the team-level dataframe to see each team’s average days of rest, both at home and away:</p>
+<div class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>sns.set_theme(font_scale<span class="op">=</span><span class="fl">0.6</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>sns.catplot(</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    tidy_pl.to_pandas(),</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span><span class="st">"variable"</span>,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span><span class="st">"rest"</span>,</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    col<span class="op">=</span><span class="st">"team"</span>,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    col_wrap<span class="op">=</span><span class="dv">5</span>,</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    kind<span class="op">=</span><span class="st">"bar"</span>,</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    height<span class="op">=</span><span class="fl">1.5</span>,</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7f6c8a2516d0&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="tidy_files/figure-html/cell-12-output-2.png" width="729" height="864"></p>
+</div>
+</div>
+<p>Plotting the distribution of <code>rest_spread</code>:</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-4-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-1" role="tab" aria-controls="tabset-4-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-2" role="tab" aria-controls="tabset-4-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-4-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-4-1-tab">
+<div class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>delta_pl <span class="op">=</span> joined_pl[<span class="st">"rest_spread"</span>]</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> (</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    delta_pl</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    .value_counts()</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    .drop_nulls()</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    .to_pandas()</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    .set_index(<span class="st">"rest_spread"</span>)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    [<span class="st">"counts"</span>]</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    .reindex(np.arange(delta_pl.<span class="bu">min</span>(), delta_pl.<span class="bu">max</span>() <span class="op">+</span> <span class="dv">1</span>), fill_value<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    .sort_index()</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    .plot(kind<span class="op">=</span><span class="st">"bar"</span>, color<span class="op">=</span><span class="st">"k"</span>, width<span class="op">=</span><span class="fl">0.9</span>, rot<span class="op">=</span><span class="dv">0</span>, figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="dv">6</span>))</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"Difference in Rest (Home - Away)"</span>, ylabel<span class="op">=</span><span class="st">"Games"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<pre><code>[Text(0.5, 0, 'Difference in Rest (Home - Away)'), Text(0, 0.5, 'Games')]</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="tidy_files/figure-html/cell-13-output-2.png" width="733" height="499"></p>
+</div>
+</div>
+</div>
+<div id="tabset-4-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-2-tab">
+<div class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>delta_pd <span class="op">=</span> joined_pd[<span class="st">"rest_spread"</span>]</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> (</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    delta_pd</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    .value_counts()</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    .reindex(np.arange(delta_pd.<span class="bu">min</span>(), delta_pd.<span class="bu">max</span>() <span class="op">+</span> <span class="dv">1</span>), fill_value<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    .sort_index()</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    .plot(kind<span class="op">=</span><span class="st">"bar"</span>, color<span class="op">=</span><span class="st">"k"</span>, width<span class="op">=</span><span class="fl">0.9</span>, rot<span class="op">=</span><span class="dv">0</span>, figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="dv">6</span>))</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"Difference in Rest (Home - Away)"</span>, ylabel<span class="op">=</span><span class="st">"Games"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<pre><code>[Text(0.5, 0, 'Difference in Rest (Home - Away)'), Text(0, 0.5, 'Games')]</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="tidy_files/figure-html/cell-14-output-2.png" width="733" height="499"></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>Plotting the win percent by rest_spread:</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-5-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-1" role="tab" aria-controls="tabset-5-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-2" role="tab" aria-controls="tabset-5-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-5-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-5-1-tab">
+<div class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="dv">6</span>))</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>sns.barplot(</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span><span class="st">"rest_spread"</span>,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span><span class="st">"home_win"</span>,</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>joined_pl.<span class="bu">filter</span>(pl.col(<span class="st">"rest_spread"</span>).is_between(<span class="op">-</span><span class="dv">3</span>, <span class="dv">3</span>, closed<span class="op">=</span><span class="st">"both"</span>)).to_pandas(),</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"#4c72b0"</span>,</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    ax<span class="op">=</span>ax,</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<pre><code>&lt;AxesSubplot: xlabel='rest_spread', ylabel='home_win'&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="tidy_files/figure-html/cell-15-output-2.png" width="731" height="503"></p>
+</div>
+</div>
+</div>
+<div id="tabset-5-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-2-tab">
+<div class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="dv">6</span>))</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>sns.barplot(</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span><span class="st">"rest_spread"</span>,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span><span class="st">"home_win"</span>,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>joined_pd.query(<span class="st">'-3 &lt;= rest_spread &lt;= 3'</span>),</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"#4c72b0"</span>,</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    ax<span class="op">=</span>ax,</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="15">
+<pre><code>&lt;AxesSubplot: xlabel='rest_spread', ylabel='home_win'&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="tidy_files/figure-html/cell-16-output-2.png" width="731" height="503"></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="stack-unstack-vs-melt-pivot" class="level2" data-number="4.5">
+<h2 data-number="4.5" class="anchored" data-anchor-id="stack-unstack-vs-melt-pivot"><span class="header-section-number">4.5</span> Stack / Unstack vs Melt / Pivot</h2>
+<p>Pandas has special methods <code>stack</code> and <code>unstack</code> for reshaping data with a MultiIndex. Polars doesn’t have an index, so anywhere you see <code>stack</code> / <code>unstack</code> in Pandas, the equivalent Polars code will use <code>melt</code> / <code>pivot</code>.</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-6-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-1" role="tab" aria-controls="tabset-6-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-2" role="tab" aria-controls="tabset-6-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-6-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-6-1-tab">
+<div class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>rest_pl <span class="op">=</span> (</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    tidy_pl</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    .groupby([<span class="st">"date"</span>, <span class="st">"variable"</span>], maintain_order<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    .agg(pl.col(<span class="st">"rest"</span>).mean())</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>rest_pl</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="16">
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+
+    .dataframe td {
+        white-space: pre;
+    }
+
+    .dataframe td {
+        padding-top: 0;
+    }
+
+    .dataframe td {
+        padding-bottom: 0;
+    }
+
+    .dataframe td {
+        line-height: 95%;
+    }
+</style>
+<small>shape: (418, 3)</small><table class="dataframe table table-sm table-striped">
+
+<thead>
+<tr>
+<th>
+date
+</th>
+<th>
+variable
+</th>
+<th>
+rest
+</th>
+</tr>
+<tr>
+<td>
+date
+</td>
+<td>
+str
+</td>
+<td>
+f64
+</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+2015-10-28
+</td>
+<td>
+"away_team"
+</td>
+<td>
+0.0
+</td>
+</tr>
+<tr>
+<td>
+2015-10-28
+</td>
+<td>
+"home_team"
+</td>
+<td>
+0.0
+</td>
+</tr>
+<tr>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+</tr>
+<tr>
+<td>
+2016-06-19
+</td>
+<td>
+"away_team"
+</td>
+<td>
+2.0
+</td>
+</tr>
+<tr>
+<td>
+2016-06-19
+</td>
+<td>
+"home_team"
+</td>
+<td>
+2.0
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-6-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-2-tab">
+<div class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>rest_pd <span class="op">=</span> (</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    tidy_pd</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    .groupby([<span class="st">"date"</span>, <span class="st">"variable"</span>])</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    [<span class="st">"rest"</span>]</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    .mean()</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>rest_pd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="17">
+<pre><code>date        variable 
+2015-10-28  away_team    0.0
+            home_team    0.0
+                        ... 
+2016-06-19  away_team    2.0
+            home_team    2.0
+Name: rest, Length: 418, dtype: Float64</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>In Polars we use <code>.pivot</code> to do what in Pandas would require <code>.unstack</code>:</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-7-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-1" role="tab" aria-controls="tabset-7-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-7-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-2" role="tab" aria-controls="tabset-7-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-7-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-7-1-tab">
+<div class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>rest_pl.pivot(index<span class="op">=</span><span class="st">"date"</span>, columns<span class="op">=</span><span class="st">"variable"</span>, values<span class="op">=</span><span class="st">"rest"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="18">
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+
+    .dataframe td {
+        white-space: pre;
+    }
+
+    .dataframe td {
+        padding-top: 0;
+    }
+
+    .dataframe td {
+        padding-bottom: 0;
+    }
+
+    .dataframe td {
+        line-height: 95%;
+    }
+</style>
+<small>shape: (209, 3)</small><table class="dataframe table table-sm table-striped">
+
+<thead>
+<tr>
+<th>
+date
+</th>
+<th>
+away_team
+</th>
+<th>
+home_team
+</th>
+</tr>
+<tr>
+<td>
+date
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+2015-10-28
+</td>
+<td>
+0.0
+</td>
+<td>
+0.0
+</td>
+</tr>
+<tr>
+<td>
+2015-10-29
+</td>
+<td>
+0.333333
+</td>
+<td>
+0.0
+</td>
+</tr>
+<tr>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+</tr>
+<tr>
+<td>
+2016-06-16
+</td>
+<td>
+2.0
+</td>
+<td>
+2.0
+</td>
+</tr>
+<tr>
+<td>
+2016-06-19
+</td>
+<td>
+2.0
+</td>
+<td>
+2.0
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-7-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-7-2-tab">
+<div class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>rest_pd.unstack()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="19">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th>variable</th>
+      <th>away_team</th>
+      <th>home_team</th>
+    </tr>
+    <tr>
+      <th>date</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2015-10-28</th>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>2015-10-29</th>
+      <td>0.333333</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>2016-06-16</th>
+      <td>2.0</td>
+      <td>2.0</td>
+    </tr>
+    <tr>
+      <th>2016-06-19</th>
+      <td>2.0</td>
+      <td>2.0</td>
+    </tr>
+  </tbody>
+</table>
+<p>209 rows × 2 columns</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>Plotting the moving average of rest days:</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-8-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-1" role="tab" aria-controls="tabset-8-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-8-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-2" role="tab" aria-controls="tabset-8-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-8-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-8-1-tab">
+<div class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> (</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    rest_pl.pivot(index<span class="op">=</span><span class="st">"date"</span>, values<span class="op">=</span><span class="st">"rest"</span>, columns<span class="op">=</span><span class="st">"variable"</span>)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"away_team"</span>) <span class="op">&lt;</span> <span class="dv">7</span>)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">"date"</span>)</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    .select([pl.col(<span class="st">"date"</span>), pl.col(pl.Float64).rolling_mean(<span class="dv">7</span>)])</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    .to_pandas()</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    .set_index(<span class="st">"date"</span>)</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>    .plot(figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="dv">6</span>), linewidth<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(ylabel<span class="op">=</span><span class="st">"Rest (7 day MA)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="20">
+<pre><code>[Text(0, 0.5, 'Rest (7 day MA)')]</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="tidy_files/figure-html/cell-21-output-2.png" width="730" height="465"></p>
+</div>
+</div>
+</div>
+<div id="tabset-8-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-8-2-tab">
+<div class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> (</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    rest_pd.unstack()</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    .query(<span class="st">'away_team &lt; 7'</span>)</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    .sort_index()</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    .rolling(<span class="dv">7</span>)</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    .mean()</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    .plot(figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="dv">6</span>), linewidth<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(ylabel<span class="op">=</span><span class="st">"Rest (7 day MA)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="21">
+<pre><code>[Text(0, 0.5, 'Rest (7 day MA)')]</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="tidy_files/figure-html/cell-22-output-2.png" width="730" height="465"></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="mini-project-home-court-advantage" class="level2" data-number="4.6">
+<h2 data-number="4.6" class="anchored" data-anchor-id="mini-project-home-court-advantage"><span class="header-section-number">4.6</span> Mini Project: Home Court Advantage?</h2>
+<p>We may as well do some (not very rigorous) analysis: let’s see if home advantage is a real thing.</p>
+<section id="find-the-win-percent-for-each-team" class="level3" data-number="4.6.1">
+<h3 data-number="4.6.1" class="anchored" data-anchor-id="find-the-win-percent-for-each-team"><span class="header-section-number">4.6.1</span> Find the win percent for each team</h3>
+<p>We want to control for the strength of the teams playing. The team’s victory percentage is probably not a good control but it’s what we’ll use:</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-9-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-9-1" role="tab" aria-controls="tabset-9-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-9-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-9-2" role="tab" aria-controls="tabset-9-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-9-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-9-1-tab">
+<div class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>win_col <span class="op">=</span> pl.col(<span class="st">"win"</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>wins_pl <span class="op">=</span> (</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    joined_pl.melt(</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>        id_vars<span class="op">=</span>[<span class="st">"game_id"</span>, <span class="st">"date"</span>, <span class="st">"home_win"</span>],</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>        value_name<span class="op">=</span><span class="st">"team"</span>,</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>        variable_name<span class="op">=</span><span class="st">"is_home"</span>,</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>        value_vars<span class="op">=</span>[<span class="st">"home_team"</span>, <span class="st">"away_team"</span>],</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>    .with_column(pl.col(<span class="st">"home_win"</span>).alias(<span class="st">"win"</span>) <span class="op">==</span> (pl.col(<span class="st">"is_home"</span>) <span class="op">==</span> <span class="st">"home_team"</span>))</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>    .groupby([<span class="st">"team"</span>, <span class="st">"is_home"</span>])</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>    .agg(</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>            win_col.<span class="bu">sum</span>().alias(<span class="st">"n_wins"</span>),</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>            win_col.count().alias(<span class="st">"n_games"</span>),</span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>            win_col.mean().alias(<span class="st">"win_pct"</span>),</span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a>    .sort([<span class="st">"team"</span>, <span class="st">"is_home"</span>])</span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a>wins_pl</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="22">
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+
+    .dataframe td {
+        white-space: pre;
+    }
+
+    .dataframe td {
+        padding-top: 0;
+    }
+
+    .dataframe td {
+        padding-bottom: 0;
+    }
+
+    .dataframe td {
+        line-height: 95%;
+    }
+</style>
+<small>shape: (60, 5)</small><table class="dataframe table table-sm table-striped">
+
+<thead>
+<tr>
+<th>
+team
+</th>
+<th>
+is_home
+</th>
+<th>
+n_wins
+</th>
+<th>
+n_games
+</th>
+<th>
+win_pct
+</th>
+</tr>
+<tr>
+<td>
+str
+</td>
+<td>
+str
+</td>
+<td>
+u32
+</td>
+<td>
+u32
+</td>
+<td>
+f64
+</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+"Atlanta Hawks"
+</td>
+<td>
+"away_team"
+</td>
+<td>
+22
+</td>
+<td>
+46
+</td>
+<td>
+0.478261
+</td>
+</tr>
+<tr>
+<td>
+"Atlanta Hawks"
+</td>
+<td>
+"home_team"
+</td>
+<td>
+30
+</td>
+<td>
+45
+</td>
+<td>
+0.666667
+</td>
+</tr>
+<tr>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+<td>
+...
+</td>
+</tr>
+<tr>
+<td>
+"Washington Wiz...
+</td>
+<td>
+"away_team"
+</td>
+<td>
+18
+</td>
+<td>
+40
+</td>
+<td>
+0.45
+</td>
+</tr>
+<tr>
+<td>
+"Washington Wiz...
+</td>
+<td>
+"home_team"
+</td>
+<td>
+22
+</td>
+<td>
+41
+</td>
+<td>
+0.536585
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-9-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-9-2-tab">
+<div class="cell" data-execution_count="23">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>wins_pd <span class="op">=</span> (</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    joined_pd</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    .reset_index()</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    .melt(</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>        id_vars<span class="op">=</span>[<span class="st">"game_id"</span>, <span class="st">"date"</span>, <span class="st">"home_win"</span>],</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>        value_name<span class="op">=</span><span class="st">"team"</span>,</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>        var_name<span class="op">=</span><span class="st">"is_home"</span>,</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>        value_vars<span class="op">=</span>[<span class="st">"home_team"</span>, <span class="st">"away_team"</span>],</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>    .assign(win<span class="op">=</span><span class="kw">lambda</span> df: df[<span class="st">"home_win"</span>] <span class="op">==</span> (df[<span class="st">"is_home"</span>] <span class="op">==</span> <span class="st">"home_team"</span>))</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>    .groupby([<span class="st">"team"</span>, <span class="st">"is_home"</span>])[<span class="st">"win"</span>]</span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>    .agg([<span class="st">'sum'</span>, <span class="st">'count'</span>, <span class="st">'mean'</span>])</span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>    .rename(columns<span class="op">=</span>{</span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"sum"</span>: <span class="st">'n_wins'</span>,</span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">"count"</span>: <span class="st">'n_games'</span>,</span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"mean"</span>: <span class="st">'win_pct'</span></span>
+<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a>wins_pd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="23">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th></th>
+      <th>n_wins</th>
+      <th>n_games</th>
+      <th>win_pct</th>
+    </tr>
+    <tr>
+      <th>team</th>
+      <th>is_home</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th rowspan="2" valign="top">Atlanta Hawks</th>
+      <th>away_team</th>
+      <td>22</td>
+      <td>46</td>
+      <td>0.478261</td>
+    </tr>
+    <tr>
+      <th>home_team</th>
+      <td>30</td>
+      <td>45</td>
+      <td>0.666667</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">Washington Wizards</th>
+      <th>away_team</th>
+      <td>18</td>
+      <td>40</td>
+      <td>0.450000</td>
+    </tr>
+    <tr>
+      <th>home_team</th>
+      <td>22</td>
+      <td>41</td>
+      <td>0.536585</td>
+    </tr>
+  </tbody>
+</table>
+<p>60 rows × 3 columns</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="some-visualisations" class="level2" data-number="4.7">
+<h2 data-number="4.7" class="anchored" data-anchor-id="some-visualisations"><span class="header-section-number">4.7</span> Some visualisations</h2>
+<div class="cell" data-execution_count="24">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> sns.FacetGrid(wins_pl.to_pandas(), hue<span class="op">=</span><span class="st">"team"</span>, aspect<span class="op">=</span><span class="fl">0.8</span>, palette<span class="op">=</span>[<span class="st">"k"</span>], height<span class="op">=</span><span class="dv">5</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>g.<span class="bu">map</span>(</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    sns.pointplot,</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"is_home"</span>,</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"win_pct"</span>,</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    order<span class="op">=</span>[<span class="st">"away_team"</span>, <span class="st">"home_team"</span>]).<span class="bu">set</span>(ylim<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="24">
+<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7f6c89258750&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="tidy_files/figure-html/cell-25-output-2.png" width="383" height="483"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="25">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>sns.catplot(</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    wins_pl.to_pandas(),</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span><span class="st">"is_home"</span>,</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span><span class="st">"win_pct"</span>,</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    col<span class="op">=</span><span class="st">"team"</span>,</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    col_wrap<span class="op">=</span><span class="dv">5</span>,</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>    hue<span class="op">=</span><span class="st">"team"</span>,</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>    kind<span class="op">=</span><span class="st">"point"</span>,</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    height<span class="op">=</span><span class="fl">1.5</span>,</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="25">
+<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7f6c62e26910&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="tidy_files/figure-html/cell-26-output-2.png" width="729" height="864"></p>
+</div>
+</div>
+<p>Now we calculate the win percent by team, regardless of whether they’re home or away:</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-10-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-10-1" role="tab" aria-controls="tabset-10-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-10-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-10-2" role="tab" aria-controls="tabset-10-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-10-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-10-1-tab">
+<div class="cell" data-execution_count="26">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>win_percent_pl <span class="op">=</span> (</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    wins_pl.groupby(<span class="st">"team"</span>, maintain_order<span class="op">=</span><span class="va">True</span>).agg(</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"n_wins"</span>).<span class="bu">sum</span>().alias(<span class="st">"win_pct"</span>) <span class="op">/</span> pl.col(<span class="st">"n_games"</span>).<span class="bu">sum</span>()</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>win_percent_pl</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="26">
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+
+    .dataframe td {
+        white-space: pre;
+    }
+
+    .dataframe td {
+        padding-top: 0;
+    }
+
+    .dataframe td {
+        padding-bottom: 0;
+    }
+
+    .dataframe td {
+        line-height: 95%;
+    }
+</style>
+<small>shape: (30, 2)</small><table class="dataframe table table-sm table-striped">
+
+<thead>
+<tr>
+<th>
+team
+</th>
+<th>
+win_pct
+</th>
+</tr>
+<tr>
+<td>
+str
+</td>
+<td>
+f64
+</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+"Atlanta Hawks"
+</td>
+<td>
+0.571429
+</td>
+</tr>
+<tr>
+<td>
+"Boston Celtics...
+</td>
+<td>
+0.563218
+</td>
+</tr>
+<tr>
+<td>
+...
+</td>
+<td>
+...
+</td>
+</tr>
+<tr>
+<td>
+"Utah Jazz"
+</td>
+<td>
+0.487805
+</td>
+</tr>
+<tr>
+<td>
+"Washington Wiz...
+</td>
+<td>
+0.493827
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-10-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-10-2-tab">
+<div class="cell" data-execution_count="27">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>win_percent_pd <span class="op">=</span> (</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>    wins_pd</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    .groupby(level<span class="op">=</span><span class="st">"team"</span>, as_index<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">apply</span>(<span class="kw">lambda</span> x: x[<span class="st">"n_wins"</span>].<span class="bu">sum</span>() <span class="op">/</span> x[<span class="st">"n_games"</span>].<span class="bu">sum</span>())</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>win_percent_pd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="27">
+<pre><code>team
+Atlanta Hawks         0.571429
+Boston Celtics        0.563218
+                        ...   
+Utah Jazz             0.487805
+Washington Wizards    0.493827
+Length: 30, dtype: float64</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="28">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>    win_percent_pl</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">"win_pct"</span>)</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    .to_pandas()</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    .set_index(<span class="st">"team"</span>)</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>    .plot.barh(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">12</span>), width<span class="op">=</span><span class="fl">0.85</span>, color<span class="op">=</span><span class="st">"k"</span>)</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Win Percent"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="28">
+<pre><code>Text(0.5, 0, 'Win Percent')</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="tidy_files/figure-html/cell-29-output-2.png" width="602" height="943"></p>
+</div>
+</div>
+<p>Here’s a plot of team home court advantage against team overall win percentage:</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-11-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-11-1" role="tab" aria-controls="tabset-11-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-11-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-11-2" role="tab" aria-controls="tabset-11-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-11-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-11-1-tab">
+<div class="cell" data-execution_count="29">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    wins_pl.pivot(index<span class="op">=</span><span class="st">"team"</span>, columns<span class="op">=</span><span class="st">"is_home"</span>, values<span class="op">=</span><span class="st">"win_pct"</span>)</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>            pl.col(<span class="st">"home_team"</span>).alias(<span class="st">"Home Win % - Away %"</span>) <span class="op">-</span> pl.col(<span class="st">"away_team"</span>),</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>            (pl.col(<span class="st">"home_team"</span>).alias(<span class="st">"Overall %"</span>) <span class="op">+</span> pl.col(<span class="st">"away_team"</span>)) <span class="op">/</span> <span class="dv">2</span>,</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>    .to_pandas()</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>    .pipe((sns.regplot, <span class="st">"data"</span>), x<span class="op">=</span><span class="st">"Overall %"</span>, y<span class="op">=</span><span class="st">"Home Win % - Away %"</span>)</span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="29">
+<pre><code>&lt;AxesSubplot: xlabel='Overall %', ylabel='Home Win % - Away %'&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="tidy_files/figure-html/cell-30-output-2.png" width="587" height="428"></p>
+</div>
+</div>
+</div>
+<div id="tabset-11-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-11-2-tab">
+<div class="cell" data-execution_count="30">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    wins_pd</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    [<span class="st">"win_pct"</span>]</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    .unstack()</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>    .assign(<span class="op">**</span>{<span class="st">'Home Win % - Away %'</span>: <span class="kw">lambda</span> x: x[<span class="st">"home_team"</span>] <span class="op">-</span> x[<span class="st">"away_team"</span>],</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>               <span class="st">'Overall %'</span>: <span class="kw">lambda</span> x: (x[<span class="st">"home_team"</span>] <span class="op">+</span> x[<span class="st">"away_team"</span>]) <span class="op">/</span> <span class="dv">2</span>})</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>     .pipe((sns.regplot, <span class="st">'data'</span>), x<span class="op">=</span><span class="st">'Overall %'</span>, y<span class="op">=</span><span class="st">'Home Win % - Away %'</span>)</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="30">
+<pre><code>&lt;AxesSubplot: xlabel='Overall %', ylabel='Home Win % - Away %'&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="tidy_files/figure-html/cell-31-output-2.png" width="587" height="428"></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>Let’s add the win percent back to the dataframe and run a regression:</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-12-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-12-1" role="tab" aria-controls="tabset-12-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-12-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-12-2" role="tab" aria-controls="tabset-12-2" aria-selected="false">Pandas</a></li></ul>
+<div class="tab-content">
+<div id="tabset-12-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-12-1-tab">
+<div class="cell" data-execution_count="31">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>reg_df_pl <span class="op">=</span> (</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>    joined_pl.join(win_percent_pl, left_on<span class="op">=</span><span class="st">"home_team"</span>, right_on<span class="op">=</span><span class="st">"team"</span>)</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">"win_pct"</span>: <span class="st">"home_strength"</span>})</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>    .join(win_percent_pl, left_on<span class="op">=</span><span class="st">"away_team"</span>, right_on<span class="op">=</span><span class="st">"team"</span>)</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>    .rename({<span class="st">"win_pct"</span>: <span class="st">"away_strength"</span>})</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>            pl.col(<span class="st">"home_points"</span>).alias(<span class="st">"point_diff"</span>) <span class="op">-</span> pl.col(<span class="st">"away_points"</span>),</span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>            pl.col(<span class="st">"home_rest"</span>).alias(<span class="st">"rest_diff"</span>) <span class="op">-</span> pl.col(<span class="st">"away_rest"</span>),</span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>            pl.col(<span class="st">"home_win"</span>).cast(pl.UInt8),  <span class="co"># for statsmodels</span></span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a>reg_df_pl.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="31">
+
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+
+    .dataframe td {
+        white-space: pre;
+    }
+
+    .dataframe td {
+        padding-top: 0;
+    }
+
+    .dataframe td {
+        padding-bottom: 0;
+    }
+
+    .dataframe td {
+        line-height: 95%;
+    }
+</style>
+<small>shape: (5, 14)</small><table class="dataframe table table-sm table-striped">
+
+<thead>
+<tr>
+<th>
+game_id
+</th>
+<th>
+date
+</th>
+<th>
+away_rest
+</th>
+<th>
+home_rest
+</th>
+<th>
+away_team
+</th>
+<th>
+away_points
+</th>
+<th>
+home_team
+</th>
+<th>
+home_points
+</th>
+<th>
+home_win
+</th>
+<th>
+rest_spread
+</th>
+<th>
+home_strength
+</th>
+<th>
+away_strength
+</th>
+<th>
+point_diff
+</th>
+<th>
+rest_diff
+</th>
+</tr>
+<tr>
+<td>
+u32
+</td>
+<td>
+date
+</td>
+<td>
+i8
+</td>
+<td>
+i8
+</td>
+<td>
+str
+</td>
+<td>
+i64
+</td>
+<td>
+str
+</td>
+<td>
+i64
+</td>
+<td>
+u8
+</td>
+<td>
+i8
+</td>
+<td>
+f64
+</td>
+<td>
+f64
+</td>
+<td>
+i64
+</td>
+<td>
+i8
+</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+5
+</td>
+<td>
+2015-10-28
+</td>
+<td>
+0
+</td>
+<td>
+null
+</td>
+<td>
+"Chicago Bulls"
+</td>
+<td>
+115
+</td>
+<td>
+"Brooklyn Nets"
+</td>
+<td>
+100
+</td>
+<td>
+0
+</td>
+<td>
+null
+</td>
+<td>
+0.256098
+</td>
+<td>
+0.506173
+</td>
+<td>
+-15
+</td>
+<td>
+null
+</td>
+</tr>
+<tr>
+<td>
+6
+</td>
+<td>
+2015-10-28
+</td>
+<td>
+null
+</td>
+<td>
+0
+</td>
+<td>
+"Utah Jazz"
+</td>
+<td>
+87
+</td>
+<td>
+"Detroit Piston...
+</td>
+<td>
+92
+</td>
+<td>
+1
+</td>
+<td>
+null
+</td>
+<td>
+0.505882
+</td>
+<td>
+0.487805
+</td>
+<td>
+5
+</td>
+<td>
+null
+</td>
+</tr>
+<tr>
+<td>
+11
+</td>
+<td>
+2015-10-28
+</td>
+<td>
+0
+</td>
+<td>
+null
+</td>
+<td>
+"Cleveland Cava...
+</td>
+<td>
+106
+</td>
+<td>
+"Memphis Grizzl...
+</td>
+<td>
+76
+</td>
+<td>
+0
+</td>
+<td>
+null
+</td>
+<td>
+0.488372
+</td>
+<td>
+0.715686
+</td>
+<td>
+-30
+</td>
+<td>
+null
+</td>
+</tr>
+<tr>
+<td>
+14
+</td>
+<td>
+2015-10-28
+</td>
+<td>
+0
+</td>
+<td>
+null
+</td>
+<td>
+"New Orleans Pe...
+</td>
+<td>
+94
+</td>
+<td>
+"Portland Trail...
+</td>
+<td>
+112
+</td>
+<td>
+1
+</td>
+<td>
+null
+</td>
+<td>
+0.526882
+</td>
+<td>
+0.37037
+</td>
+<td>
+18
+</td>
+<td>
+null
+</td>
+</tr>
+<tr>
+<td>
+17
+</td>
+<td>
+2015-10-29
+</td>
+<td>
+0
+</td>
+<td>
+0
+</td>
+<td>
+"Memphis Grizzl...
+</td>
+<td>
+112
+</td>
+<td>
+"Indiana Pacers...
+</td>
+<td>
+103
+</td>
+<td>
+0
+</td>
+<td>
+0
+</td>
+<td>
+0.545455
+</td>
+<td>
+0.488372
+</td>
+<td>
+-9
+</td>
+<td>
+0
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-12-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-12-2-tab">
+<div class="cell" data-execution_count="32">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>reg_df_pd <span class="op">=</span> (</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>    joined_pd.assign(</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>        away_strength<span class="op">=</span>joined_pd[<span class="st">'away_team'</span>].<span class="bu">map</span>(win_percent_pd),</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>        home_strength<span class="op">=</span>joined_pd[<span class="st">'home_team'</span>].<span class="bu">map</span>(win_percent_pd),</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>        point_diff<span class="op">=</span>joined_pd[<span class="st">'home_points'</span>] <span class="op">-</span> joined_pd[<span class="st">'away_points'</span>],</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>        rest_diff<span class="op">=</span>joined_pd[<span class="st">'home_rest'</span>] <span class="op">-</span> joined_pd[<span class="st">'away_rest'</span>])</span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>reg_df_pd.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="32">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th></th>
+      <th>away_rest</th>
+      <th>home_rest</th>
+      <th>away_team</th>
+      <th>away_points</th>
+      <th>home_team</th>
+      <th>home_points</th>
+      <th>home_win</th>
+      <th>rest_spread</th>
+      <th>away_strength</th>
+      <th>home_strength</th>
+      <th>point_diff</th>
+      <th>rest_diff</th>
+    </tr>
+    <tr>
+      <th>game_id</th>
+      <th>date</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>7</th>
+      <th>2015-10-28</th>
+      <td>0</td>
+      <td>&lt;NA&gt;</td>
+      <td>New Orleans Pelicans</td>
+      <td>94</td>
+      <td>Portland Trail Blazers</td>
+      <td>112</td>
+      <td>True</td>
+      <td>&lt;NA&gt;</td>
+      <td>0.370370</td>
+      <td>0.526882</td>
+      <td>18</td>
+      <td>&lt;NA&gt;</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <th>2015-10-28</th>
+      <td>0</td>
+      <td>&lt;NA&gt;</td>
+      <td>Chicago Bulls</td>
+      <td>115</td>
+      <td>Brooklyn Nets</td>
+      <td>100</td>
+      <td>False</td>
+      <td>&lt;NA&gt;</td>
+      <td>0.506173</td>
+      <td>0.256098</td>
+      <td>-15</td>
+      <td>&lt;NA&gt;</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <th>2015-10-28</th>
+      <td>&lt;NA&gt;</td>
+      <td>0</td>
+      <td>Utah Jazz</td>
+      <td>87</td>
+      <td>Detroit Pistons</td>
+      <td>92</td>
+      <td>True</td>
+      <td>&lt;NA&gt;</td>
+      <td>0.487805</td>
+      <td>0.505882</td>
+      <td>5</td>
+      <td>&lt;NA&gt;</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <th>2015-10-28</th>
+      <td>0</td>
+      <td>&lt;NA&gt;</td>
+      <td>Cleveland Cavaliers</td>
+      <td>106</td>
+      <td>Memphis Grizzlies</td>
+      <td>76</td>
+      <td>False</td>
+      <td>&lt;NA&gt;</td>
+      <td>0.715686</td>
+      <td>0.488372</td>
+      <td>-30</td>
+      <td>&lt;NA&gt;</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <th>2015-10-29</th>
+      <td>1</td>
+      <td>0</td>
+      <td>Atlanta Hawks</td>
+      <td>112</td>
+      <td>New York Knicks</td>
+      <td>101</td>
+      <td>False</td>
+      <td>-1</td>
+      <td>0.571429</td>
+      <td>0.382716</td>
+      <td>-11</td>
+      <td>-1</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="33">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> sm</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>mod <span class="op">=</span> sm.logit(</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"home_win ~ home_strength + away_strength + home_rest + away_rest"</span>,</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>    reg_df_pl.to_pandas(),</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>res <span class="op">=</span> mod.fit()</span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>res.summary()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Optimization terminated successfully.
+         Current function value: 0.554797
+         Iterations 6</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="33">
+
+<table class="simpletable">
+<caption>Logit Regression Results</caption>
+<tbody><tr>
+  <th>Dep. Variable:</th>       <td>home_win</td>     <th>  No. Observations:  </th>  <td>  1299</td>  
+</tr>
+<tr>
+  <th>Model:</th>                 <td>Logit</td>      <th>  Df Residuals:      </th>  <td>  1294</td>  
+</tr>
+<tr>
+  <th>Method:</th>                 <td>MLE</td>       <th>  Df Model:          </th>  <td>     4</td>  
+</tr>
+<tr>
+  <th>Date:</th>            <td>Fri, 06 Jan 2023</td> <th>  Pseudo R-squ.:     </th>  <td>0.1777</td>  
+</tr>
+<tr>
+  <th>Time:</th>                <td>14:13:16</td>     <th>  Log-Likelihood:    </th> <td> -720.68</td> 
+</tr>
+<tr>
+  <th>converged:</th>             <td>True</td>       <th>  LL-Null:           </th> <td> -876.38</td> 
+</tr>
+<tr>
+  <th>Covariance Type:</th>     <td>nonrobust</td>    <th>  LLR p-value:       </th> <td>3.748e-66</td>
+</tr>
+</tbody></table>
+<table class="simpletable">
+<tbody><tr>
+        <td></td>           <th>coef</th>     <th>std err</th>      <th>z</th>      <th>P&gt;|z|</th>  <th>[0.025</th>    <th>0.975]</th>  
+</tr>
+<tr>
+  <th>Intercept</th>     <td>   -0.0019</td> <td>    0.304</td> <td>   -0.006</td> <td> 0.995</td> <td>   -0.597</td> <td>    0.593</td>
+</tr>
+<tr>
+  <th>home_strength</th> <td>    5.7161</td> <td>    0.466</td> <td>   12.272</td> <td> 0.000</td> <td>    4.803</td> <td>    6.629</td>
+</tr>
+<tr>
+  <th>away_strength</th> <td>   -4.9133</td> <td>    0.456</td> <td>  -10.786</td> <td> 0.000</td> <td>   -5.806</td> <td>   -4.020</td>
+</tr>
+<tr>
+  <th>home_rest</th>     <td>    0.1045</td> <td>    0.076</td> <td>    1.381</td> <td> 0.167</td> <td>   -0.044</td> <td>    0.253</td>
+</tr>
+<tr>
+  <th>away_rest</th>     <td>   -0.0347</td> <td>    0.066</td> <td>   -0.526</td> <td> 0.599</td> <td>   -0.164</td> <td>    0.095</td>
+</tr>
+</tbody></table>
+</div>
+</div>
+<p>You can play around with the regressions yourself but we’ll end them here.</p>
+</section>
+<section id="summary" class="level2" data-number="4.8">
+<h2 data-number="4.8" class="anchored" data-anchor-id="summary"><span class="header-section-number">4.8</span> Summary</h2>
+<p>This was mostly a demonstration of <code>.pivot</code> and <code>.melt</code>, with several different examples of reshaping data in Polars and Pandas.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<script src="https://giscus.app/client.js" data-repo="kevinheavey/modern-polars" data-repo-id="R_kgDOIqAHAQ" data-category="General" data-category-id="DIC_kwDOIqAHAc4CTW4n" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="en" crossorigin="anonymous" async="">
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./performance.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Performance</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./timeseries.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Timeseries</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>
