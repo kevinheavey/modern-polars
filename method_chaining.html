@@ -239,7 +239,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <ul>
   <li><a href="#setup" id="toc-setup" class="nav-link active" data-scroll-target="#setup"><span class="toc-section-number">2.1</span>  Setup</a></li>
   <li><a href="#extract-city-names" id="toc-extract-city-names" class="nav-link" data-scroll-target="#extract-city-names"><span class="toc-section-number">2.2</span>  Extract city names</a></li>
-  <li><a href="#brining-it-all-back-home" id="toc-brining-it-all-back-home" class="nav-link" data-scroll-target="#brining-it-all-back-home"><span class="toc-section-number">2.3</span>  Brining It All Back Home</a></li>
+  <li><a href="#bringing-it-all-back-home" id="toc-bringing-it-all-back-home" class="nav-link" data-scroll-target="#bringing-it-all-back-home"><span class="toc-section-number">2.3</span>  Bringing It All Back Home</a></li>
   <li><a href="#example-plots" id="toc-example-plots" class="nav-link" data-scroll-target="#example-plots"><span class="toc-section-number">2.4</span>  Example plots</a>
   <ul class="collapse">
   <li><a href="#daily-flights" id="toc-daily-flights" class="nav-link" data-scroll-target="#daily-flights"><span class="toc-section-number">2.4.1</span>  Daily Flights</a></li>
@@ -385,8 +385,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <p>The Pandas version concatenates the date and time strings then parses the datetime string. We could do the same in Polars but I wanted to show you the <code>pl.Date</code> and <code>pl.Time</code> dtypes, which Pandas lacks. It turns out that combining <code>pl.Date</code> and <code>pl.Time</code> isn’t that straightforward: we have to convert them both to microseconds, add them and then cast as <code>pl.Datetime</code>.</p>
 </section>
-<section id="brining-it-all-back-home" class="level2" data-number="2.3">
-<h2 data-number="2.3" class="anchored" data-anchor-id="brining-it-all-back-home"><span class="header-section-number">2.3</span> Brining It All Back Home</h2>
+<section id="bringing-it-all-back-home" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="bringing-it-all-back-home"><span class="header-section-number">2.3</span> Bringing It All Back Home</h2>
 <p>It’s time for some method chaining. First, some common variables for both the Polars and Pandas code:</p>
 <div class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>category_cols <span class="op">=</span> [</span>
