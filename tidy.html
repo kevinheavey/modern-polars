@@ -502,20 +502,14 @@ i64
 <div class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>games_pl <span class="op">=</span> (</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    pl.scan_csv(nba_glob)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        <span class="op">~</span>pl.fold(</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>            acc<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>            f<span class="op">=</span><span class="kw">lambda</span> acc, s: acc <span class="op">&amp;</span> s.is_null(),</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>            exprs<span class="op">=</span>pl.<span class="bu">all</span>(),</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    .with_column(</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"date"</span>).<span class="bu">str</span>.strptime(pl.Date, <span class="st">"%a, %b </span><span class="sc">%d</span><span class="st">, %Y"</span>),</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">"date"</span>)</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    .with_row_count(<span class="st">"game_id"</span>)</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>games_pl.head().collect()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(<span class="op">~</span>pl.<span class="bu">all</span>(pl.<span class="bu">all</span>().is_null()))</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    .with_column(</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"date"</span>).<span class="bu">str</span>.strptime(pl.Date, <span class="st">"%a, %b </span><span class="sc">%d</span><span class="st">, %Y"</span>),</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    .sort(<span class="st">"date"</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    .with_row_count(<span class="st">"game_id"</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>games_pl.head().collect()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
 
 <div>
@@ -704,7 +698,7 @@ i64
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>games_pd <span class="op">=</span> (</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    pl.read_csv(nba_glob)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    .to_pandas()</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    .dropna(thresh<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    .dropna(how<span class="op">=</span><span class="st">"all"</span>)</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    .assign(date<span class="op">=</span><span class="kw">lambda</span> x: pd.to_datetime(x[<span class="st">"date"</span>], <span class="bu">format</span><span class="op">=</span><span class="st">"%a, %b </span><span class="sc">%d</span><span class="st">, %Y"</span>))</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    .sort_values(<span class="st">"date"</span>)</span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    .reset_index(drop<span class="op">=</span><span class="va">True</span>)</span>
@@ -785,7 +779,20 @@ i64
 </div>
 </div>
 </div>
-<p>One thing we haven’t seen already is <a href="https://pola-rs.github.io/polars-book/user-guide/dsl/folds.html"><code>pl.fold</code></a>. This is for fast horizontal operations, and it’s what the Polars docs recommend for dropping a row where every column is null. In Pandas we do that via <code>.dropna(thresh=num_cols)</code>.</p>
+<p>Polars does have a <a href="https://pola-rs.github.io/polars/py-polars/html/reference/dataframe/api/polars.DataFrame.drop_nulls.html#polars.DataFrame.drop_nulls"><code>drop_nulls</code></a> method but the only parameter it takes is <code>subset</code>, which — like in Pandas — lets you consider null values just for a subset of the columns. Pandas additionally lets you specify <code>how="all"</code> to drop a row only if every value is null, but Polars <code>drop_nulls</code> has no such parameter and will drop the row if <em>any</em> values are null. If you only want to drop when all values are null, the docs recommend <code>.filter(~pl.all(pl.all().is_null()))</code>.</p>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A previous version of the Polars example used <a href="https://pola-rs.github.io/polars-book/user-guide/dsl/folds.html"><code>pl.fold</code></a>, which is for fast horizontal operations. It doesn’t come up anywhere else in this book, so consider this your warning that it exists.</p>
+</div>
+</div>
 </section>
 <section id="pivot-and-melt" class="level2" data-number="4.3">
 <h2 data-number="4.3" class="anchored" data-anchor-id="pivot-and-melt"><span class="header-section-number">4.3</span> Pivot and Melt</h2>
@@ -1894,7 +1901,7 @@ false
 <span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    height<span class="op">=</span><span class="fl">1.5</span>,</span>
 <span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
-<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7f1e492b5450&gt;</code></pre>
+<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7f64fef74f90&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <p><img src="tidy_files/figure-html/cell-12-output-2.png" width="729" height="864"></p>
@@ -1968,7 +1975,7 @@ false
 <pre><code>&lt;AxesSubplot: xlabel='rest_spread', ylabel='home_win'&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="tidy_files/figure-html/cell-15-output-2.png" width="731" height="503"></p>
+<p><img src="tidy_files/figure-html/cell-15-output-2.png" width="731" height="500"></p>
 </div>
 </div>
 </div>
@@ -2667,7 +2674,7 @@ f64
 <span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"win_pct"</span>,</span>
 <span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    order<span class="op">=</span>[<span class="st">"away_team"</span>, <span class="st">"home_team"</span>]).<span class="bu">set</span>(ylim<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="24">
-<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7f1e2d7d3fd0&gt;</code></pre>
+<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7f64fd53c590&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <p><img src="tidy_files/figure-html/cell-25-output-2.png" width="383" height="483"></p>
@@ -2685,7 +2692,7 @@ f64
 <span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    height<span class="op">=</span><span class="fl">1.5</span>,</span>
 <span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="25">
-<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7f1e2d403410&gt;</code></pre>
+<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7f64e6b658d0&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <p><img src="tidy_files/figure-html/cell-26-output-2.png" width="729" height="864"></p>
@@ -3421,10 +3428,10 @@ null
   <th>Method:</th>                 <td>MLE</td>       <th>  Df Model:          </th>  <td>     4</td>  
 </tr>
 <tr>
-  <th>Date:</th>            <td>Sat, 07 Jan 2023</td> <th>  Pseudo R-squ.:     </th>  <td>0.1777</td>  
+  <th>Date:</th>            <td>Mon, 16 Jan 2023</td> <th>  Pseudo R-squ.:     </th>  <td>0.1777</td>  
 </tr>
 <tr>
-  <th>Time:</th>                <td>01:15:31</td>     <th>  Log-Likelihood:    </th> <td> -720.68</td> 
+  <th>Time:</th>                <td>00:22:39</td>     <th>  Log-Likelihood:    </th> <td> -720.68</td> 
 </tr>
 <tr>
   <th>converged:</th>             <td>True</td>       <th>  LL-Null:           </th> <td> -876.38</td> 
