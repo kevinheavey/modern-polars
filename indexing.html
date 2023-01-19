@@ -6,6 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="description" content="A side-by-side comparison of the Polars and Pandas libraries.">
 
 <title>Modern Polars - 1&nbsp; Indexing (Or Lack Thereof)</title>
 <style>
@@ -130,6 +131,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 <link rel="stylesheet" href="custom.css">
+<meta property="og:title" content="Modern Polars - 1&nbsp; Indexing (Or Lack Thereof)">
+<meta property="og:description" content="A side-by-side comparison of the Polars and Pandas libraries.">
+<meta property="og:site-name" content="Modern Polars">
+<meta name="twitter:title" content="Modern Polars - 1&nbsp; Indexing (Or Lack Thereof)">
+<meta name="twitter:description" content="A side-by-side comparison of the Polars and Pandas libraries.">
+<meta name="twitter:card" content="summary">
 </head>
 
 <body class="nav-sidebar floating">
@@ -1966,7 +1973,7 @@ null
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>df_pd <span class="op">=</span> pd.read_csv(extracted)</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>df_pd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_45536/2805799744.py:3: DtypeWarning: Columns (76,77,84) have mixed types. Specify dtype option on import or set low_memory=False.
+<pre><code>/tmp/ipykernel_83718/2805799744.py:3: DtypeWarning: Columns (76,77,84) have mixed types. Specify dtype option on import or set low_memory=False.
   df_pd = pd.read_csv(extracted)</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="3">
@@ -2923,7 +2930,7 @@ i64
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>f[f[<span class="st">'a'</span>] <span class="op">&lt;=</span> <span class="dv">3</span>][<span class="st">'b'</span>] <span class="op">=</span> f[<span class="st">'b'</span>] <span class="op">//</span> <span class="dv">10</span></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>f</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_45536/1317853993.py:2: SettingWithCopyWarning: 
+<pre><code>/tmp/ipykernel_83718/1317853993.py:2: SettingWithCopyWarning: 
 A value is trying to be set on a copy of a slice from a DataFrame.
 Try using .loc[row_indexer,col_indexer] = value instead
 
