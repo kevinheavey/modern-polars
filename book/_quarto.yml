@@ -22,7 +22,7 @@ book:
     giscus:
       repo: kevinheavey/modern-polars
   open-graph:
-    image: resized-og-polar-bear-airpods-no-background.png
+    image: https://github.com/kevinheavey/modern-polars/raw/master/book/resized-og-polar-bear-airpods-no-background.png
     description: A side-by-side comparison of the Polars and Pandas libraries.
 
   chapters:
