@@ -21,8 +21,11 @@ book:
   comments:
     giscus:
       repo: kevinheavey/modern-polars
-  twitter-card: true
-  open-graph: true
+  twitter-card:
+    image: polar-bear-airpods-no-background.png
+  open-graph:
+    image: polar-bear-airpods-no-background.png
+    description: A side-by-side comparison of the Polars and Pandas libraries.
 
   chapters:
     - index.qmd
