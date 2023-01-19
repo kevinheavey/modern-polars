@@ -5,6 +5,9 @@ book:
   title: "Modern Polars"
   author: "Kevin Heavey"
   favicon: polar-bear-airpods-no-background.png
+  description: A side-by-side comparison of the Polars and Pandas libraries.
+  keyword: "polars, pandas, python, dataframe, performance, data science, data engineering"
+  url: "https://kevinheavey.github.io/modern-polars/"
   sidebar: 
     background: "#F5F5F5"
     logo: polar-bear-airpods-no-background.png
@@ -18,6 +21,8 @@ book:
   comments:
     giscus:
       repo: kevinheavey/modern-polars
+  twitter-card: true
+  open-graph: true
 
   chapters:
     - index.qmd
