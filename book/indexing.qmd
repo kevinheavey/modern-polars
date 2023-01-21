@@ -12,7 +12,7 @@ from pathlib import Path
 from zipfile import ZipFile
 import requests
 
-data_dir = Path("../data")
+data_dir = Path("../data") # replace this with a directory of your choice
 dest = data_dir / "flights.csv.zip"
 
 if not dest.exists():
