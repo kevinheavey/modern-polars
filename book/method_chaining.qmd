@@ -94,10 +94,10 @@ def time_to_datetime_pl(columns: list[str]) -> list[pl.Expr]:
 
     2014-01-01,0914 -> 2014-01-01 09:14:00
     """
-    date_val = pl.col("FlightDate").dt.epoch("us")
+    date_col = pl.col("FlightDate")
     return [
-        (date_val + time_col_pl(col).to_physical() // 1000)
-        .cast(pl.Datetime)
+        date_col
+        .dt.combine(time_col_pl(col))
         .alias(col)
         for col in columns
     ]
@@ -126,7 +126,7 @@ def time_to_datetime_pd(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
 
 The Pandas version concatenates the date and time strings then parses the datetime string.
 We could do the same in Polars but I wanted to show you the `pl.Date` and `pl.Time` dtypes, which Pandas lacks.
-It turns out that combining `pl.Date` and `pl.Time` isn't that straightforward: we have to convert them both to microseconds, add them and then cast as `pl.Datetime`.
+We can then combine `pl.Date` and `pl.Time` with `.dt.combine()`.
 
 
 ## Bringing It All Back Home
