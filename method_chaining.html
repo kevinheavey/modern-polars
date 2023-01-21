@@ -359,10 +359,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">    2014-01-01,0914 -&gt; 2014-01-01 09:14:00</span></span>
 <span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    date_val <span class="op">=</span> pl.col(<span class="st">"FlightDate"</span>).dt.epoch(<span class="st">"us"</span>)</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    date_col <span class="op">=</span> pl.col(<span class="st">"FlightDate"</span>)</span>
 <span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [</span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        (date_val <span class="op">+</span> time_col_pl(col).to_physical() <span class="op">//</span> <span class="dv">1000</span>)</span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        .cast(pl.Datetime)</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        date_col</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        .dt.combine(time_col_pl(col))</span>
 <span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        .alias(col)</span>
 <span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> col <span class="kw">in</span> columns</span>
 <span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -388,7 +388,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 </div>
 </div>
-<p>The Pandas version concatenates the date and time strings then parses the datetime string. We could do the same in Polars but I wanted to show you the <code>pl.Date</code> and <code>pl.Time</code> dtypes, which Pandas lacks. It turns out that combining <code>pl.Date</code> and <code>pl.Time</code> isn’t that straightforward: we have to convert them both to microseconds, add them and then cast as <code>pl.Datetime</code>.</p>
+<p>The Pandas version concatenates the date and time strings then parses the datetime string. We could do the same in Polars but I wanted to show you the <code>pl.Date</code> and <code>pl.Time</code> dtypes, which Pandas lacks. We can then combine <code>pl.Date</code> and <code>pl.Time</code> with <code>.dt.combine()</code>.</p>
 </section>
 <section id="bringing-it-all-back-home" class="level2" data-number="2.3">
 <h2 data-number="2.3" class="anchored" data-anchor-id="bringing-it-all-back-home"><span class="header-section-number">2.3</span> Bringing It All Back Home</h2>
