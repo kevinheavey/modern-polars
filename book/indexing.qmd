@@ -11,6 +11,7 @@ First we fetch some flight delay data. This part isn't about dataframes so feel 
 from pathlib import Path
 from zipfile import ZipFile
 import requests
+import os
 
 data_dir = Path("../data")
 dest = data_dir / "flights.csv.zip"
@@ -22,13 +23,15 @@ if not dest.exists():
         stream=True,
     )
 
+    os.makedirs(data_dir, exist_ok=True)
     with dest.open("wb") as f:
         for chunk in r.iter_content(chunk_size=102400):
             if chunk:
                 f.write(chunk)
 
     with ZipFile(dest) as zf:
-        zf.extract(zf.filelist[0].filename, path="data/")
+        zf.extract(zf.filelist[0].filename, path=data_dir)
+
 extracted = data_dir / "On_Time_Reporting_Carrier_On_Time_Performance_(1987_present)_2022_1.csv"
 ```
 
