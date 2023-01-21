@@ -529,7 +529,7 @@ rand_df_pl = create_frame(50_000_000, 50_000)
 rand_df_pd = rand_df_pl.to_pandas()
 ```
 
-The Pandas version tends to be 10-60% faster on my machine:
+The Polars version tends to be 10-100% slower on my machine:
 
 ::: {.panel-tabset}
 ## Polars
