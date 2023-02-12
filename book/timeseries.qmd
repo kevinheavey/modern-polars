@@ -53,7 +53,7 @@ else:
     )
     ohlcv_pl.write_parquet(data_path)
 
-ohlcv_pd = ohlcv_pl.to_pandas().set_index("time")
+ohlcv_pd = ohlcv_pl.with_column(pl.col("time").cast(pl.Datetime)).to_pandas().set_index("time")
 ```
 
 ## Filtering
