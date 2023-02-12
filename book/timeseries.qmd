@@ -252,7 +252,8 @@ Suppose we know that our timestamps are UTC, and we want to see what time it was
     .with_column(
         pl.col("time")
         .cast(pl.Datetime)
-        .dt.with_time_zone("US/Eastern")
+        .dt.replace_time_zone("UTC")
+        .dt.convert_time_zone("US/Eastern")
     )
 )
 ```
