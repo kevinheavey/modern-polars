@@ -218,7 +218,7 @@ by_game_pl = (
 )
 joined_pl = (
     by_game_pl
-    .join(games_pl, on=["game_id", "date"])
+    .join(games_pl.collect(), on=["game_id", "date"])
     .with_columns([
         pl.col("home_points").alias("home_win") > pl.col("away_points"),
         pl.col("home_rest").alias("rest_spread") - pl.col("away_rest"),
