@@ -336,7 +336,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>ohlcv_pd <span class="op">=</span> ohlcv_pl.with_column(pl.col(<span class="st">"time"</span>).cast(pl.Datetime)).to_pandas().set_index(<span class="st">"time"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_8106/2189175284.py:47: DeprecationWarning: `DataFrame.with_column` has been renamed; this redirect is temporary, please use `.with_columns` instead
+<pre><code>/tmp/ipykernel_5597/2189175284.py:47: DeprecationWarning: `DataFrame.with_column` has been renamed; this redirect is temporary, please use `.with_columns` instead
   ohlcv_pd = ohlcv_pl.with_column(pl.col("time").cast(pl.Datetime)).to_pandas().set_index("time")</code></pre>
 </div>
 </div>
@@ -365,7 +365,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 }
 </style>
 
-<small>shape: (28, 6)</small><table border="1" class="pl-dataframe">
+<small>shape: (28, 6)</small><table class="dataframe pl-dataframe table table-sm table-striped">
 
 <thead>
 <tr>
@@ -620,7 +620,7 @@ f64
 }
 </style>
 
-<small>shape: (74, 6)</small><table border="1" class="pl-dataframe">
+<small>shape: (74, 6)</small><table class="dataframe pl-dataframe table table-sm table-striped">
 
 <thead>
 <tr>
@@ -868,7 +868,7 @@ f64
 }
 </style>
 
-<small>shape: (53, 11)</small><table border="1" class="pl-dataframe">
+<small>shape: (53, 11)</small><table class="dataframe pl-dataframe table table-sm table-striped">
 
 <thead>
 <tr>
@@ -1262,7 +1262,7 @@ f64
 }
 </style>
 
-<small>shape: (1461, 6)</small><table border="1" class="pl-dataframe">
+<small>shape: (1461, 6)</small><table class="dataframe pl-dataframe table table-sm table-striped">
 
 <thead>
 <tr>
@@ -1616,7 +1616,7 @@ null
 }
 </style>
 
-<small>shape: (366, 1)</small><table border="1" class="pl-dataframe">
+<small>shape: (366, 1)</small><table class="dataframe pl-dataframe table table-sm table-striped">
 
 <thead>
 <tr>
@@ -1717,7 +1717,7 @@ date
 <span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_8106/2518021911.py:3: DeprecationWarning: `DataFrame.with_column` has been renamed; this redirect is temporary, please use `.with_columns` instead
+<pre><code>/tmp/ipykernel_5597/2518021911.py:3: DeprecationWarning: `DataFrame.with_column` has been renamed; this redirect is temporary, please use `.with_columns` instead
   .with_column(</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="17">
@@ -1729,7 +1729,7 @@ date
 }
 </style>
 
-<small>shape: (366, 6)</small><table border="1" class="pl-dataframe">
+<small>shape: (366, 6)</small><table class="dataframe pl-dataframe table table-sm table-striped">
 
 <thead>
 <tr>

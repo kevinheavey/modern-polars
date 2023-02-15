@@ -441,7 +441,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 }
 </style>
 
-<small>shape: (5, 14)</small><table border="1" class="pl-dataframe">
+<small>shape: (5, 14)</small><table class="dataframe pl-dataframe table table-sm table-striped">
 
 <thead>
 <tr>
@@ -1055,7 +1055,7 @@ Note
 <span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>sns.boxplot(x<span class="op">=</span><span class="st">"turn"</span>, y<span class="op">=</span><span class="st">"DepDelay"</span>, data<span class="op">=</span>flights_pl.to_pandas(), ax<span class="op">=</span>ax)</span>
 <span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="op">-</span><span class="dv">50</span>, <span class="dv">50</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_7354/2009830836.py:13: DeprecationWarning: `DataFrame.with_column` has been renamed; this redirect is temporary, please use `.with_columns` instead
+<pre><code>/tmp/ipykernel_4787/2009830836.py:13: DeprecationWarning: `DataFrame.with_column` has been renamed; this redirect is temporary, please use `.with_columns` instead
   .with_column(</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="11">
@@ -1124,7 +1124,7 @@ Note
 <span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    .pipe((sns.boxplot, <span class="st">"data"</span>), x<span class="op">=</span><span class="st">"hour"</span>, y<span class="op">=</span><span class="st">"DepDelay"</span>)</span>
 <span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_7354/3740369134.py:10: DeprecationWarning: `DataFrame.with_column` has been renamed; this redirect is temporary, please use `.with_columns` instead
+<pre><code>/tmp/ipykernel_4787/3740369134.py:10: DeprecationWarning: `DataFrame.with_column` has been renamed; this redirect is temporary, please use `.with_columns` instead
   .with_column(pl.col("DepTime").dt.hour().alias("hour"))</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="13">
