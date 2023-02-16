@@ -53,7 +53,7 @@ else:
     )
     ohlcv_pl.write_parquet(data_path)
 
-ohlcv_pd = ohlcv_pl.with_column(pl.col("time").cast(pl.Datetime)).to_pandas().set_index("time")
+ohlcv_pd = ohlcv_pl.with_columns(pl.col("time").cast(pl.Datetime)).to_pandas().set_index("time")
 ```
 
 ## Filtering
@@ -249,7 +249,7 @@ Suppose we know that our timestamps are UTC, and we want to see what time it was
 ``` {python}
 (
     ohlcv_pl
-    .with_column(
+    .with_columns(
         pl.col("time")
         .cast(pl.Datetime)
         .dt.replace_time_zone("UTC")
