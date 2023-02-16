@@ -361,7 +361,7 @@ Warning
 <span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>            sep<span class="op">=</span><span class="st">"|"</span>,</span>
 <span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>            dtypes<span class="op">=</span>dtypes,</span>
 <span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>            encoding<span class="op">=</span><span class="st">"cp1252"</span>,</span>
-<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>        ).with_column(</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>        ).with_columns(</span>
 <span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>            pl.col(<span class="st">"TRANSACTION_DT"</span>).<span class="bu">str</span>.strptime(pl.Date, fmt<span class="op">=</span><span class="st">"%m</span><span class="sc">%d</span><span class="st">%Y"</span>, strict<span class="op">=</span><span class="va">False</span>)</span>
 <span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>        ).write_parquet(</span>
 <span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>            fec_dir <span class="op">/</span> <span class="ss">f"indiv</span><span class="sc">{</span>year<span class="sc">}</span><span class="ss">.pq"</span></span>
@@ -537,8 +537,8 @@ Note
 <span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    common_subplan_elimination<span class="op">=</span><span class="va">False</span>, <span class="co"># cannot use CSE with streaming</span></span>
 <span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>CPU times: user 11 s, sys: 2.3 s, total: 13.3 s
-Wall time: 4.68 s</code></pre>
+<pre><code>CPU times: user 10.6 s, sys: 2.1 s, total: 12.7 s
+Wall time: 4.59 s</code></pre>
 </div>
 </div>
 </div>
@@ -563,7 +563,7 @@ Wall time: 4.68 s</code></pre>
 <span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    avg_transaction_lazy_dd, total_by_employer_lazy_dd, avg_by_occupation_lazy_dd</span>
 <span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>CPU times: user 24 s, sys: 3.83 s, total: 27.8 s
+<pre><code>CPU times: user 24.1 s, sys: 3.77 s, total: 27.9 s
 Wall time: 19.4 s</code></pre>
 </div>
 </div>
@@ -1020,7 +1020,7 @@ cat
 <span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"TRANSACTION_DT"</span>)</span>
 <span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>        .is_between(date(<span class="dv">2011</span>, <span class="dv">1</span>, <span class="dv">1</span>), date(<span class="dv">2017</span>, <span class="dv">1</span>, <span class="dv">1</span>), closed<span class="op">=</span><span class="st">"left"</span>)</span>
 <span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>    .with_column(pl.col(<span class="st">"TRANSACTION_AMT"</span>) <span class="op">/</span> <span class="dv">1000</span>)</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>    .with_columns(pl.col(<span class="st">"TRANSACTION_AMT"</span>) <span class="op">/</span> <span class="dv">1000</span>)</span>
 <span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>    .collect(streaming<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> (</span>
