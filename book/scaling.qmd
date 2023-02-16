@@ -66,7 +66,7 @@ async def download_and_save_indiv(year: str, client: httpx.AsyncClient):
             sep="|",
             dtypes=dtypes,
             encoding="cp1252",
-        ).with_column(
+        ).with_columns(
             pl.col("TRANSACTION_DT").str.strptime(pl.Date, fmt="%m%d%Y", strict=False)
         ).write_parquet(
             fec_dir / f"indiv{year}.pq"
@@ -343,7 +343,7 @@ daily_pl = (
         pl.col("TRANSACTION_DT")
         .is_between(date(2011, 1, 1), date(2017, 1, 1), closed="left")
     )
-    .with_column(pl.col("TRANSACTION_AMT") / 1000)
+    .with_columns(pl.col("TRANSACTION_AMT") / 1000)
     .collect(streaming=True)
 )
 ax = (

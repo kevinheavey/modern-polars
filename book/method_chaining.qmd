@@ -317,7 +317,7 @@ flights_pl = (
     .drop_nulls()
     .sort("DepTime")
     .filter(pl.col("DepDelay") < 500)
-    .with_column(
+    .with_columns(
         pl.col("DepTime")
         .rank()
         .over(["FlightDate", "Tail_Number"])
@@ -383,7 +383,7 @@ plt.figure(figsize=(10, 5))
     )
     .drop_nulls()
     .filter(pl.col("DepDelay").is_between(5, 600, closed="none"))
-    .with_column(pl.col("DepTime").dt.hour().alias("hour"))
+    .with_columns(pl.col("DepTime").dt.hour().alias("hour"))
     .to_pandas()
     .pipe((sns.boxplot, "data"), x="hour", y="DepDelay")
 )

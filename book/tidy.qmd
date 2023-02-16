@@ -72,7 +72,7 @@ Nothing super interesting here:
 games_pl = (
     pl.scan_csv(nba_glob)
     .filter(~pl.all(pl.all().is_null()))
-    .with_column(
+    .with_columns(
         pl.col("date").str.strptime(pl.Date, "%a, %b %d, %Y"),
     )
     .sort("date")
@@ -163,7 +163,7 @@ tidy_pl = (
         value_name="team",
     )
     .sort("game_id")
-    .with_column((
+    .with_columns((
         pl.col("date")
         .alias("rest")
         .diff().over("team")
@@ -417,7 +417,7 @@ wins_pl = (
         variable_name="is_home",
         value_vars=["home_team", "away_team"],
     )
-    .with_column(pl.col("home_win").alias("win") == (pl.col("is_home") == "home_team"))
+    .with_columns(pl.col("home_win").alias("win") == (pl.col("is_home") == "home_team"))
     .groupby(["team", "is_home"])
     .agg(
         [
