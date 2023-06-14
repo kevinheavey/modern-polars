@@ -42,7 +42,7 @@ def extract_city_name_pl() -> pl.Expr:
     Chicago, IL -> Chicago for OriginCityName and DestCityName
     """
     cols = ["OriginCityName", "DestCityName"]
-    return pl.col(cols).str.split(",").arr.get(0)
+    return pl.col(cols).str.split(",").list.get(0)
 ```
 
 ## Pandas

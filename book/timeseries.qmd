@@ -25,7 +25,7 @@ def epoch_ms(dt: datetime) -> int:
 
 
 if data_path.exists():
-    ohlcv_pl = pl.read_parquet(data_path)
+    ohlcv_pl = pl.read_parquet(data_path).set_sorted("time")
 
 else:
     start = epoch_ms(datetime(2021, 1, 1))
@@ -50,7 +50,7 @@ else:
             pl.col(time_col).cast(pl.Datetime).dt.with_time_unit("ms").cast(pl.Date),
             pl.col(ohlcv_cols).cast(pl.Float64),
         ]
-    )
+    ).set_sorted("time")
     ohlcv_pl.write_parquet(data_path)
 
 ohlcv_pd = ohlcv_pl.with_columns(pl.col("time").cast(pl.Datetime)).to_pandas().set_index("time")
@@ -111,11 +111,13 @@ Resampling and performing multiple aggregations to each column:
 ::: {.panel-tabset}
 ## Polars
 ``` {python}
-ohlcv_pl.groupby_dynamic("time", every="1w").agg(
-    [
+(
+    ohlcv_pl
+    .groupby_dynamic("time", every="1w")
+    .agg([
         pl.col(pl.Float64).mean().suffix("_mean"),
         pl.col(pl.Float64).sum().suffix("_sum")
-    ]
+    ])
 )
 
 ```

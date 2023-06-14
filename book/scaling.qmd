@@ -93,7 +93,7 @@ We can solve this using Polars streaming, using Dask's lazy dataframe or simply 
 
 ``` {python}
 # otherwise we can't read categoricals from multiple files
-pl.toggle_string_cache(True)
+pl.enable_string_cache(True)
 occupation_counts_pl = (
     pl.scan_parquet(fec_dir / "indiv*.pq", cache=False)
     .select(pl.col("OCCUPATION").value_counts(multithreaded=True, sort=True))
@@ -150,13 +150,13 @@ total_by_employer_lazy_pl = (
     indiv_pl.drop_nulls("EMPLOYER")
     .groupby("EMPLOYER")
     .agg([pl.col("TRANSACTION_AMT").sum()])
-    .sort("TRANSACTION_AMT", reverse=True)
+    .sort("TRANSACTION_AMT", descending=True)
     .head(10)
 )
 avg_by_occupation_lazy_pl = (
     indiv_pl.groupby("OCCUPATION")
     .agg([pl.col("TRANSACTION_AMT").mean()])
-    .sort("TRANSACTION_AMT", reverse=True)
+    .sort("TRANSACTION_AMT", descending=True)
     .head(10)
 )
 
