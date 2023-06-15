@@ -326,7 +326,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    ]</span>
 <span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    cols_to_use <span class="op">=</span> [time_col, <span class="op">*</span>ohlcv_cols] </span>
 <span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    cols <span class="op">=</span> cols_to_use <span class="op">+</span> [<span class="ss">f"ignore_</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">6</span>)]</span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    ohlcv_pl <span class="op">=</span> pl.from_records(resp.json(), orient<span class="op">=</span><span class="st">"row"</span>, columns<span class="op">=</span>cols).select(</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    ohlcv_pl <span class="op">=</span> pl.from_records(resp.json(), orient<span class="op">=</span><span class="st">"row"</span>, schema<span class="op">=</span>cols).select(</span>
 <span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>        [</span>
 <span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>            pl.col(time_col).cast(pl.Datetime).dt.with_time_unit(<span class="st">"ms"</span>).cast(pl.Date),</span>
 <span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>            pl.col(ohlcv_cols).cast(pl.Float64),</span>
@@ -555,7 +555,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    ohlcv_pl</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    .groupby_dynamic(<span class="st">"time"</span>, every<span class="op">=</span><span class="st">"1w"</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    .groupby_dynamic(<span class="st">"time"</span>, every<span class="op">=</span><span class="st">"1w"</span>, start_by<span class="op">=</span><span class="st">"friday"</span>)</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    .agg([</span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        pl.col(pl.Float64).mean().suffix(<span class="st">"_mean"</span>),</span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        pl.col(pl.Float64).<span class="bu">sum</span>().suffix(<span class="st">"_sum"</span>)</span>
@@ -575,7 +575,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
 <div class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pd.resample(<span class="st">"W"</span>).agg([<span class="st">'mean'</span>, <span class="st">'sum'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pd.resample(<span class="st">"W-Fri"</span>, closed<span class="op">=</span><span class="st">"left"</span>, label<span class="op">=</span><span class="st">"left"</span>).agg([<span class="st">'mean'</span>, <span class="st">'sum'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="7">
 
 <div>
@@ -619,30 +619,30 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </thead>
   <tbody>
     <tr>
-      <th>2021-01-03</th>
-      <td>30143.926667</td>
-      <td>90431.78</td>
-      <td>32559.370000</td>
-      <td>97678.11</td>
-      <td>29844.696667</td>
-      <td>89534.09</td>
-      <td>31503.356667</td>
-      <td>94510.07</td>
-      <td>101711.455041</td>
-      <td>305134.365123</td>
+      <th>2021-01-01</th>
+      <td>32305.781429</td>
+      <td>226140.47</td>
+      <td>34706.045714</td>
+      <td>242942.32</td>
+      <td>31021.727143</td>
+      <td>217152.09</td>
+      <td>33807.135714</td>
+      <td>236649.95</td>
+      <td>117435.592800</td>
+      <td>822049.149598</td>
     </tr>
     <tr>
-      <th>2021-01-10</th>
-      <td>36545.192857</td>
-      <td>255816.35</td>
-      <td>38563.458571</td>
-      <td>269944.21</td>
-      <td>33992.730000</td>
-      <td>237949.11</td>
-      <td>37280.132857</td>
-      <td>260960.93</td>
-      <td>121528.609450</td>
-      <td>850700.266152</td>
+      <th>2021-01-08</th>
+      <td>37869.797143</td>
+      <td>265088.58</td>
+      <td>39646.105714</td>
+      <td>277522.74</td>
+      <td>34623.334286</td>
+      <td>242363.34</td>
+      <td>37827.520000</td>
+      <td>264792.64</td>
+      <td>135188.296617</td>
+      <td>946318.076319</td>
     </tr>
     <tr>
       <th>...</th>
@@ -658,30 +658,30 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <td>...</td>
     </tr>
     <tr>
-      <th>2021-12-26</th>
-      <td>49018.521429</td>
-      <td>343129.65</td>
-      <td>50294.841429</td>
-      <td>352063.89</td>
-      <td>48352.841429</td>
-      <td>338469.89</td>
-      <td>49603.737143</td>
-      <td>347226.16</td>
-      <td>29878.489421</td>
-      <td>209149.425950</td>
+      <th>2021-12-24</th>
+      <td>49649.114286</td>
+      <td>347543.80</td>
+      <td>50439.622857</td>
+      <td>353077.36</td>
+      <td>48528.250000</td>
+      <td>339697.75</td>
+      <td>49117.980000</td>
+      <td>343825.86</td>
+      <td>31126.709793</td>
+      <td>217886.968550</td>
     </tr>
     <tr>
-      <th>2022-01-02</th>
-      <td>48137.188333</td>
-      <td>288823.13</td>
-      <td>49222.336667</td>
-      <td>295334.02</td>
-      <td>46940.895000</td>
-      <td>281645.37</td>
-      <td>47628.381667</td>
-      <td>285770.29</td>
-      <td>33173.196967</td>
-      <td>199039.181800</td>
+      <th>2021-12-31</th>
+      <td>46668.905000</td>
+      <td>93337.81</td>
+      <td>48251.445000</td>
+      <td>96502.89</td>
+      <td>45943.185000</td>
+      <td>91886.37</td>
+      <td>46969.790000</td>
+      <td>93939.58</td>
+      <td>27271.230605</td>
+      <td>54542.461210</td>
     </tr>
   </tbody>
 </table>

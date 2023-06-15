@@ -497,8 +497,8 @@ Note
 <pre><code>PARTITIONED DS</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>CPU times: user 14.7 s, sys: 3.9 s, total: 18.6 s
-Wall time: 5.92 s</code></pre>
+<pre><code>CPU times: user 10.5 s, sys: 2.49 s, total: 13 s
+Wall time: 4.18 s</code></pre>
 </div>
 </div>
 </div>
@@ -523,8 +523,8 @@ Wall time: 5.92 s</code></pre>
 <span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    avg_transaction_lazy_dd, total_by_employer_lazy_dd, avg_by_occupation_lazy_dd</span>
 <span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>CPU times: user 27.1 s, sys: 4.32 s, total: 31.4 s
-Wall time: 21.3 s</code></pre>
+<pre><code>CPU times: user 23.4 s, sys: 3.61 s, total: 27 s
+Wall time: 18.9 s</code></pre>
 </div>
 </div>
 </div>
@@ -617,7 +617,7 @@ Name: TRANSACTION_AMT, Length: 10, dtype: int32</code></pre>
   text-align: right;
 }
 </style>
-<small>shape: (10, 2)</small><table class="dataframe table table-sm table-striped"><thead><tr><th>OCCUPATION</th><th>TRANSACTION_AMT</th></tr><tr><td>cat</td><td>f64</td></tr></thead><tbody><tr><td>"CHAIRMAN CEO &amp;…</td><td>1.0233e6</td></tr><tr><td>"PAULSON AND CO…</td><td>1e6</td></tr><tr><td>…</td><td>…</td></tr><tr><td>"CHIEF EXECUTIV…</td><td>500000.0</td></tr><tr><td>"MOORE CAPITAL …</td><td>500000.0</td></tr></tbody></table></div>
+<small>shape: (10, 2)</small><table class="dataframe table table-sm table-striped"><thead><tr><th>OCCUPATION</th><th>TRANSACTION_AMT</th></tr><tr><td>cat</td><td>f64</td></tr></thead><tbody><tr><td>"CHAIRMAN CEO &amp;…</td><td>1.0233e6</td></tr><tr><td>"PAULSON AND CO…</td><td>1e6</td></tr><tr><td>…</td><td>…</td></tr><tr><td>"OWNER, FOUNDER…</td><td>500000.0</td></tr><tr><td>"PERRY HOMES"</td><td>500000.0</td></tr></tbody></table></div>
 </div>
 </div>
 </div>
@@ -1008,7 +1008,7 @@ Name: TRANSACTION_AMT, Length: 10, dtype: float64</code></pre>
 <span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(title<span class="op">=</span><span class="st">"Daily Donations (30-D Moving Average)"</span>, xlabel<span class="op">=</span><span class="st">"Date"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_45546/1958779972.py:3: DeprecationWarning: In a future version of polars, the default `aggregate_function` will change from `'first'` to `None`. Please pass `'first'` to keep the current behaviour, or `None` to accept the new one.
+<pre><code>/tmp/ipykernel_4162/1958779972.py:3: DeprecationWarning: In a future version of polars, the default `aggregate_function` will change from `'first'` to `None`. Please pass `'first'` to keep the current behaviour, or `None` to accept the new one.
   .pivot(</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="27">

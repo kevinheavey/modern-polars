@@ -514,7 +514,7 @@ Note
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>pivoted</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_45351/2694378470.py:1: DeprecationWarning: In a future version of polars, the default `aggregate_function` will change from `'first'` to `None`. Please pass `'first'` to keep the current behaviour, or `None` to accept the new one.
+<pre><code>/tmp/ipykernel_3964/2694378470.py:1: DeprecationWarning: In a future version of polars, the default `aggregate_function` will change from `'first'` to `None`. Please pass `'first'` to keep the current behaviour, or `None` to accept the new one.
   pivoted = prices.pivot(index="date", values="price", columns="ticker")</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="5">
@@ -704,7 +704,7 @@ Note
 <span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>joined_pl</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_45351/627471089.py:3: DeprecationWarning: In a future version of polars, the default `aggregate_function` will change from `'first'` to `None`. Please pass `'first'` to keep the current behaviour, or `None` to accept the new one.
+<pre><code>/tmp/ipykernel_3964/627471089.py:3: DeprecationWarning: In a future version of polars, the default `aggregate_function` will change from `'first'` to `None`. Please pass `'first'` to keep the current behaviour, or `None` to accept the new one.
   .pivot(</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="9">
@@ -856,7 +856,7 @@ Note
 <span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    height<span class="op">=</span><span class="fl">1.5</span>,</span>
 <span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
-<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7f38d684a690&gt;</code></pre>
+<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7f5aa25adf10&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <p><img src="tidy_files/figure-html/cell-12-output-2.png" width="729" height="864"></p>
@@ -930,7 +930,7 @@ Note
 <pre><code>&lt;AxesSubplot: xlabel='rest_spread', ylabel='home_win'&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="tidy_files/figure-html/cell-15-output-2.png" width="731" height="500"></p>
+<p><img src="tidy_files/figure-html/cell-15-output-2.png" width="731" height="503"></p>
 </div>
 </div>
 </div>
@@ -1011,7 +1011,7 @@ Name: rest, Length: 418, dtype: Float64</code></pre>
 <div class="cell" data-execution_count="18">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>rest_pl.pivot(index<span class="op">=</span><span class="st">"date"</span>, columns<span class="op">=</span><span class="st">"variable"</span>, values<span class="op">=</span><span class="st">"rest"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_45351/3125023503.py:1: DeprecationWarning: In a future version of polars, the default `aggregate_function` will change from `'first'` to `None`. Please pass `'first'` to keep the current behaviour, or `None` to accept the new one.
+<pre><code>/tmp/ipykernel_3964/3125023503.py:1: DeprecationWarning: In a future version of polars, the default `aggregate_function` will change from `'first'` to `None`. Please pass `'first'` to keep the current behaviour, or `None` to accept the new one.
   rest_pl.pivot(index="date", columns="variable", values="rest")</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="18">
@@ -1098,7 +1098,7 @@ Name: rest, Length: 418, dtype: Float64</code></pre>
 <span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(ylabel<span class="op">=</span><span class="st">"Rest (7 day MA)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_45351/2281708156.py:2: DeprecationWarning: In a future version of polars, the default `aggregate_function` will change from `'first'` to `None`. Please pass `'first'` to keep the current behaviour, or `None` to accept the new one.
+<pre><code>/tmp/ipykernel_3964/2281708156.py:2: DeprecationWarning: In a future version of polars, the default `aggregate_function` will change from `'first'` to `None`. Please pass `'first'` to keep the current behaviour, or `None` to accept the new one.
   rest_pl.pivot(index="date", values="rest", columns="variable")</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="20">
@@ -1271,7 +1271,7 @@ Name: rest, Length: 418, dtype: Float64</code></pre>
 <span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"win_pct"</span>,</span>
 <span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>    order<span class="op">=</span>[<span class="st">"away_team"</span>, <span class="st">"home_team"</span>]).<span class="bu">set</span>(ylim<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="24">
-<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7f38d4041490&gt;</code></pre>
+<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7f5a8a7598d0&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <p><img src="tidy_files/figure-html/cell-25-output-2.png" width="383" height="483"></p>
@@ -1289,7 +1289,7 @@ Name: rest, Length: 418, dtype: Float64</code></pre>
 <span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>    height<span class="op">=</span><span class="fl">1.5</span>,</span>
 <span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="25">
-<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7f38ce29fc90&gt;</code></pre>
+<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7f5a8a2c3e50&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <p><img src="tidy_files/figure-html/cell-26-output-2.png" width="729" height="864"></p>
@@ -1374,7 +1374,7 @@ Length: 30, dtype: float64</code></pre>
 <span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>    .pipe((sns.regplot, <span class="st">"data"</span>), x<span class="op">=</span><span class="st">"Overall %"</span>, y<span class="op">=</span><span class="st">"Home Win % - Away %"</span>)</span>
 <span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_45351/30977874.py:2: DeprecationWarning: In a future version of polars, the default `aggregate_function` will change from `'first'` to `None`. Please pass `'first'` to keep the current behaviour, or `None` to accept the new one.
+<pre><code>/tmp/ipykernel_3964/30977874.py:2: DeprecationWarning: In a future version of polars, the default `aggregate_function` will change from `'first'` to `None`. Please pass `'first'` to keep the current behaviour, or `None` to accept the new one.
   wins_pl.pivot(index="team", columns="is_home", values="win_pct")</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="29">
@@ -1603,10 +1603,10 @@ Length: 30, dtype: float64</code></pre>
   <th>Method:</th>                 <td>MLE</td>       <th>  Df Model:          </th>  <td>     4</td>  
 </tr>
 <tr>
-  <th>Date:</th>            <td>Wed, 14 Jun 2023</td> <th>  Pseudo R-squ.:     </th>  <td>0.1777</td>  
+  <th>Date:</th>            <td>Thu, 15 Jun 2023</td> <th>  Pseudo R-squ.:     </th>  <td>0.1777</td>  
 </tr>
 <tr>
-  <th>Time:</th>                <td>19:56:10</td>     <th>  Log-Likelihood:    </th> <td> -720.68</td> 
+  <th>Time:</th>                <td>21:19:22</td>     <th>  Log-Likelihood:    </th> <td> -720.68</td> 
 </tr>
 <tr>
   <th>converged:</th>             <td>True</td>       <th>  LL-Null:           </th> <td> -876.38</td> 
