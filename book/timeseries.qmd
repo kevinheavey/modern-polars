@@ -45,7 +45,7 @@ else:
     ]
     cols_to_use = [time_col, *ohlcv_cols] 
     cols = cols_to_use + [f"ignore_{i}" for i in range(6)]
-    ohlcv_pl = pl.from_records(resp.json(), orient="row", columns=cols).select(
+    ohlcv_pl = pl.from_records(resp.json(), orient="row", schema=cols).select(
         [
             pl.col(time_col).cast(pl.Datetime).dt.with_time_unit("ms").cast(pl.Date),
             pl.col(ohlcv_cols).cast(pl.Float64),
@@ -113,7 +113,7 @@ Resampling and performing multiple aggregations to each column:
 ``` {python}
 (
     ohlcv_pl
-    .groupby_dynamic("time", every="1w")
+    .groupby_dynamic("time", every="1w", start_by="friday")
     .agg([
         pl.col(pl.Float64).mean().suffix("_mean"),
         pl.col(pl.Float64).sum().suffix("_sum")
@@ -123,7 +123,7 @@ Resampling and performing multiple aggregations to each column:
 ```
 ## Pandas
 ``` {python}
-ohlcv_pd.resample("W").agg(['mean', 'sum'])
+ohlcv_pd.resample("W-Fri", closed="left", label="left").agg(['mean', 'sum'])
 ```
 :::
 
