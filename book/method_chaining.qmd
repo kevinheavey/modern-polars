@@ -81,7 +81,7 @@ def time_col_pl(col: str) -> pl.Expr:
     col_expr = pl.col(col)
     return (
         pl.when(col_expr == "2400")
-        .then("0000")
+        .then(pl.lit("0000"))
         .otherwise(col_expr)
         .str.strptime(pl.Time, "%H%M", strict=True)
         .alias(col)
