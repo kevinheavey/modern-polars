@@ -179,10 +179,10 @@ indiv_dd = (
 )
 avg_transaction_lazy_dd = indiv_dd["TRANSACTION_AMT"].mean()
 total_by_employer_lazy_dd = (
-    indiv_dd.groupby("EMPLOYER")["TRANSACTION_AMT"].sum().nlargest(10)
+    indiv_dd.groupby("EMPLOYER", observed=True)["TRANSACTION_AMT"].sum().nlargest(10)
 )
 avg_by_occupation_lazy_dd = (
-    indiv_dd.groupby("OCCUPATION")["TRANSACTION_AMT"].mean().nlargest(10)
+    indiv_dd.groupby("OCCUPATION", observed=True)["TRANSACTION_AMT"].mean().nlargest(10)
 )
 avg_transaction_dd, total_by_employer_dd, avg_by_occupation_dd = compute(
     avg_transaction_lazy_dd, total_by_employer_lazy_dd, avg_by_occupation_lazy_dd
@@ -285,7 +285,7 @@ total_avg_pl, occupation_avg_pl = pl.collect_all(
 ``` {python}
 donations_dd_lazy = (
     indiv_dd[indiv_dd["OCCUPATION"].isin(top_occupations_dd)]
-    .groupby("OCCUPATION")["TRANSACTION_AMT"]
+    .groupby("OCCUPATION", observed=True)["TRANSACTION_AMT"]
     .mean()
     .dropna()
 )

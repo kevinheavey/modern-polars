@@ -54,11 +54,12 @@ If you're not using mamba/conda you can install the following package versions a
 ```
 polars: 0.19.9
 pyarrow: 10.0.1
-pandas: 1.5.2
+pandas: 2.1.1
 numpy: 1.23.5
 fsspec: 2022.11.0
-matplotlib: 3.6.2
-seaborn: 0.12.1
+matplotlib: 3.8.0
+seaborn: 0.13.0
+statsmodels: 0.14.0
 filprofiler: 2022.11.0
 ```
 

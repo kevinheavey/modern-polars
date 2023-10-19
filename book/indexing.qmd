@@ -106,7 +106,7 @@ Or using `take`:
 df_pl.select(pl.col(["Dest", "Tail_Number"]).take(list(range(12, 16))))
 ```
 
-## Polars (antipattern)
+## Polars (square bracket)
 
 ``` {python}
 df_pl[12:16, ["Dest", "Tail_Number"]]

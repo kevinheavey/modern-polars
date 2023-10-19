@@ -248,7 +248,7 @@ joined_pd
 
 Here's a lightly edited quote from *Modern Pandas*:
 
-> One somewhat subtle point: an "observation" depends on the question being asked. So really, we have two tidy datasets, `tidy_pl` for answering team-level questions, and `joined` for answering game-level questions.
+> One somewhat subtle point: an "observation" depends on the question being asked. So really, we have two tidy datasets, `tidy` for answering team-level questions, and `joined` for answering game-level questions.
 
 Let's use the team-level dataframe to see each team's average days of rest, both at home and away:
 
