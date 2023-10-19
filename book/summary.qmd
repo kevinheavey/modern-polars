@@ -12,9 +12,13 @@ By now you should have a good idea of what Polars can do and how it compares to 
 
 ## Reasons not to use Polars
 
-### Bugs
+### Bugs (maybe)
 
-By my count I ran into [11 bugs](https://github.com/pola-rs/polars/issues?q=is%3Aissue+author%3Akevinheavey) while writing this book. They were fixed quickly and tests were added to make sure they don't happen again, but it all makes me feel somewhat uneasy. It's not like Pandas hasn't gone through a whole insectarium of bugs, but Polars probably has more right now due to being newer.
+By my count I ran into [11 bugs](https://github.com/pola-rs/polars/issues?q=is%3Aissue+author%3Akevinheavey) while writing this book. They were fixed quickly and tests were added to make sure they don't happen again, but it made me feel somewhat uneasy.
+
+However that was some time ago, and Pandas also has plenty of bugs, so at this point it's quite difficult
+to measure which library is buggier.
+
 
 ### If it ain't broke, don't fix it
 
