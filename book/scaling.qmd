@@ -93,10 +93,10 @@ We can solve this using Polars streaming, using Dask's lazy dataframe or simply 
 
 ``` {python}
 # otherwise we can't read categoricals from multiple files
-pl.enable_string_cache(True)
+pl.enable_string_cache()
 occupation_counts_pl = (
     pl.scan_parquet(fec_dir / "indiv*.pq", cache=False)
-    .select(pl.col("OCCUPATION").value_counts(multithreaded=True, sort=True))
+    .select(pl.col("OCCUPATION").value_counts(parallel=True, sort=True))
     .collect(streaming=True)
 )
 occupation_counts_pl
