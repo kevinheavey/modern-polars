@@ -82,9 +82,9 @@ It just has ordinary methods like `.select`, `.filter` and `.head` for accessing
 In Pandas you can subset a dataframe with `.loc[]`, `.iloc[]` or just `[]`.
 In Polars you select rows and columns with expressions as noted above.
 
-However, at the time of writing you *can* also use square bracket indexing, but it's
-[considered an anti-pattern](https://pola-rs.github.io/polars-book/user-guide/howcani/selecting_data/selecting_data_indexing.html?highlight=indexing#indexing-is-an-anti-pattern-in-polars),
-doesn't work in lazy mode and may be deprecated in future 🙃
+You *can* also use square bracket indexing in Polars, but it 
+doesn't work in lazy mode so is only to be used when convenience
+is most important.
 
 Here are some examples:
 
