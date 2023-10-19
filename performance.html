@@ -570,7 +570,7 @@ Tip
 <div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
 <div class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parse_date_pl(col: pl.Expr) <span class="op">-&gt;</span> pl.Expr:</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> col.<span class="bu">str</span>.strptime(pl.Date, fmt<span class="op">=</span><span class="st">"%b </span><span class="sc">%d</span><span class="st">, %Y"</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> col.<span class="bu">str</span>.strptime(pl.Date, <span class="bu">format</span><span class="op">=</span><span class="st">"%b </span><span class="sc">%d</span><span class="st">, %Y"</span>)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parse_suffixed_num_pl(col: pl.Expr) <span class="op">-&gt;</span> pl.Expr:</span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    suffix <span class="op">=</span> col.<span class="bu">str</span>.<span class="bu">slice</span>(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
@@ -601,7 +601,7 @@ Tip
 <span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>    feet_inches_split <span class="op">=</span> col.<span class="bu">str</span>.split_exact(<span class="st">"'"</span>, <span class="dv">1</span>)</span>
 <span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    total_inches <span class="op">=</span> (</span>
 <span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>        (feet_inches_split.struct.field(<span class="st">"field_0"</span>).cast(pl.UInt8, strict<span class="op">=</span><span class="va">False</span>) <span class="op">*</span> <span class="dv">12</span>)</span>
-<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> feet_inches_split.struct.field(<span class="st">"field_1"</span>).<span class="bu">str</span>.rstrip(<span class="st">'"'</span>).cast(pl.UInt8, strict<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> feet_inches_split.struct.field(<span class="st">"field_1"</span>).<span class="bu">str</span>.strip_chars_end(<span class="st">'"'</span>).cast(pl.UInt8, strict<span class="op">=</span><span class="va">False</span>)</span>
 <span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (total_inches <span class="op">*</span> <span class="fl">2.54</span>).<span class="bu">round</span>(<span class="dv">0</span>).cast(pl.UInt8)</span>
 <span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a></span>
@@ -718,7 +718,7 @@ Tip
 <div class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>new_cols_pl <span class="op">=</span> ([</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">"Club"</span>).<span class="bu">str</span>.strip().cast(pl.Categorical),</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">"Club"</span>).<span class="bu">str</span>.strip_chars().cast(pl.Categorical),</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    parse_suffixed_num_pl(pl.col(<span class="st">"Hits"</span>)).cast(pl.UInt32),</span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">"Positions"</span>).<span class="bu">str</span>.split(<span class="st">","</span>),</span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    parse_height_pl(pl.col(<span class="st">"Height"</span>)),</span>
@@ -739,35 +739,31 @@ Tip
 <span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    .collect()</span>
 <span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>CPU times: user 161 ms, sys: 26 ms, total: 187 ms
-Wall time: 44.9 ms</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_3750/211386667.py:2: DeprecationWarning: `fmt` is deprecated as an argument to `strptime`; use `format` instead.
-  return col.str.strptime(pl.Date, fmt="%b %d, %Y")</code></pre>
+<pre><code>CPU times: user 119 ms, sys: 28.8 ms, total: 148 ms
+Wall time: 34.1 ms</code></pre>
 </div>
 </div>
 </div>
 <div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
 <div class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>fifa_pd <span class="op">=</span> (</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    pd.read_csv(<span class="st">"../data/fifa21_raw_big.csv"</span>, dtype<span class="op">=</span>dtypes_pd)</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    .assign(Club<span class="op">=</span><span class="kw">lambda</span> df: df[<span class="st">"Club"</span>].cat.rename_categories(<span class="kw">lambda</span> c: c.strip()),</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>        <span class="op">**</span>{col: <span class="kw">lambda</span> df: parse_date_pd(df[col]) <span class="cf">for</span> col <span class="kw">in</span> date_cols},</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">**</span>{col: <span class="kw">lambda</span> df: parse_money_pd(df[col]) <span class="cf">for</span> col <span class="kw">in</span> money_cols},</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">**</span>{col: <span class="kw">lambda</span> df: parse_star_pd(df[col]) <span class="cf">for</span> col <span class="kw">in</span> star_cols},</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        Hits<span class="op">=</span><span class="kw">lambda</span> df: parse_suffixed_num_pd(df[<span class="st">"Hits"</span>]).astype(pd.UInt32Dtype()),</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        Positions<span class="op">=</span><span class="kw">lambda</span> df: df[<span class="st">"Positions"</span>].<span class="bu">str</span>.split(<span class="st">","</span>),</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>        Height<span class="op">=</span><span class="kw">lambda</span> df: parse_height_pd(df[<span class="st">"Height"</span>]),</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>        Weight<span class="op">=</span><span class="kw">lambda</span> df: parse_weight_pd(df[<span class="st">"Weight"</span>])</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    .pipe(parse_contract_pd)</span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    .rename(columns<span class="op">=</span>{<span class="st">"↓OVA"</span>: <span class="st">"OVA"</span>})</span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>fifa_pd <span class="op">=</span> (</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    pd.read_csv(<span class="st">"../data/fifa21_raw_big.csv"</span>, dtype<span class="op">=</span>dtypes_pd)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    .assign(Club<span class="op">=</span><span class="kw">lambda</span> df: df[<span class="st">"Club"</span>].cat.rename_categories(<span class="kw">lambda</span> c: c.strip()),</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        <span class="op">**</span>{col: <span class="kw">lambda</span> df: parse_date_pd(df[col]) <span class="cf">for</span> col <span class="kw">in</span> date_cols},</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">**</span>{col: <span class="kw">lambda</span> df: parse_money_pd(df[col]) <span class="cf">for</span> col <span class="kw">in</span> money_cols},</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">**</span>{col: <span class="kw">lambda</span> df: parse_star_pd(df[col]) <span class="cf">for</span> col <span class="kw">in</span> star_cols},</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>        Hits<span class="op">=</span><span class="kw">lambda</span> df: parse_suffixed_num_pd(df[<span class="st">"Hits"</span>]).astype(pd.UInt32Dtype()),</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>        Positions<span class="op">=</span><span class="kw">lambda</span> df: df[<span class="st">"Positions"</span>].<span class="bu">str</span>.split(<span class="st">","</span>),</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>        Height<span class="op">=</span><span class="kw">lambda</span> df: parse_height_pd(df[<span class="st">"Height"</span>]),</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>        Weight<span class="op">=</span><span class="kw">lambda</span> df: parse_weight_pd(df[<span class="st">"Weight"</span>])</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    .pipe(parse_contract_pd)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    .rename(columns<span class="op">=</span>{<span class="st">"↓OVA"</span>: <span class="st">"OVA"</span>})</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>CPU times: user 6 s, sys: 311 ms, total: 6.31 s
-Wall time: 6.38 s</code></pre>
+<pre><code>CPU times: user 6.16 s, sys: 229 ms, total: 6.39 s
+Wall time: 6.39 s</code></pre>
 </div>
 </div>
 </div>
@@ -779,13 +775,14 @@ Wall time: 6.38 s</code></pre>
 <div class="tab-content">
 <div id="tabset-4-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-4-1-tab">
 <div class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fifa_pl.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>fifa_pl.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="9">
 
 <div><style>
 .dataframe > thead > tr > th,
 .dataframe > tbody > tr > td {
   text-align: right;
+  white-space: pre-wrap;
 }
 </style>
 <small>shape: (5, 80)</small><table class="dataframe table table-sm table-striped"><thead><tr><th>ID</th><th>Name</th><th>LongName</th><th>photoUrl</th><th>playerUrl</th><th>Nationality</th><th>Age</th><th>OVA</th><th>POT</th><th>Club</th><th>Positions</th><th>Height</th><th>Weight</th><th>Preferred Foot</th><th>BOV</th><th>Best Position</th><th>Joined</th><th>Loan Date End</th><th>Value</th><th>Wage</th><th>Release Clause</th><th>Attacking</th><th>Crossing</th><th>Finishing</th><th>Heading Accuracy</th><th>Short Passing</th><th>Volleys</th><th>Skill</th><th>Dribbling</th><th>Curve</th><th>FK Accuracy</th><th>Long Passing</th><th>Ball Control</th><th>Movement</th><th>Acceleration</th><th>Sprint Speed</th><th>Agility</th><th>…</th><th>Strength</th><th>Long Shots</th><th>Mentality</th><th>Aggression</th><th>Interceptions</th><th>Positioning</th><th>Vision</th><th>Penalties</th><th>Composure</th><th>Defending</th><th>Marking</th><th>Standing Tackle</th><th>Sliding Tackle</th><th>Goalkeeping</th><th>GK Diving</th><th>GK Handling</th><th>GK Kicking</th><th>GK Positioning</th><th>GK Reflexes</th><th>Total Stats</th><th>Base Stats</th><th>W/F</th><th>SM</th><th>A/W</th><th>D/W</th><th>IR</th><th>PAC</th><th>SHO</th><th>PAS</th><th>DRI</th><th>DEF</th><th>PHY</th><th>Hits</th><th>contract_start</th><th>contract_end</th><th>free_agent</th><th>loan_date_start</th></tr><tr><td>u32</td><td>str</td><td>str</td><td>str</td><td>str</td><td>cat</td><td>u8</td><td>u8</td><td>u8</td><td>cat</td><td>list[str]</td><td>u8</td><td>u8</td><td>cat</td><td>u8</td><td>cat</td><td>date</td><td>date</td><td>u32</td><td>u32</td><td>u32</td><td>u16</td><td>u8</td><td>u8</td><td>u8</td><td>u8</td><td>u8</td><td>u16</td><td>u8</td><td>u8</td><td>u8</td><td>u8</td><td>u8</td><td>u16</td><td>u8</td><td>u8</td><td>u8</td><td>…</td><td>u8</td><td>u8</td><td>u16</td><td>u8</td><td>u8</td><td>u8</td><td>u8</td><td>u8</td><td>u8</td><td>u16</td><td>u8</td><td>u8</td><td>u8</td><td>u16</td><td>u8</td><td>u8</td><td>u8</td><td>u8</td><td>u8</td><td>u16</td><td>u16</td><td>u8</td><td>u8</td><td>cat</td><td>cat</td><td>u8</td><td>u8</td><td>u8</td><td>u8</td><td>u8</td><td>u8</td><td>u8</td><td>u32</td><td>u16</td><td>u16</td><td>bool</td><td>date</td></tr></thead><tbody><tr><td>158023</td><td>"L. Messi"</td><td>"Lionel Messi"</td><td>"https://cdn.so…</td><td>"http://sofifa.…</td><td>"Argentina"</td><td>33</td><td>93</td><td>93</td><td>"FC Barcelona"</td><td>["RW", " ST", " CF"]</td><td>170</td><td>72</td><td>"Left"</td><td>93</td><td>"RW"</td><td>2004-07-01</td><td>null</td><td>103500000</td><td>560000</td><td>138399993</td><td>429</td><td>85</td><td>95</td><td>70</td><td>91</td><td>88</td><td>470</td><td>96</td><td>93</td><td>94</td><td>91</td><td>96</td><td>451</td><td>91</td><td>80</td><td>91</td><td>…</td><td>69</td><td>94</td><td>347</td><td>44</td><td>40</td><td>93</td><td>95</td><td>75</td><td>96</td><td>91</td><td>32</td><td>35</td><td>24</td><td>54</td><td>6</td><td>11</td><td>15</td><td>14</td><td>8</td><td>2231</td><td>466</td><td>4</td><td>4</td><td>"Medium"</td><td>"Low"</td><td>5</td><td>85</td><td>92</td><td>91</td><td>95</td><td>38</td><td>65</td><td>771</td><td>2004</td><td>2021</td><td>false</td><td>null</td></tr><tr><td>20801</td><td>"Cristiano Rona…</td><td>"C. Ronaldo dos…</td><td>"https://cdn.so…</td><td>"http://sofifa.…</td><td>"Portugal"</td><td>35</td><td>92</td><td>92</td><td>"Juventus"</td><td>["ST", " LW"]</td><td>187</td><td>83</td><td>"Right"</td><td>92</td><td>"ST"</td><td>2018-07-10</td><td>null</td><td>63000000</td><td>220000</td><td>75900001</td><td>437</td><td>84</td><td>95</td><td>90</td><td>82</td><td>86</td><td>414</td><td>88</td><td>81</td><td>76</td><td>77</td><td>92</td><td>431</td><td>87</td><td>91</td><td>87</td><td>…</td><td>78</td><td>93</td><td>353</td><td>63</td><td>29</td><td>95</td><td>82</td><td>84</td><td>95</td><td>84</td><td>28</td><td>32</td><td>24</td><td>58</td><td>7</td><td>11</td><td>15</td><td>14</td><td>11</td><td>2221</td><td>464</td><td>4</td><td>5</td><td>"High"</td><td>"Low"</td><td>5</td><td>89</td><td>93</td><td>81</td><td>89</td><td>35</td><td>77</td><td>562</td><td>2018</td><td>2022</td><td>false</td><td>null</td></tr><tr><td>200389</td><td>"J. Oblak"</td><td>"Jan Oblak"</td><td>"https://cdn.so…</td><td>"http://sofifa.…</td><td>"Slovenia"</td><td>27</td><td>91</td><td>93</td><td>"Atlético Madri…</td><td>["GK"]</td><td>188</td><td>87</td><td>"Right"</td><td>91</td><td>"GK"</td><td>2014-07-16</td><td>null</td><td>120000000</td><td>125000</td><td>159399993</td><td>95</td><td>13</td><td>11</td><td>15</td><td>43</td><td>13</td><td>109</td><td>12</td><td>13</td><td>14</td><td>40</td><td>30</td><td>307</td><td>43</td><td>60</td><td>67</td><td>…</td><td>78</td><td>12</td><td>140</td><td>34</td><td>19</td><td>11</td><td>65</td><td>11</td><td>68</td><td>57</td><td>27</td><td>12</td><td>18</td><td>437</td><td>87</td><td>92</td><td>78</td><td>90</td><td>90</td><td>1413</td><td>489</td><td>3</td><td>1</td><td>"Medium"</td><td>"Medium"</td><td>3</td><td>87</td><td>92</td><td>78</td><td>90</td><td>52</td><td>90</td><td>150</td><td>2014</td><td>2023</td><td>false</td><td>null</td></tr><tr><td>192985</td><td>"K. De Bruyne"</td><td>"Kevin De Bruyn…</td><td>"https://cdn.so…</td><td>"http://sofifa.…</td><td>"Belgium"</td><td>29</td><td>91</td><td>91</td><td>"Manchester Cit…</td><td>["CAM", " CM"]</td><td>181</td><td>70</td><td>"Right"</td><td>91</td><td>"CAM"</td><td>2015-08-30</td><td>null</td><td>129000000</td><td>370000</td><td>161000000</td><td>407</td><td>94</td><td>82</td><td>55</td><td>94</td><td>82</td><td>441</td><td>88</td><td>85</td><td>83</td><td>93</td><td>92</td><td>398</td><td>77</td><td>76</td><td>78</td><td>…</td><td>74</td><td>91</td><td>408</td><td>76</td><td>66</td><td>88</td><td>94</td><td>84</td><td>91</td><td>186</td><td>68</td><td>65</td><td>53</td><td>56</td><td>15</td><td>13</td><td>5</td><td>10</td><td>13</td><td>2304</td><td>485</td><td>5</td><td>4</td><td>"High"</td><td>"High"</td><td>4</td><td>76</td><td>86</td><td>93</td><td>88</td><td>64</td><td>78</td><td>207</td><td>2015</td><td>2023</td><td>false</td><td>null</td></tr><tr><td>190871</td><td>"Neymar Jr"</td><td>"Neymar da Silv…</td><td>"https://cdn.so…</td><td>"http://sofifa.…</td><td>"Brazil"</td><td>28</td><td>91</td><td>91</td><td>"Paris Saint-Ge…</td><td>["LW", " CAM"]</td><td>175</td><td>68</td><td>"Right"</td><td>91</td><td>"LW"</td><td>2017-08-03</td><td>null</td><td>132000000</td><td>270000</td><td>166500000</td><td>408</td><td>85</td><td>87</td><td>62</td><td>87</td><td>87</td><td>448</td><td>95</td><td>88</td><td>89</td><td>81</td><td>95</td><td>453</td><td>94</td><td>89</td><td>96</td><td>…</td><td>50</td><td>84</td><td>356</td><td>51</td><td>36</td><td>87</td><td>90</td><td>92</td><td>93</td><td>94</td><td>35</td><td>30</td><td>29</td><td>59</td><td>9</td><td>9</td><td>15</td><td>15</td><td>11</td><td>2175</td><td>451</td><td>5</td><td>5</td><td>"High"</td><td>"Medium"</td><td>5</td><td>91</td><td>85</td><td>86</td><td>94</td><td>36</td><td>59</td><td>595</td><td>2017</td><td>2022</td><td>false</td><td>null</td></tr></tbody></table></div>
@@ -794,7 +791,7 @@ Wall time: 6.38 s</code></pre>
 </div>
 <div id="tabset-4-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-2-tab">
 <div class="cell" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>fifa_pd.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fifa_pd.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="10">
 
 <div>
@@ -971,12 +968,12 @@ Wall time: 6.38 s</code></pre>
 <h3 data-number="3.3.1" class="anchored" data-anchor-id="get-the-data"><span class="header-section-number">3.3.1</span> Get the data</h3>
 <p>We create a lazy dataframe containing pairs of airports and their coordinates:</p>
 <div class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>airports <span class="op">=</span> pl.scan_csv(<span class="st">"../data/airports.csv"</span>).drop_nulls().unique(subset<span class="op">=</span>[<span class="st">"AIRPORT"</span>])</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>pairs <span class="op">=</span> airports.join(airports, on<span class="op">=</span><span class="st">"AIRPORT"</span>, how<span class="op">=</span><span class="st">"cross"</span>).<span class="bu">filter</span>(</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    (pl.col(<span class="st">"AIRPORT"</span>) <span class="op">!=</span> pl.col(<span class="st">"AIRPORT_right"</span>))</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">&amp;</span> (pl.col(<span class="st">"LATITUDE"</span>) <span class="op">!=</span> pl.col(<span class="st">"LATITUDE_right"</span>))</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">&amp;</span> (pl.col(<span class="st">"LONGITUDE"</span>) <span class="op">!=</span> pl.col(<span class="st">"LONGITUDE_right"</span>))</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>airports <span class="op">=</span> pl.scan_csv(<span class="st">"../data/airports.csv"</span>).drop_nulls().unique(subset<span class="op">=</span>[<span class="st">"AIRPORT"</span>])</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>pairs <span class="op">=</span> airports.join(airports, on<span class="op">=</span><span class="st">"AIRPORT"</span>, how<span class="op">=</span><span class="st">"cross"</span>).<span class="bu">filter</span>(</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    (pl.col(<span class="st">"AIRPORT"</span>) <span class="op">!=</span> pl.col(<span class="st">"AIRPORT_right"</span>))</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">&amp;</span> (pl.col(<span class="st">"LATITUDE"</span>) <span class="op">!=</span> pl.col(<span class="st">"LATITUDE_right"</span>))</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">&amp;</span> (pl.col(<span class="st">"LONGITUDE"</span>) <span class="op">!=</span> pl.col(<span class="st">"LONGITUDE_right"</span>))</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="calculate-great-circle-distance" class="level3" data-number="3.3.2">
@@ -987,80 +984,80 @@ Wall time: 6.38 s</code></pre>
 <div class="tab-content">
 <div id="tabset-5-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-5-1-tab">
 <div class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> deg2rad_pl(degrees: pl.Expr) <span class="op">-&gt;</span> pl.Expr:</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> degrees <span class="op">*</span> math.pi <span class="op">/</span> <span class="dv">180</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gcd_pl(lat1: pl.Expr, lng1: pl.Expr, lat2: pl.Expr, lng2: pl.Expr):</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    ϕ<span class="dv">1</span> <span class="op">=</span> deg2rad_pl(<span class="dv">90</span> <span class="op">-</span> lat1)</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    ϕ<span class="dv">2</span> <span class="op">=</span> deg2rad_pl(<span class="dv">90</span> <span class="op">-</span> lat2)</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    θ<span class="dv">1</span> <span class="op">=</span> deg2rad_pl(lng1)</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    θ<span class="dv">2</span> <span class="op">=</span> deg2rad_pl(lng2)</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    cos <span class="op">=</span> ϕ<span class="fl">1.</span><span class="er">sin</span>() <span class="op">*</span> ϕ<span class="fl">2.</span><span class="er">sin</span>() <span class="op">*</span> (θ<span class="dv">1</span> <span class="op">-</span> θ<span class="dv">2</span>).cos() <span class="op">+</span> ϕ<span class="fl">1.</span><span class="er">cos</span>() <span class="op">*</span> ϕ<span class="fl">2.</span><span class="er">cos</span>()</span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    arc <span class="op">=</span> cos.arccos()</span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> arc <span class="op">*</span> <span class="dv">6373</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> deg2rad_pl(degrees: pl.Expr) <span class="op">-&gt;</span> pl.Expr:</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> degrees <span class="op">*</span> math.pi <span class="op">/</span> <span class="dv">180</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gcd_pl(lat1: pl.Expr, lng1: pl.Expr, lat2: pl.Expr, lng2: pl.Expr):</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    ϕ<span class="dv">1</span> <span class="op">=</span> deg2rad_pl(<span class="dv">90</span> <span class="op">-</span> lat1)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    ϕ<span class="dv">2</span> <span class="op">=</span> deg2rad_pl(<span class="dv">90</span> <span class="op">-</span> lat2)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    θ<span class="dv">1</span> <span class="op">=</span> deg2rad_pl(lng1)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    θ<span class="dv">2</span> <span class="op">=</span> deg2rad_pl(lng2)</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    cos <span class="op">=</span> ϕ<span class="fl">1.</span><span class="er">sin</span>() <span class="op">*</span> ϕ<span class="fl">2.</span><span class="er">sin</span>() <span class="op">*</span> (θ<span class="dv">1</span> <span class="op">-</span> θ<span class="dv">2</span>).cos() <span class="op">+</span> ϕ<span class="fl">1.</span><span class="er">cos</span>() <span class="op">*</span> ϕ<span class="fl">2.</span><span class="er">cos</span>()</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    arc <span class="op">=</span> cos.arccos()</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> arc <span class="op">*</span> <span class="dv">6373</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div id="tabset-5-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-2-tab">
 <div class="cell" data-execution_count="13">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gcd_np(lat1, lng1, lat2, lng2):</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    ϕ<span class="dv">1</span> <span class="op">=</span> np.deg2rad(<span class="dv">90</span> <span class="op">-</span> lat1)</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    ϕ<span class="dv">2</span> <span class="op">=</span> np.deg2rad(<span class="dv">90</span> <span class="op">-</span> lat2)</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    θ<span class="dv">1</span> <span class="op">=</span> np.deg2rad(lng1)</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    θ<span class="dv">2</span> <span class="op">=</span> np.deg2rad(lng2)</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    cos <span class="op">=</span> np.sin(ϕ<span class="dv">1</span>) <span class="op">*</span> np.sin(ϕ<span class="dv">2</span>) <span class="op">*</span> np.cos(θ<span class="dv">1</span> <span class="op">-</span> θ<span class="dv">2</span>) <span class="op">+</span> np.cos(ϕ<span class="dv">1</span>) <span class="op">*</span> np.cos(ϕ<span class="dv">2</span>)</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    arc <span class="op">=</span> np.arccos(cos)</span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> arc <span class="op">*</span> <span class="dv">6373</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gcd_np(lat1, lng1, lat2, lng2):</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    ϕ<span class="dv">1</span> <span class="op">=</span> np.deg2rad(<span class="dv">90</span> <span class="op">-</span> lat1)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    ϕ<span class="dv">2</span> <span class="op">=</span> np.deg2rad(<span class="dv">90</span> <span class="op">-</span> lat2)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    θ<span class="dv">1</span> <span class="op">=</span> np.deg2rad(lng1)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    θ<span class="dv">2</span> <span class="op">=</span> np.deg2rad(lng2)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    cos <span class="op">=</span> np.sin(ϕ<span class="dv">1</span>) <span class="op">*</span> np.sin(ϕ<span class="dv">2</span>) <span class="op">*</span> np.cos(θ<span class="dv">1</span> <span class="op">-</span> θ<span class="dv">2</span>) <span class="op">+</span> np.cos(ϕ<span class="dv">1</span>) <span class="op">*</span> np.cos(ϕ<span class="dv">2</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    arc <span class="op">=</span> np.arccos(cos)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> arc <span class="op">*</span> <span class="dv">6373</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
 </div>
 <p>We can pass Polars expressions directly to our <code>gcd_np</code> function, which is pretty nice since these things don’t even store the data themselves:</p>
 <div class="cell" data-execution_count="14">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>timeit</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>pairs.select(</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    gcd_np(</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"LATITUDE"</span>),</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"LONGITUDE"</span>),</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"LATITUDE_right"</span>),</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"LONGITUDE_right"</span>)</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>).collect()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>timeit</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>pairs.select(</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    gcd_np(</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"LATITUDE"</span>),</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"LONGITUDE"</span>),</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"LATITUDE_right"</span>),</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"LONGITUDE_right"</span>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>).collect()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>4.03 s ± 29.2 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
+<pre><code>3.97 s ± 43.4 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
 </div>
 </div>
 <p>On my machine the NumPy version tends to be 5-20% faster than the pure Polars version:</p>
 <div class="cell" data-execution_count="15">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>timeit</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>pairs.select(</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    gcd_pl(</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"LATITUDE"</span>),</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"LONGITUDE"</span>),</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"LATITUDE_right"</span>),</span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"LONGITUDE_right"</span>)</span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>).collect()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>timeit</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>pairs.select(</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    gcd_pl(</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"LATITUDE"</span>),</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"LONGITUDE"</span>),</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"LATITUDE_right"</span>),</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"LONGITUDE_right"</span>)</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>).collect()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>4.33 s ± 84.7 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
+<pre><code>4.97 s ± 140 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
 </div>
 </div>
 <p>This may not be a huge performance difference, but it at least means you don’t sacrifice speed when relying on NumPy. There are some <a href="https://pola-rs.github.io/polars-book/user-guide/howcani/interop/numpy.html">gotchas</a> though so watch out for those.</p>
 <p>Also watch out for <code>.to_numpy()</code> - you don’t always need to call this and it can slow things down:</p>
 <div class="cell" data-execution_count="16">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>timeit</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>collected <span class="op">=</span> pairs.collect()</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>gcd_np(</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    collected[<span class="st">"LATITUDE"</span>].to_numpy(),</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    collected[<span class="st">"LONGITUDE"</span>].to_numpy(),</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    collected[<span class="st">"LATITUDE_right"</span>].to_numpy(),</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    collected[<span class="st">"LONGITUDE_right"</span>].to_numpy()</span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>timeit</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>collected <span class="op">=</span> pairs.collect()</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>gcd_np(</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    collected[<span class="st">"LATITUDE"</span>].to_numpy(),</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    collected[<span class="st">"LONGITUDE"</span>].to_numpy(),</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    collected[<span class="st">"LATITUDE_right"</span>].to_numpy(),</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    collected[<span class="st">"LONGITUDE_right"</span>].to_numpy()</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>5.43 s ± 34.6 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
+<pre><code>5.54 s ± 58.5 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
 </div>
 </div>
 </section>
@@ -1069,23 +1066,23 @@ Wall time: 6.38 s</code></pre>
 <h2 data-number="3.4" class="anchored" data-anchor-id="polars-can-be-slower-than-pandas-sometimes-maybe"><span class="header-section-number">3.4</span> Polars can be slower than Pandas sometimes, maybe</h2>
 <p>Here’s an example where we calculate z-scores, using window functions in Polars and using groupby-transform in Pandas:</p>
 <div class="cell" data-execution_count="17">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_frame(n, n_groups):</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pl.DataFrame(</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"name"</span>: np.random.randint(<span class="dv">0</span>, n_groups, size<span class="op">=</span>n), <span class="st">"value2"</span>: np.random.randn(n)}</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> pandas_transform(df: pd.DataFrame) <span class="op">-&gt;</span> pd.DataFrame:</span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    g <span class="op">=</span> df.groupby(<span class="st">"name"</span>)[<span class="st">"value2"</span>]</span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    v <span class="op">=</span> df[<span class="st">"value2"</span>]</span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (v <span class="op">-</span> g.transform(np.mean)) <span class="op">/</span> g.transform(np.std)</span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> polars_transform() <span class="op">-&gt;</span> pl.Expr:</span>
-<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>    v <span class="op">=</span> pl.col(<span class="st">"value2"</span>)</span>
-<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (v <span class="op">-</span> v.mean().over(<span class="st">"name"</span>)) <span class="op">/</span> v.std().over(<span class="st">"name"</span>)</span>
-<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>rand_df_pl <span class="op">=</span> create_frame(<span class="dv">50_000_000</span>, <span class="dv">50_000</span>)</span>
-<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>rand_df_pd <span class="op">=</span> rand_df_pl.to_pandas()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_frame(n, n_groups):</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pl.DataFrame(</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"name"</span>: np.random.randint(<span class="dv">0</span>, n_groups, size<span class="op">=</span>n), <span class="st">"value2"</span>: np.random.randn(n)}</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> pandas_transform(df: pd.DataFrame) <span class="op">-&gt;</span> pd.DataFrame:</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    g <span class="op">=</span> df.groupby(<span class="st">"name"</span>)[<span class="st">"value2"</span>]</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    v <span class="op">=</span> df[<span class="st">"value2"</span>]</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (v <span class="op">-</span> g.transform(np.mean)) <span class="op">/</span> g.transform(np.std)</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> polars_transform() <span class="op">-&gt;</span> pl.Expr:</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    v <span class="op">=</span> pl.col(<span class="st">"value2"</span>)</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (v <span class="op">-</span> v.mean().over(<span class="st">"name"</span>)) <span class="op">/</span> v.std().over(<span class="st">"name"</span>)</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>rand_df_pl <span class="op">=</span> create_frame(<span class="dv">50_000_000</span>, <span class="dv">50_000</span>)</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>rand_df_pd <span class="op">=</span> rand_df_pl.to_pandas()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The Polars version tends to be 10-100% slower on my machine:</p>
 <div class="panel-tabset">
@@ -1093,17 +1090,25 @@ Wall time: 6.38 s</code></pre>
 <div class="tab-content">
 <div id="tabset-6-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-6-1-tab">
 <div class="cell" data-execution_count="18">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>timeit rand_df_pl.select(polars_transform())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>timeit rand_df_pl.select(polars_transform())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>2.29 s ± 9.39 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
+<pre><code>2.31 s ± 215 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
 </div>
 </div>
 </div>
 <div id="tabset-6-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-2-tab">
 <div class="cell" data-execution_count="19">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>timeit pandas_transform(rand_df_pd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>timeit pandas_transform(rand_df_pd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/tmp/ipykernel_30129/1003544873.py:9: FutureWarning: The provided callable &lt;function mean at 0x7fef602a4a40&gt; is currently using SeriesGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+  return (v - g.transform(np.mean)) / g.transform(np.std)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/tmp/ipykernel_30129/1003544873.py:9: FutureWarning: The provided callable &lt;function std at 0x7fef602a4c20&gt; is currently using SeriesGroupBy.std. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "std" instead.
+  return (v - g.transform(np.mean)) / g.transform(np.std)</code></pre>
+</div>
 <div class="cell-output cell-output-stdout">
-<pre><code>1.45 s ± 19.7 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
+<pre><code>1.67 s ± 50.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
 </div>
 </div>
 </div>

@@ -358,6 +358,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 .dataframe > thead > tr > th,
 .dataframe > tbody > tr > td {
   text-align: right;
+  white-space: pre-wrap;
 }
 </style>
 <small>shape: (28, 6)</small><table class="dataframe table table-sm table-striped"><thead><tr><th>time</th><th>open</th><th>high</th><th>low</th><th>close</th><th>volume</th></tr><tr><td>date</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td></tr></thead><tbody><tr><td>2021-02-01</td><td>33092.97</td><td>34717.27</td><td>32296.16</td><td>33526.37</td><td>82718.276882</td></tr><tr><td>2021-02-02</td><td>33517.09</td><td>35984.33</td><td>33418.0</td><td>35466.24</td><td>78056.65988</td></tr><tr><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td></tr><tr><td>2021-02-27</td><td>46276.88</td><td>48394.0</td><td>45000.0</td><td>46106.43</td><td>66060.834292</td></tr><tr><td>2021-02-28</td><td>46103.67</td><td>46638.46</td><td>43000.0</td><td>45135.66</td><td>83055.369042</td></tr></tbody></table></div>
@@ -456,7 +457,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    ohlcv_pl</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    .groupby_dynamic(<span class="st">"time"</span>, every<span class="op">=</span><span class="st">"5d"</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    .group_by_dynamic(<span class="st">"time"</span>, every<span class="op">=</span><span class="st">"5d"</span>)</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    .agg(pl.col(pl.Float64).mean())</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
@@ -465,9 +466,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 .dataframe > thead > tr > th,
 .dataframe > tbody > tr > td {
   text-align: right;
+  white-space: pre-wrap;
 }
 </style>
-<small>shape: (74, 6)</small><table class="dataframe table table-sm table-striped"><thead><tr><th>time</th><th>open</th><th>high</th><th>low</th><th>close</th><th>volume</th></tr><tr><td>date</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td></tr></thead><tbody><tr><td>2021-01-01</td><td>31084.316</td><td>33127.622</td><td>29512.818</td><td>32089.662</td><td>112416.84957</td></tr><tr><td>2021-01-06</td><td>38165.31</td><td>40396.842</td><td>35983.822</td><td>39004.538</td><td>118750.076685</td></tr><tr><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td></tr><tr><td>2021-12-27</td><td>48521.24</td><td>49475.878</td><td>47087.4</td><td>47609.528</td><td>35886.94371</td></tr><tr><td>2022-01-01</td><td>46216.93</td><td>47954.63</td><td>46208.37</td><td>47722.65</td><td>19604.46325</td></tr></tbody></table></div>
+<small>shape: (74, 6)</small><table class="dataframe table table-sm table-striped"><thead><tr><th>time</th><th>open</th><th>high</th><th>low</th><th>close</th><th>volume</th></tr><tr><td>date</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td></tr></thead><tbody><tr><td>2020-12-29</td><td>29127.665</td><td>31450.0</td><td>28785.55</td><td>30755.01</td><td>92088.399186</td></tr><tr><td>2021-01-03</td><td>33577.028</td><td>36008.464</td><td>31916.198</td><td>35027.986</td><td>127574.470245</td></tr><tr><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td></tr><tr><td>2021-12-24</td><td>50707.08</td><td>51407.656</td><td>49540.152</td><td>50048.066</td><td>29607.160572</td></tr><tr><td>2021-12-29</td><td>46836.5525</td><td>48135.4925</td><td>45970.84</td><td>46881.2775</td><td>31098.406725</td></tr></tbody></table></div>
 </div>
 </div>
 </div>
@@ -555,7 +557,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    ohlcv_pl</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    .groupby_dynamic(<span class="st">"time"</span>, every<span class="op">=</span><span class="st">"1w"</span>, start_by<span class="op">=</span><span class="st">"friday"</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    .group_by_dynamic(<span class="st">"time"</span>, every<span class="op">=</span><span class="st">"1w"</span>, start_by<span class="op">=</span><span class="st">"friday"</span>)</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    .agg([</span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        pl.col(pl.Float64).mean().suffix(<span class="st">"_mean"</span>),</span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        pl.col(pl.Float64).<span class="bu">sum</span>().suffix(<span class="st">"_sum"</span>)</span>
@@ -567,6 +569,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 .dataframe > thead > tr > th,
 .dataframe > tbody > tr > td {
   text-align: right;
+  white-space: pre-wrap;
 }
 </style>
 <small>shape: (53, 11)</small><table class="dataframe table table-sm table-striped"><thead><tr><th>time</th><th>open_mean</th><th>high_mean</th><th>low_mean</th><th>close_mean</th><th>volume_mean</th><th>open_sum</th><th>high_sum</th><th>low_sum</th><th>close_sum</th><th>volume_sum</th></tr><tr><td>date</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td></tr></thead><tbody><tr><td>2021-01-01</td><td>32305.781429</td><td>34706.045714</td><td>31021.727143</td><td>33807.135714</td><td>117435.5928</td><td>226140.47</td><td>242942.32</td><td>217152.09</td><td>236649.95</td><td>822049.149598</td></tr><tr><td>2021-01-08</td><td>37869.797143</td><td>39646.105714</td><td>34623.334286</td><td>37827.52</td><td>135188.296617</td><td>265088.58</td><td>277522.74</td><td>242363.34</td><td>264792.64</td><td>946318.076319</td></tr><tr><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td></tr><tr><td>2021-12-24</td><td>49649.114286</td><td>50439.622857</td><td>48528.25</td><td>49117.98</td><td>31126.709793</td><td>347543.8</td><td>353077.36</td><td>339697.75</td><td>343825.86</td><td>217886.96855</td></tr><tr><td>2021-12-31</td><td>46668.905</td><td>48251.445</td><td>45943.185</td><td>46969.79</td><td>27271.230605</td><td>93337.81</td><td>96502.89</td><td>91886.37</td><td>93939.58</td><td>54542.46121</td></tr></tbody></table></div>
@@ -708,6 +711,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 .dataframe > thead > tr > th,
 .dataframe > tbody > tr > td {
   text-align: right;
+  white-space: pre-wrap;
 }
 </style>
 <small>shape: (1_461, 6)</small><table class="dataframe table table-sm table-striped"><thead><tr><th>time</th><th>open</th><th>high</th><th>low</th><th>close</th><th>volume</th></tr><tr><td>date</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td></tr></thead><tbody><tr><td>2021-01-01</td><td>28923.63</td><td>29600.0</td><td>28624.57</td><td>29331.69</td><td>54182.925011</td></tr><tr><td>2021-01-01</td><td>null</td><td>null</td><td>null</td><td>null</td><td>null</td></tr><tr><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td></tr><tr><td>2021-12-31</td><td>null</td><td>null</td><td>null</td><td>null</td><td>null</td></tr><tr><td>2022-01-01</td><td>46216.93</td><td>47954.63</td><td>46208.37</td><td>47722.65</td><td>19604.46325</td></tr></tbody></table></div>
@@ -914,6 +918,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 .dataframe > thead > tr > th,
 .dataframe > tbody > tr > td {
   text-align: right;
+  white-space: pre-wrap;
 }
 </style>
 <small>shape: (366, 1)</small><table class="dataframe table table-sm table-striped"><thead><tr><th>time</th></tr><tr><td>date</td></tr></thead><tbody><tr><td>2021-03-22</td></tr><tr><td>2021-03-23</td></tr><tr><td>…</td></tr><tr><td>2022-03-21</td></tr><tr><td>2022-03-22</td></tr></tbody></table></div>
@@ -980,6 +985,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 .dataframe > thead > tr > th,
 .dataframe > tbody > tr > td {
   text-align: right;
+  white-space: pre-wrap;
 }
 </style>
 <small>shape: (366, 6)</small><table class="dataframe table table-sm table-striped"><thead><tr><th>time</th><th>open</th><th>high</th><th>low</th><th>close</th><th>volume</th></tr><tr><td>datetime[μs, US/Eastern]</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td></tr></thead><tbody><tr><td>2020-12-31 19:00:00 EST</td><td>28923.63</td><td>29600.0</td><td>28624.57</td><td>29331.69</td><td>54182.925011</td></tr><tr><td>2021-01-01 19:00:00 EST</td><td>29331.7</td><td>33300.0</td><td>28946.53</td><td>32178.33</td><td>129993.873362</td></tr><tr><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td></tr><tr><td>2021-12-30 19:00:00 EST</td><td>47120.88</td><td>48548.26</td><td>45678.0</td><td>46216.93</td><td>34937.99796</td></tr><tr><td>2021-12-31 19:00:00 EST</td><td>46216.93</td><td>47954.63</td><td>46208.37</td><td>47722.65</td><td>19604.46325</td></tr></tbody></table></div>
