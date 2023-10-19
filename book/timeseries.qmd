@@ -95,7 +95,7 @@ In Polars we use the [`.groupby_dynamic`](https://pola-rs.github.io/polars/py-po
 ``` {python}
 (
     ohlcv_pl
-    .groupby_dynamic("time", every="5d")
+    .group_by_dynamic("time", every="5d")
     .agg(pl.col(pl.Float64).mean())
 )
 
@@ -113,7 +113,7 @@ Resampling and performing multiple aggregations to each column:
 ``` {python}
 (
     ohlcv_pl
-    .groupby_dynamic("time", every="1w", start_by="friday")
+    .group_by_dynamic("time", every="1w", start_by="friday")
     .agg([
         pl.col(pl.Float64).mean().suffix("_mean"),
         pl.col(pl.Float64).sum().suffix("_sum")

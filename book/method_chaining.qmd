@@ -232,7 +232,7 @@ filter_expr = pl.col("IATA_CODE_Reporting_Airline").is_in(
     .drop_nulls(subset=["DepTime", "IATA_CODE_Reporting_Airline"])
     .filter(filter_expr)
     .sort("DepTime")
-    .groupby_dynamic(
+    .group_by_dynamic(
         "DepTime",
         every="1h",
         by="IATA_CODE_Reporting_Airline")

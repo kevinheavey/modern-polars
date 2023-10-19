@@ -71,7 +71,6 @@ Nothing super interesting here:
 ``` {python}
 games_pl = (
     pl.scan_csv(nba_glob)
-    .filter(~pl.all(pl.all().is_null()))
     .with_columns(
         pl.col("date").str.strptime(pl.Date, "%a, %b %d, %Y"),
     )
@@ -338,7 +337,7 @@ Pandas has special methods `stack` and `unstack` for reshaping data with a Multi
 ``` {python}
 rest_pl = (
     tidy_pl
-    .groupby(["date", "variable"], maintain_order=True)
+    .group_by(["date", "variable"], maintain_order=True)
     .agg(pl.col("rest").mean())
 )
 rest_pl
@@ -418,7 +417,7 @@ wins_pl = (
         value_vars=["home_team", "away_team"],
     )
     .with_columns(pl.col("home_win").alias("win") == (pl.col("is_home") == "home_team"))
-    .groupby(["team", "is_home"])
+    .group_by(["team", "is_home"])
     .agg(
         [
             win_col.sum().alias("n_wins"),
@@ -484,7 +483,7 @@ Now we calculate the win percent by team, regardless of whether they're home or 
 ## Polars
 ``` {python}
 win_percent_pl = (
-    wins_pl.groupby("team", maintain_order=True).agg(
+    wins_pl.group_by("team", maintain_order=True).agg(
         pl.col("n_wins").sum().alias("win_pct") / pl.col("n_games").sum()
     )
 )

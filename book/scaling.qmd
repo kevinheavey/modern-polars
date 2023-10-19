@@ -148,13 +148,13 @@ indiv_pl = pl.scan_parquet(fec_dir / "indiv*.pq")
 avg_transaction_lazy_pl = indiv_pl.select(pl.col("TRANSACTION_AMT").mean())
 total_by_employer_lazy_pl = (
     indiv_pl.drop_nulls("EMPLOYER")
-    .groupby("EMPLOYER")
+    .group_by("EMPLOYER")
     .agg([pl.col("TRANSACTION_AMT").sum()])
     .sort("TRANSACTION_AMT", descending=True)
     .head(10)
 )
 avg_by_occupation_lazy_pl = (
-    indiv_pl.groupby("OCCUPATION")
+    indiv_pl.group_by("OCCUPATION")
     .agg([pl.col("TRANSACTION_AMT").mean()])
     .sort("TRANSACTION_AMT", descending=True)
     .head(10)
@@ -163,7 +163,7 @@ avg_by_occupation_lazy_pl = (
 avg_transaction_pl, total_by_employer_pl, avg_by_occupation_pl = pl.collect_all(
     [avg_transaction_lazy_pl, total_by_employer_lazy_pl, avg_by_occupation_lazy_pl],
     streaming=True,
-    common_subplan_elimination=False, # cannot use CSE with streaming
+    comm_subplan_elim=False, # cannot use CSE with streaming
 )
 ```
 
@@ -271,13 +271,13 @@ top_occupations_dd
 ``` {python}
 donations_pl_lazy = (
     indiv_pl.filter(pl.col("OCCUPATION").is_in(top_occupations_pl.to_list()))
-    .groupby("OCCUPATION")
+    .group_by("OCCUPATION")
     .agg(pl.col("TRANSACTION_AMT").mean())
 )
 total_avg_pl, occupation_avg_pl = pl.collect_all(
     [indiv_pl.select(pl.col("TRANSACTION_AMT").mean()), donations_pl_lazy],
     streaming=True,
-    common_subplan_elimination=False
+    comm_subplan_elim=False
 )
 ```
 
@@ -337,7 +337,7 @@ daily_pl = (
     indiv_pl.select(["TRANSACTION_DT", "TRANSACTION_AMT"])
     .drop_nulls()
     .sort("TRANSACTION_DT")
-    .groupby_dynamic("TRANSACTION_DT", every="1d")
+    .group_by_dynamic("TRANSACTION_DT", every="1d")
     .agg(pl.col("TRANSACTION_AMT").sum())
     .filter(
         pl.col("TRANSACTION_DT")
@@ -388,7 +388,7 @@ cm_pl = (
     # Also, .last isn't available in lazy mode.
     pl.read_parquet(fec_dir / "cm*.pq")
     # Some committees change their name, but the ID stays the same
-    .groupby("CMTE_ID", maintain_order=True).last()
+    .group_by("CMTE_ID", maintain_order=True).last()
 )
 cm_pl
 ```
@@ -440,7 +440,7 @@ Daily donations by party:
 ## Polars
 ``` {python}
 party_donations_pl = (
-    merged_pl.groupby(["TRANSACTION_DT", "CMTE_PTY_AFFILIATION"])
+    merged_pl.group_by(["TRANSACTION_DT", "CMTE_PTY_AFFILIATION"])
     .agg(pl.col("TRANSACTION_AMT").sum())
     .sort(["TRANSACTION_DT", "CMTE_PTY_AFFILIATION"])
     .collect(streaming=True)

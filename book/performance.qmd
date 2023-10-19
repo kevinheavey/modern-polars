@@ -192,7 +192,7 @@ There's not much that you haven't seen here already, so we won't explain the cod
 
 ``` {python}
 def parse_date_pl(col: pl.Expr) -> pl.Expr:
-    return col.str.strptime(pl.Date, fmt="%b %d, %Y")
+    return col.str.strptime(pl.Date, format="%b %d, %Y")
 
 def parse_suffixed_num_pl(col: pl.Expr) -> pl.Expr:
     suffix = col.str.slice(-1, 1)
@@ -223,7 +223,7 @@ def feet_to_cm_pl(col: pl.Expr) -> pl.Expr:
     feet_inches_split = col.str.split_exact("'", 1)
     total_inches = (
         (feet_inches_split.struct.field("field_0").cast(pl.UInt8, strict=False) * 12)
-        + feet_inches_split.struct.field("field_1").str.rstrip('"').cast(pl.UInt8, strict=False)
+        + feet_inches_split.struct.field("field_1").str.strip_chars_end('"').cast(pl.UInt8, strict=False)
     )
     return (total_inches * 2.54).round(0).cast(pl.UInt8)
 
@@ -340,7 +340,7 @@ In this example, **Polars is ~150x faster than Pandas**:
 ``` {python}
 %%time
 new_cols_pl = ([
-    pl.col("Club").str.strip().cast(pl.Categorical),
+    pl.col("Club").str.strip_chars().cast(pl.Categorical),
     parse_suffixed_num_pl(pl.col("Hits")).cast(pl.UInt32),
     pl.col("Positions").str.split(","),
     parse_height_pl(pl.col("Height")),
