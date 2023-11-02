@@ -739,8 +739,8 @@ Tip
 <span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    .collect()</span>
 <span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>CPU times: user 119 ms, sys: 28.8 ms, total: 148 ms
-Wall time: 34.1 ms</code></pre>
+<pre><code>CPU times: user 82.6 ms, sys: 29.6 ms, total: 112 ms
+Wall time: 34.8 ms</code></pre>
 </div>
 </div>
 </div>
@@ -762,8 +762,8 @@ Wall time: 34.1 ms</code></pre>
 <span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    .rename(columns<span class="op">=</span>{<span class="st">"↓OVA"</span>: <span class="st">"OVA"</span>})</span>
 <span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>CPU times: user 6.16 s, sys: 229 ms, total: 6.39 s
-Wall time: 6.39 s</code></pre>
+<pre><code>CPU times: user 6.53 s, sys: 402 ms, total: 6.93 s
+Wall time: 6.93 s</code></pre>
 </div>
 </div>
 </div>
@@ -1027,7 +1027,7 @@ Wall time: 6.39 s</code></pre>
 <span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>).collect()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>3.97 s ± 43.4 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
+<pre><code>4.42 s ± 261 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
 </div>
 </div>
 <p>On my machine the NumPy version tends to be 5-20% faster than the pure Polars version:</p>
@@ -1042,7 +1042,7 @@ Wall time: 6.39 s</code></pre>
 <span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>).collect()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>4.97 s ± 140 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
+<pre><code>5.21 s ± 75.6 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
 </div>
 </div>
 <p>This may not be a huge performance difference, but it at least means you don’t sacrifice speed when relying on NumPy. There are some <a href="https://pola-rs.github.io/polars-book/user-guide/howcani/interop/numpy.html">gotchas</a> though so watch out for those.</p>
@@ -1057,7 +1057,7 @@ Wall time: 6.39 s</code></pre>
 <span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    collected[<span class="st">"LONGITUDE_right"</span>].to_numpy()</span>
 <span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>5.54 s ± 58.5 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
+<pre><code>5.63 s ± 33.8 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
 </div>
 </div>
 </section>
@@ -1092,7 +1092,7 @@ Wall time: 6.39 s</code></pre>
 <div class="cell" data-execution_count="18">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>timeit rand_df_pl.select(polars_transform())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>2.31 s ± 215 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
+<pre><code>2.2 s ± 153 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
 </div>
 </div>
 </div>
@@ -1100,15 +1100,15 @@ Wall time: 6.39 s</code></pre>
 <div class="cell" data-execution_count="19">
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>timeit pandas_transform(rand_df_pd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_30129/1003544873.py:9: FutureWarning: The provided callable &lt;function mean at 0x7fef602a4a40&gt; is currently using SeriesGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
+<pre><code>/tmp/ipykernel_10730/1003544873.py:9: FutureWarning: The provided callable &lt;function mean at 0x7f99d02a0a40&gt; is currently using SeriesGroupBy.mean. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "mean" instead.
   return (v - g.transform(np.mean)) / g.transform(np.std)</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_30129/1003544873.py:9: FutureWarning: The provided callable &lt;function std at 0x7fef602a4c20&gt; is currently using SeriesGroupBy.std. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "std" instead.
+<pre><code>/tmp/ipykernel_10730/1003544873.py:9: FutureWarning: The provided callable &lt;function std at 0x7f99d02a0c20&gt; is currently using SeriesGroupBy.std. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "std" instead.
   return (v - g.transform(np.mean)) / g.transform(np.std)</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>1.67 s ± 50.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
+<pre><code>1.67 s ± 10.5 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
 </div>
 </div>
 </div>

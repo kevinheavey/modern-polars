@@ -845,7 +845,7 @@ Note
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>sns.set_theme(font_scale<span class="op">=</span><span class="fl">0.6</span>)</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>sns.catplot(</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    tidy_pl.to_pandas(),</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    tidy_pl,</span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span><span class="st">"variable"</span>,</span>
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span><span class="st">"rest"</span>,</span>
 <span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    col<span class="op">=</span><span class="st">"team"</span>,</span>
@@ -854,7 +854,7 @@ Note
 <span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    height<span class="op">=</span><span class="fl">1.5</span>,</span>
 <span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
-<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7f331e88bf10&gt;</code></pre>
+<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7fd14ed3fd90&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <p><img src="tidy_files/figure-html/cell-12-output-2.png" width="729" height="864"></p>
@@ -920,7 +920,7 @@ Note
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>sns.barplot(</span>
 <span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span><span class="st">"rest_spread"</span>,</span>
 <span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span><span class="st">"home_win"</span>,</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>joined_pl.<span class="bu">filter</span>(pl.col(<span class="st">"rest_spread"</span>).is_between(<span class="op">-</span><span class="dv">3</span>, <span class="dv">3</span>, closed<span class="op">=</span><span class="st">"both"</span>)).to_pandas(),</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>joined_pl.<span class="bu">filter</span>(pl.col(<span class="st">"rest_spread"</span>).is_between(<span class="op">-</span><span class="dv">3</span>, <span class="dv">3</span>, closed<span class="op">=</span><span class="st">"both"</span>)),</span>
 <span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">"#4c72b0"</span>,</span>
 <span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    ax<span class="op">=</span>ax,</span>
 <span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1257,14 +1257,14 @@ Name: rest, Length: 418, dtype: Float64</code></pre>
 <section id="some-visualisations" class="level2" data-number="4.7">
 <h2 data-number="4.7" class="anchored" data-anchor-id="some-visualisations"><span class="header-section-number">4.7</span> Some visualisations</h2>
 <div class="cell" data-execution_count="24">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> sns.FacetGrid(wins_pl.to_pandas(), hue<span class="op">=</span><span class="st">"team"</span>, aspect<span class="op">=</span><span class="fl">0.8</span>, palette<span class="op">=</span>[<span class="st">"k"</span>], height<span class="op">=</span><span class="dv">5</span>)</span>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> sns.FacetGrid(wins_pl, hue<span class="op">=</span><span class="st">"team"</span>, aspect<span class="op">=</span><span class="fl">0.8</span>, palette<span class="op">=</span>[<span class="st">"k"</span>], height<span class="op">=</span><span class="dv">5</span>)</span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>g.<span class="bu">map</span>(</span>
 <span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    sns.pointplot,</span>
 <span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"is_home"</span>,</span>
 <span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"win_pct"</span>,</span>
 <span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    order<span class="op">=</span>[<span class="st">"away_team"</span>, <span class="st">"home_team"</span>]).<span class="bu">set</span>(ylim<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="24">
-<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7f3316733610&gt;</code></pre>
+<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7fd136348790&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <p><img src="tidy_files/figure-html/cell-25-output-2.png" width="383" height="483"></p>
@@ -1272,7 +1272,7 @@ Name: rest, Length: 418, dtype: Float64</code></pre>
 </div>
 <div class="cell" data-execution_count="25">
 <div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>sns.catplot(</span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    wins_pl.to_pandas(),</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    wins_pl,</span>
 <span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span><span class="st">"is_home"</span>,</span>
 <span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span><span class="st">"win_pct"</span>,</span>
 <span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    col<span class="op">=</span><span class="st">"team"</span>,</span>
@@ -1282,7 +1282,7 @@ Name: rest, Length: 418, dtype: Float64</code></pre>
 <span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    height<span class="op">=</span><span class="fl">1.5</span>,</span>
 <span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="25">
-<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7f331679df10&gt;</code></pre>
+<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7fd136126490&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <p><img src="tidy_files/figure-html/cell-26-output-2.png" width="862" height="651"></p>
@@ -1356,7 +1356,7 @@ Length: 30, dtype: float64</code></pre>
 <div class="tab-content">
 <div id="tabset-11-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-11-1-tab">
 <div class="cell" data-execution_count="29">
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>wins_to_plot_pl <span class="op">=</span> (</span>
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    wins_pl.pivot(index<span class="op">=</span><span class="st">"team"</span>, columns<span class="op">=</span><span class="st">"is_home"</span>, values<span class="op">=</span><span class="st">"win_pct"</span>)</span>
 <span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
 <span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>        [</span>
@@ -1364,27 +1364,26 @@ Length: 30, dtype: float64</code></pre>
 <span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>            (pl.col(<span class="st">"home_team"</span>).alias(<span class="st">"Overall %"</span>) <span class="op">+</span> pl.col(<span class="st">"away_team"</span>)) <span class="op">/</span> <span class="dv">2</span>,</span>
 <span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>        ]</span>
 <span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>    .to_pandas()</span>
-<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>    .pipe((sns.regplot, <span class="st">"data"</span>), x<span class="op">=</span><span class="st">"Overall %"</span>, y<span class="op">=</span><span class="st">"Home Win % - Away %"</span>)</span>
-<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>sns.regplot(data<span class="op">=</span>wins_to_plot_pl, x<span class="op">=</span><span class="st">'Overall %'</span>, y<span class="op">=</span><span class="st">'Home Win % - Away %'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="29">
-<pre><code>&lt;Axes: xlabel='Overall %', ylabel='Home Win % - Away %'&gt;</code></pre>
+<pre><code>&lt;Axes: &gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="tidy_files/figure-html/cell-30-output-2.png" width="587" height="428"></p>
+<p><img src="tidy_files/figure-html/cell-30-output-2.png" width="572" height="413"></p>
 </div>
 </div>
 </div>
 <div id="tabset-11-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-11-2-tab">
 <div class="cell" data-execution_count="30">
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>wins_to_plot_pd <span class="op">=</span> (</span>
 <span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    wins_pd</span>
 <span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    [<span class="st">"win_pct"</span>]</span>
 <span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    .unstack()</span>
 <span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>    .assign(<span class="op">**</span>{<span class="st">'Home Win % - Away %'</span>: <span class="kw">lambda</span> x: x[<span class="st">"home_team"</span>] <span class="op">-</span> x[<span class="st">"away_team"</span>],</span>
 <span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>               <span class="st">'Overall %'</span>: <span class="kw">lambda</span> x: (x[<span class="st">"home_team"</span>] <span class="op">+</span> x[<span class="st">"away_team"</span>]) <span class="op">/</span> <span class="dv">2</span>})</span>
-<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>     .pipe((sns.regplot, <span class="st">'data'</span>), x<span class="op">=</span><span class="st">'Overall %'</span>, y<span class="op">=</span><span class="st">'Home Win % - Away %'</span>)</span>
-<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>sns.regplot(data<span class="op">=</span>wins_to_plot_pd, x<span class="op">=</span><span class="st">'Overall %'</span>, y<span class="op">=</span><span class="st">'Home Win % - Away %'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="30">
 <pre><code>&lt;Axes: xlabel='Overall %', ylabel='Home Win % - Away %'&gt;</code></pre>
 </div>
@@ -1594,10 +1593,10 @@ Length: 30, dtype: float64</code></pre>
   <th>Method:</th>                 <td>MLE</td>       <th>  Df Model:          </th>  <td>     4</td>  
 </tr>
 <tr>
-  <th>Date:</th>            <td>Thu, 19 Oct 2023</td> <th>  Pseudo R-squ.:     </th>  <td>0.1777</td>  
+  <th>Date:</th>            <td>Fri, 03 Nov 2023</td> <th>  Pseudo R-squ.:     </th>  <td>0.1777</td>  
 </tr>
 <tr>
-  <th>Time:</th>                <td>17:04:38</td>     <th>  Log-Likelihood:    </th> <td> -720.68</td> 
+  <th>Time:</th>                <td>01:52:21</td>     <th>  Log-Likelihood:    </th> <td> -720.68</td> 
 </tr>
 <tr>
   <th>converged:</th>             <td>True</td>       <th>  LL-Null:           </th> <td> -876.38</td> 
