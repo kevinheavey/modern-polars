@@ -256,7 +256,7 @@ Let's use the team-level dataframe to see each team's average days of rest, both
 import seaborn as sns
 sns.set_theme(font_scale=0.6)
 sns.catplot(
-    tidy_pl.to_pandas(),
+    tidy_pl,
     x="variable",
     y="rest",
     col="team",
@@ -310,7 +310,7 @@ fig, ax = plt.subplots(figsize=(9, 6))
 sns.barplot(
     x="rest_spread",
     y="home_win",
-    data=joined_pl.filter(pl.col("rest_spread").is_between(-3, 3, closed="both")).to_pandas(),
+    data=joined_pl.filter(pl.col("rest_spread").is_between(-3, 3, closed="both")),
     color="#4c72b0",
     ax=ax,
 )
@@ -456,7 +456,7 @@ wins_pd
 ## Some visualisations
 
 ``` {python}
-g = sns.FacetGrid(wins_pl.to_pandas(), hue="team", aspect=0.8, palette=["k"], height=5)
+g = sns.FacetGrid(wins_pl, hue="team", aspect=0.8, palette=["k"], height=5)
 g.map(
     sns.pointplot,
     "is_home",
@@ -466,7 +466,7 @@ g.map(
 
 ``` {python}
 sns.catplot(
-    wins_pl.to_pandas(),
+    wins_pl,
     x="is_home",
     y="win_pct",
     col="team",
@@ -516,7 +516,7 @@ Here's a plot of team home court advantage against team overall win percentage:
 ::: {.panel-tabset}
 ## Polars
 ``` {python}
-(
+wins_to_plot_pl = (
     wins_pl.pivot(index="team", columns="is_home", values="win_pct")
     .with_columns(
         [
@@ -524,20 +524,19 @@ Here's a plot of team home court advantage against team overall win percentage:
             (pl.col("home_team").alias("Overall %") + pl.col("away_team")) / 2,
         ]
     )
-    .to_pandas()
-    .pipe((sns.regplot, "data"), x="Overall %", y="Home Win % - Away %")
 )
+sns.regplot(data=wins_to_plot_pl, x='Overall %', y='Home Win % - Away %')
 ```
 ## Pandas
 ``` {python}
-(
+wins_to_plot_pd = (
     wins_pd
     ["win_pct"]
     .unstack()
     .assign(**{'Home Win % - Away %': lambda x: x["home_team"] - x["away_team"],
                'Overall %': lambda x: (x["home_team"] + x["away_team"]) / 2})
-     .pipe((sns.regplot, 'data'), x='Overall %', y='Home Win % - Away %')
 )
+sns.regplot(data=wins_to_plot_pd, x='Overall %', y='Home Win % - Away %')
 ```
 :::
 

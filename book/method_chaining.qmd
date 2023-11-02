@@ -212,8 +212,8 @@ Basically the `.with_columns` method is just convenient for when you don't want 
 Here's how plotting the number of daily flights looks in Polars and Pandas:
 
 ::: {.callout-note}
-Polars works fine with Matplotlib, Plotly, and Altair, but it doesn't work with Seaborn, nor does it have its own `.plot` method. The latter two are very convenient
-for exploratory data analysis, so for these examples we'll just use `to_pandas` followed by `plot` or a Seaborn function after doing all the data manipulation in Polars.
+Polars works fine with Matplotlib, Plotly, Seaborn, and Altair, but it doesn't have its own `.plot` method. The `.plot` method in Pandas is pretty convenient
+for exploratory data analysis, so for some these examples we'll just use `.to_pandas()` followed by `.plot()` function after doing all the data manipulation in Polars.
 :::
 
 ::: {.panel-tabset}
@@ -326,7 +326,7 @@ flights_pl = (
 )
 
 fig, ax = plt.subplots(figsize=(10, 5))
-sns.boxplot(x="turn", y="DepDelay", data=flights_pl.to_pandas(), ax=ax)
+sns.boxplot(x="turn", y="DepDelay", data=flights_pl, ax=ax)
 ax.set_ylim(-50, 50)
 ```
 
