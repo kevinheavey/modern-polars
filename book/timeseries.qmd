@@ -115,8 +115,8 @@ Resampling and performing multiple aggregations to each column:
     ohlcv_pl
     .group_by_dynamic("time", every="1w", start_by="friday")
     .agg([
-        pl.col(pl.Float64).mean().suffix("_mean"),
-        pl.col(pl.Float64).sum().suffix("_sum")
+        pl.col(pl.Float64).mean().name.suffix("_mean"),
+        pl.col(pl.Float64).sum().name.suffix("_sum")
     ])
 )
 
