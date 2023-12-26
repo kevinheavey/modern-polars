@@ -279,7 +279,7 @@ ax = (
     .drop_nulls()
     .to_pandas()
     .set_index("rest_spread")
-    ["counts"]
+    ["count"]
     .reindex(np.arange(delta_pl.min(), delta_pl.max() + 1), fill_value=0)
     .sort_index()
     .plot(kind="bar", color="k", width=0.9, rot=0, figsize=(9, 6))
