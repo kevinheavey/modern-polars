@@ -518,7 +518,7 @@ def create_frame(n, n_groups):
 def pandas_transform(df: pd.DataFrame) -> pd.DataFrame:
     g = df.groupby("name")["value2"]
     v = df["value2"]
-    return (v - g.transform(np.mean)) / g.transform(np.std)
+    return (v - g.transform("mean")) / g.transform("std")
 
 
 def polars_transform() -> pl.Expr:

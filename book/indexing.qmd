@@ -37,7 +37,7 @@ extracted = data_dir / "On_Time_Reporting_Carrier_On_Time_Performance_(1987_pres
 ## Read the data
 
 :::{.callout-tip}
-The examples in this book use the [lazy evaluation](https://pola-rs.github.io/polars-book/user-guide/coming_from_pandas.html?highlight=lazy#be-lazy)
+The examples in this book use the [lazy evaluation](https://pola-rs.github.io/polars/user-guide/migration/pandas/#be-lazy)
 feature of Polars less than you should.
 It's just inconvenient to use the lazy API when displaying dozens of intermediate results for educational purposes.
 :::
