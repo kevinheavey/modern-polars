@@ -115,8 +115,8 @@ Resampling and performing multiple aggregations to each column:
     ohlcv_pl
     .group_by_dynamic("time", every="1w", start_by="friday")
     .agg([
-        pl.col(pl.Float64).mean().suffix("_mean"),
-        pl.col(pl.Float64).sum().suffix("_sum")
+        pl.col(pl.Float64).mean().name.suffix("_mean"),
+        pl.col(pl.Float64).sum().name.suffix("_sum")
     ])
 )
 
@@ -156,7 +156,7 @@ ohlcv_pl.select(
         pl.col("time"),
         close.alias("Raw"),
         close.rolling_mean(28).alias("28D MA"),
-        close.alias("Expanding Average").cumsum() / (close.cumcount() + 1),
+        close.alias("Expanding Average").cum_sum() / (close.cum_count() + 1),
         close.ewm_mean(alpha=0.03).alias("EWMA($\\alpha=.03$)"),
     ]
 ).to_pandas().set_index("time").plot()

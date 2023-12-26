@@ -103,7 +103,7 @@ df_pl.select(["Dest", "Tail_Number"]).head(16).tail(4)
 Or using `take`:
 
 ``` {python}
-df_pl.select(pl.col(["Dest", "Tail_Number"]).take(list(range(12, 16))))
+df_pl.select(pl.col(["Dest", "Tail_Number"]).gather(list(range(12, 16))))
 ```
 
 ## Polars (square bracket)

@@ -43,7 +43,7 @@ async def download_and_save_cm(year: str, client: httpx.AsyncClient):
             has_header=False,
             columns=[0, 1, 10],
             new_columns=cm_cols,
-            sep="|",
+            separator="|",
             dtypes=dtypes,
         ).write_parquet(fec_dir / f"cm{year}.pq")
 
@@ -63,11 +63,11 @@ async def download_and_save_indiv(year: str, client: httpx.AsyncClient):
             has_header=False,
             columns=[0, 11, 12, 13, 14],
             new_columns=list(dtypes.keys()),
-            sep="|",
+            separator="|",
             dtypes=dtypes,
             encoding="cp1252",
         ).with_columns(
-            pl.col("TRANSACTION_DT").str.strptime(pl.Date, fmt="%m%d%Y", strict=False)
+            pl.col("TRANSACTION_DT").str.to_date(format="%m%d%Y", strict=False)
         ).write_parquet(
             fec_dir / f"indiv{year}.pq"
         )

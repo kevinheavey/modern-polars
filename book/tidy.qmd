@@ -166,7 +166,7 @@ tidy_pl = (
         pl.col("date")
         .alias("rest")
         .diff().over("team")
-        .dt.days() - 1).cast(pl.Int8))
+        .dt.total_days() - 1).cast(pl.Int8))
     .drop_nulls("rest")
     .collect()
 )
