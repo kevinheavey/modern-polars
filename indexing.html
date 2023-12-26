@@ -322,7 +322,7 @@ Tip
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>The examples in this book use the <a href="https://pola-rs.github.io/polars-book/user-guide/coming_from_pandas.html?highlight=lazy#be-lazy">lazy evaluation</a> feature of Polars less than you should. It’s just inconvenient to use the lazy API when displaying dozens of intermediate results for educational purposes.</p>
+<p>The examples in this book use the <a href="https://pola-rs.github.io/polars/user-guide/migration/pandas/#be-lazy">lazy evaluation</a> feature of Polars less than you should. It’s just inconvenient to use the lazy API when displaying dozens of intermediate results for educational purposes.</p>
 </div>
 </div>
 <div class="panel-tabset">
@@ -337,8 +337,8 @@ Tip
 <div class="cell-output cell-output-display" data-execution_count="2">
 
 <div><style>
-.dataframe > thead > tr > th,
-.dataframe > tbody > tr > td {
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
   text-align: right;
   white-space: pre-wrap;
 }
@@ -354,7 +354,7 @@ Tip
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>df_pd <span class="op">=</span> pd.read_csv(extracted)</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>df_pd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_10491/2805799744.py:3: DtypeWarning: Columns (76,77,84) have mixed types. Specify dtype option on import or set low_memory=False.
+<pre><code>/tmp/ipykernel_13993/2805799744.py:3: DtypeWarning: Columns (76,77,84) have mixed types. Specify dtype option on import or set low_memory=False.
   df_pd = pd.read_csv(extracted)</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="3">
@@ -545,8 +545,8 @@ Tip
 <div class="cell-output cell-output-display" data-execution_count="4">
 
 <div><style>
-.dataframe > thead > tr > th,
-.dataframe > tbody > tr > td {
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
   text-align: right;
   white-space: pre-wrap;
 }
@@ -556,12 +556,12 @@ Tip
 </div>
 <p>Or using <code>take</code>:</p>
 <div class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>df_pl.select(pl.col([<span class="st">"Dest"</span>, <span class="st">"Tail_Number"</span>]).take(<span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">12</span>, <span class="dv">16</span>))))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>df_pl.select(pl.col([<span class="st">"Dest"</span>, <span class="st">"Tail_Number"</span>]).gather(<span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">12</span>, <span class="dv">16</span>))))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 
 <div><style>
-.dataframe > thead > tr > th,
-.dataframe > tbody > tr > td {
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
   text-align: right;
   white-space: pre-wrap;
 }
@@ -576,8 +576,8 @@ Tip
 <div class="cell-output cell-output-display" data-execution_count="6">
 
 <div><style>
-.dataframe > thead > tr > th,
-.dataframe > tbody > tr > td {
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
   text-align: right;
   white-space: pre-wrap;
 }
@@ -647,8 +647,8 @@ Tip
 <div class="cell-output cell-output-display" data-execution_count="8">
 
 <div><style>
-.dataframe > thead > tr > th,
-.dataframe > tbody > tr > td {
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
   text-align: right;
   white-space: pre-wrap;
 }
@@ -729,8 +729,8 @@ Tip
 <div class="cell-output cell-output-display" data-execution_count="10">
 
 <div><style>
-.dataframe > thead > tr > th,
-.dataframe > tbody > tr > td {
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
   text-align: right;
   white-space: pre-wrap;
 }
@@ -798,8 +798,8 @@ Tip
 <div class="cell-output cell-output-display" data-execution_count="12">
 
 <div><style>
-.dataframe > thead > tr > th,
-.dataframe > tbody > tr > td {
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
   text-align: right;
   white-space: pre-wrap;
 }
@@ -814,7 +814,7 @@ Tip
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>f[f[<span class="st">'a'</span>] <span class="op">&lt;=</span> <span class="dv">3</span>][<span class="st">'b'</span>] <span class="op">=</span> f[<span class="st">'b'</span>] <span class="op">//</span> <span class="dv">10</span></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>f</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_10491/1317853993.py:2: SettingWithCopyWarning: 
+<pre><code>/tmp/ipykernel_13993/1317853993.py:2: SettingWithCopyWarning: 
 A value is trying to be set on a copy of a slice from a DataFrame.
 Try using .loc[row_indexer,col_indexer] = value instead
 

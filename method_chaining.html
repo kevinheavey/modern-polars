@@ -435,8 +435,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="cell-output cell-output-display" data-execution_count="7">
 
 <div><style>
-.dataframe > thead > tr > th,
-.dataframe > tbody > tr > td {
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
   text-align: right;
   white-space: pre-wrap;
 }
@@ -690,7 +690,7 @@ Note
 <span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>    .plot()</span>
 <span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_10556/4223446110.py:17: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+<pre><code>/tmp/ipykernel_14072/4223446110.py:17: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
   .groupby(["IATA_CODE_Reporting_Airline", pd.Grouper(freq="H")])[</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="10">
@@ -773,7 +773,7 @@ Note
 <span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>sns.boxplot(x<span class="op">=</span><span class="st">"turn"</span>, y<span class="op">=</span><span class="st">"DepDelay"</span>, data<span class="op">=</span>flights_pd, ax<span class="op">=</span>ax)</span>
 <span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="op">-</span><span class="dv">50</span>, <span class="dv">50</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_10556/2848021590.py:12: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
+<pre><code>/tmp/ipykernel_14072/2848021590.py:12: FutureWarning: The default of observed=False is deprecated and will be changed to True in a future version of pandas. Pass observed=False to retain current behavior or observed=True to adopt the future default and silence this warning.
   x.groupby(["FlightDate", "Tail_Number"])</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="12">

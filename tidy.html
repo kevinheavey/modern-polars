@@ -338,8 +338,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="cell-output cell-output-display" data-execution_count="1">
 
 <div><style>
-.dataframe > thead > tr > th,
-.dataframe > tbody > tr > td {
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
   text-align: right;
   white-space: pre-wrap;
 }
@@ -368,8 +368,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="cell-output cell-output-display" data-execution_count="2">
 
 <div><style>
-.dataframe > thead > tr > th,
-.dataframe > tbody > tr > td {
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
   text-align: right;
   white-space: pre-wrap;
 }
@@ -499,8 +499,8 @@ Note
 <div class="cell-output cell-output-display" data-execution_count="4">
 
 <div><style>
-.dataframe > thead > tr > th,
-.dataframe > tbody > tr > td {
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
   text-align: right;
   white-space: pre-wrap;
 }
@@ -518,8 +518,8 @@ Note
 <div class="cell-output cell-output-display" data-execution_count="5">
 
 <div><style>
-.dataframe > thead > tr > th,
-.dataframe > tbody > tr > td {
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
   text-align: right;
   white-space: pre-wrap;
 }
@@ -541,8 +541,8 @@ Note
 <div class="cell-output cell-output-display" data-execution_count="6">
 
 <div><style>
-.dataframe > thead > tr > th,
-.dataframe > tbody > tr > td {
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
   text-align: right;
   white-space: pre-wrap;
 }
@@ -572,7 +572,7 @@ Note
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"date"</span>)</span>
 <span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        .alias(<span class="st">"rest"</span>)</span>
 <span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        .diff().over(<span class="st">"team"</span>)</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        .dt.days() <span class="op">-</span> <span class="dv">1</span>).cast(pl.Int8))</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        .dt.total_days() <span class="op">-</span> <span class="dv">1</span>).cast(pl.Int8))</span>
 <span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    .drop_nulls(<span class="st">"rest"</span>)</span>
 <span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    .collect()</span>
 <span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>)</span>
@@ -580,8 +580,8 @@ Note
 <div class="cell-output cell-output-display" data-execution_count="7">
 
 <div><style>
-.dataframe > thead > tr > th,
-.dataframe > tbody > tr > td {
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
   text-align: right;
   white-space: pre-wrap;
 }
@@ -707,8 +707,8 @@ Note
 <div class="cell-output cell-output-display" data-execution_count="9">
 
 <div><style>
-.dataframe > thead > tr > th,
-.dataframe > tbody > tr > td {
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
   text-align: right;
   white-space: pre-wrap;
 }
@@ -854,7 +854,7 @@ Note
 <span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    height<span class="op">=</span><span class="fl">1.5</span>,</span>
 <span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
-<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7fd14ed3fd90&gt;</code></pre>
+<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7f39da615690&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <p><img src="tidy_files/figure-html/cell-12-output-2.png" width="729" height="864"></p>
@@ -874,7 +874,7 @@ Note
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    .drop_nulls()</span>
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    .to_pandas()</span>
 <span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    .set_index(<span class="st">"rest_spread"</span>)</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    [<span class="st">"counts"</span>]</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    [<span class="st">"count"</span>]</span>
 <span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    .reindex(np.arange(delta_pl.<span class="bu">min</span>(), delta_pl.<span class="bu">max</span>() <span class="op">+</span> <span class="dv">1</span>), fill_value<span class="op">=</span><span class="dv">0</span>)</span>
 <span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    .sort_index()</span>
 <span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    .plot(kind<span class="op">=</span><span class="st">"bar"</span>, color<span class="op">=</span><span class="st">"k"</span>, width<span class="op">=</span><span class="fl">0.9</span>, rot<span class="op">=</span><span class="dv">0</span>, figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="dv">6</span>))</span>
@@ -928,7 +928,7 @@ Note
 <pre><code>&lt;Axes: xlabel='rest_spread', ylabel='home_win'&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="tidy_files/figure-html/cell-15-output-2.png" width="731" height="503"></p>
+<p><img src="tidy_files/figure-html/cell-15-output-2.png" width="731" height="500"></p>
 </div>
 </div>
 </div>
@@ -946,7 +946,7 @@ Note
 <pre><code>&lt;Axes: xlabel='rest_spread', ylabel='home_win'&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="tidy_files/figure-html/cell-16-output-2.png" width="731" height="500"></p>
+<p><img src="tidy_files/figure-html/cell-16-output-2.png" width="731" height="503"></p>
 </div>
 </div>
 </div>
@@ -970,8 +970,8 @@ Note
 <div class="cell-output cell-output-display" data-execution_count="16">
 
 <div><style>
-.dataframe > thead > tr > th,
-.dataframe > tbody > tr > td {
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
   text-align: right;
   white-space: pre-wrap;
 }
@@ -1012,8 +1012,8 @@ Name: rest, Length: 418, dtype: Float64</code></pre>
 <div class="cell-output cell-output-display" data-execution_count="18">
 
 <div><style>
-.dataframe > thead > tr > th,
-.dataframe > tbody > tr > td {
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
   text-align: right;
   white-space: pre-wrap;
 }
@@ -1157,8 +1157,8 @@ Name: rest, Length: 418, dtype: Float64</code></pre>
 <div class="cell-output cell-output-display" data-execution_count="22">
 
 <div><style>
-.dataframe > thead > tr > th,
-.dataframe > tbody > tr > td {
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
   text-align: right;
   white-space: pre-wrap;
 }
@@ -1264,7 +1264,7 @@ Name: rest, Length: 418, dtype: Float64</code></pre>
 <span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"win_pct"</span>,</span>
 <span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    order<span class="op">=</span>[<span class="st">"away_team"</span>, <span class="st">"home_team"</span>]).<span class="bu">set</span>(ylim<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="24">
-<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7fd136348790&gt;</code></pre>
+<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7f39da38fb50&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <p><img src="tidy_files/figure-html/cell-25-output-2.png" width="383" height="483"></p>
@@ -1282,7 +1282,7 @@ Name: rest, Length: 418, dtype: Float64</code></pre>
 <span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    height<span class="op">=</span><span class="fl">1.5</span>,</span>
 <span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="25">
-<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7fd136126490&gt;</code></pre>
+<pre><code>&lt;seaborn.axisgrid.FacetGrid at 0x7f39d8132a90&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <p><img src="tidy_files/figure-html/cell-26-output-2.png" width="862" height="651"></p>
@@ -1303,8 +1303,8 @@ Name: rest, Length: 418, dtype: Float64</code></pre>
 <div class="cell-output cell-output-display" data-execution_count="26">
 
 <div><style>
-.dataframe > thead > tr > th,
-.dataframe > tbody > tr > td {
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
   text-align: right;
   white-space: pre-wrap;
 }
@@ -1417,8 +1417,8 @@ Length: 30, dtype: float64</code></pre>
 <div class="cell-output cell-output-display" data-execution_count="31">
 
 <div><style>
-.dataframe > thead > tr > th,
-.dataframe > tbody > tr > td {
+.dataframe > thead > tr,
+.dataframe > tbody > tr {
   text-align: right;
   white-space: pre-wrap;
 }
@@ -1593,10 +1593,10 @@ Length: 30, dtype: float64</code></pre>
   <th>Method:</th>                 <td>MLE</td>       <th>  Df Model:          </th>  <td>     4</td>  
 </tr>
 <tr>
-  <th>Date:</th>            <td>Fri, 03 Nov 2023</td> <th>  Pseudo R-squ.:     </th>  <td>0.1777</td>  
+  <th>Date:</th>            <td>Wed, 27 Dec 2023</td> <th>  Pseudo R-squ.:     </th>  <td>0.1777</td>  
 </tr>
 <tr>
-  <th>Time:</th>                <td>01:52:21</td>     <th>  Log-Likelihood:    </th> <td> -720.68</td> 
+  <th>Time:</th>                <td>02:59:27</td>     <th>  Log-Likelihood:    </th> <td> -720.68</td> 
 </tr>
 <tr>
   <th>converged:</th>             <td>True</td>       <th>  LL-Null:           </th> <td> -876.38</td> 
