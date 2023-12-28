@@ -52,7 +52,7 @@ mamba env create -f env.yml
 If you're not using mamba/conda you can install the following package versions and it should work:
 
 ```
-polars: 0.19.9
+polars: 0.20.2
 pyarrow: 10.0.1
 pandas: 2.1.1
 numpy: 1.23.5
