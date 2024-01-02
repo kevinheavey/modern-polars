@@ -52,6 +52,8 @@ mamba env create -f env.yml
 If you're not using mamba/conda you can install the following package versions and it should work:
 
 ```
+hvplot: 0.9.1
+holoviews: 1.18.1
 polars: 0.20.2
 pyarrow: 10.0.1
 pandas: 2.1.1
