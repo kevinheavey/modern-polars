@@ -273,18 +273,12 @@ Plotting the distribution of `rest_spread`:
 ``` {python}
 import numpy as np
 delta_pl = joined_pl["rest_spread"]
-ax = (
+(
     delta_pl
     .value_counts()
     .drop_nulls()
-    .to_pandas()
-    .set_index("rest_spread")
-    ["count"]
-    .reindex(np.arange(delta_pl.min(), delta_pl.max() + 1), fill_value=0)
-    .sort_index()
-    .plot(kind="bar", color="k", width=0.9, rot=0, figsize=(9, 6))
+    .plot.bar(x="rest_spread", y="count", color="k", frame_width=0.9, rot=0, xlabel="Difference in Rest (Home - Away)", ylabel="Games")
 )
-ax.set(xlabel="Difference in Rest (Home - Away)", ylabel="Games")
 ```
 ## Pandas
 ``` {python}
@@ -372,16 +366,13 @@ Plotting the moving average of rest days:
 ::: {.panel-tabset}
 ## Polars
 ``` {python}
-ax = (
+(
     rest_pl.pivot(index="date", values="rest", columns="variable")
     .filter(pl.col("away_team") < 7)
     .sort("date")
     .select([pl.col("date"), pl.col(pl.Float64).rolling_mean(7)])
-    .to_pandas()
-    .set_index("date")
-    .plot(figsize=(9, 6), linewidth=3)
+    .plot(x="date", figsize=(9, 6), linewidth=3, ylabel="Rest (7 day MA)")
 )
-ax.set(ylabel="Rest (7 day MA)")
 ```
 ## Pandas
 ``` {python}
@@ -504,11 +495,8 @@ win_percent_pd
 (
     win_percent_pl
     .sort("win_pct")
-    .to_pandas()
-    .set_index("team")
-    .plot.barh(figsize=(6, 12), width=0.85, color="k")
+    .plot.barh(x="team", figsize=(6, 12), width=0.85, color="k", xlabel="Win Percent")
 )
-plt.xlabel("Win Percent")
 ```
 
 Here's a plot of team home court advantage against team overall win percentage:

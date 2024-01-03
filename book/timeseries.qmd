@@ -159,9 +159,8 @@ ohlcv_pl.select(
         close.alias("Expanding Average").cum_sum() / (close.cum_count() + 1),
         close.ewm_mean(alpha=0.03).alias("EWMA($\\alpha=.03$)"),
     ]
-).to_pandas().set_index("time").plot()
+).plot.line(x="time", ylabel="Close ($)")
 
-plt.ylabel("Close ($)")
 ```
 ## Pandas
 ``` {python}
@@ -182,22 +181,21 @@ Polars doesn't have an `expanding_mean` yet so we make do by combining `cumsum` 
 ::: {.panel-tabset}
 ## Polars
 ``` {python}
+from holoviews import Spread
 mean_std_pl = ohlcv_pl.select(
     [
         "time",
         pl.col("close").rolling_mean(30, center=True).alias("mean"),
         pl.col("close").rolling_std(30, center=True).alias("std"),
     ]
+).with_columns(
+    [
+        (pl.col("mean") - pl.col("std")).alias("lower"),
+        (pl.col("mean") + pl.col("std")).alias("upper"),
+    ]
 )
-ax = mean_std_pl.to_pandas().set_index("time")["mean"].plot()
-ax.fill_between(
-    mean_std_pl["time"].to_numpy(),
-    mean_std_pl["mean"] - mean_std_pl["std"],
-    mean_std_pl["mean"] + mean_std_pl["std"],
-    alpha=0.25,
-)
-plt.tight_layout()
-plt.ylabel("Close ($)")
+line = mean_std_pl.plot.line(x="time", y="mean", ylabel="Close ($)")
+line * mean_std_pl.plot.area(x="time", y="lower", y2="upper", alpha=0.25) 
 ```
 ## Pandas
 ``` {python}

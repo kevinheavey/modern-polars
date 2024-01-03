@@ -25,8 +25,9 @@ from io import BytesIO
 import httpx
 import polars as pl
 import pandas as pd
+import hvplot
 
-
+hvplot.extension("matplotlib")
 pl.Config.set_tbl_rows(5)
 pd.options.display.max_rows = 5
 
@@ -302,18 +303,12 @@ These results are small enough to plot:
 ::: {.panel-tabset}
 ## Polars
 ``` {python}
-ax = (
+from holoviews import VLine, opts
+((
     occupation_avg_pl
-    .to_pandas()
-    .set_index("OCCUPATION")
-    .squeeze()
-    .sort_values(ascending=False)
-    .plot.barh(color="k", width=0.9)
-)
-lim = ax.get_ylim()
-ax.vlines(total_avg_pl, *lim, color="C1", linewidth=3)
-ax.legend(["Average donation"])
-ax.set(xlabel="Donation Amount", title="Average Donation by Occupation")
+    .sort("TRANSACTION_AMT", descending=True)
+    .plot.barh(x="OCCUPATION", y="TRANSACTION_AMT", color="k", xlabel="Donation Amount", title="Average Donation by Occupation", legend="Average donation")
+) * VLine(total_avg_pl)).opts(opts.VLine(color="C1", linewidth=3))
 ```
 
 ## Dask
@@ -346,16 +341,12 @@ daily_pl = (
     .with_columns(pl.col("TRANSACTION_AMT") / 1000)
     .collect(streaming=True)
 )
-ax = (
+(
     daily_pl.select(
         [pl.col("TRANSACTION_DT").cast(pl.Datetime), "TRANSACTION_AMT"]
     )
-    .to_pandas()
-    .set_index("TRANSACTION_DT")
-    .squeeze()
-    .plot(figsize=(12, 6))
+    .plot.line(x="TRANSACTION_DT", y="TRANSACTION_AMT", title="Daily Donations", ylabel="$ (thousands)")
 )
-ax.set(ylim=0, title="Daily Donations", ylabel="$ (thousands)")
 ```
 
 ## Dask
@@ -466,7 +457,7 @@ Plotting daily donations:
 ::: {.panel-tabset}
 ## Polars
 ``` {python}
-ax = (
+(
     party_donations_pl
     .pivot(
         index="TRANSACTION_DT", columns="CMTE_PTY_AFFILIATION", values="TRANSACTION_AMT"
@@ -474,12 +465,8 @@ ax = (
     .select(
         [pl.col("TRANSACTION_DT"), pl.col(pl.Int32).rolling_mean(30, min_periods=0)]
     )
-    .to_pandas()
-    .set_index("TRANSACTION_DT")
-    [["DEM", "REP"]]
-    .plot(color=["C0", "C3"], figsize=(12, 6), linewidth=3)
+    .plot.line(x="TRANSACTION_DT", y=["DEM", "REP"], color=["C0", "C3"], line_width=3, title="Daily Donations (30-D Moving Average)", xlabel="Date")
 )
-ax.set(title="Daily Donations (30-D Moving Average)", xlabel="Date")
 ```
 ## Dask
 ``` {python}
