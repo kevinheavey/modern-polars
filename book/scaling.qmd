@@ -307,8 +307,8 @@ from holoviews import VLine, opts
 ((
     occupation_avg_pl
     .sort("TRANSACTION_AMT", descending=True)
-    .plot.barh(x="OCCUPATION", y="TRANSACTION_AMT", color="k", xlabel="Donation Amount", title="Average Donation by Occupation", legend="Average donation")
-) * VLine(total_avg_pl)).opts(opts.VLine(color="C1", linewidth=3))
+    .plot.barh(x="OCCUPATION", y="TRANSACTION_AMT", color="k", xlabel="Donation Amount", title="Average Donation by Occupation")
+) * VLine(total_avg_pl.item())).opts(opts.VLine(color="C1", linewidth=3))
 ```
 
 ## Dask
