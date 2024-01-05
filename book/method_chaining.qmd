@@ -247,7 +247,7 @@ filter_expr = pl.col("IATA_CODE_Reporting_Airline").is_in(
     .upsample(time_column="DepTime", every="1h")
     .fill_null(0)
     .select([pl.col("DepTime"), pl.col(pl.UInt32).rolling_sum(24)])
-    .plot.line(x="DepTime")
+    .plot.line(x="DepTime", group_label="Flights per Day")
 )
 ```
 
