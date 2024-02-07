@@ -19,7 +19,10 @@ Now we'll explore what tidy data looks like for an NBA results dataset.
 from pathlib import Path
 import polars as pl
 import pandas as pd
+import hvplot
 
+hvplot.extension("matplotlib")
+%matplotlib inline
 pl.Config.set_tbl_rows(5)
 pd.options.display.max_rows = 5
 

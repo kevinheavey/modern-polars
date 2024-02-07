@@ -28,6 +28,7 @@ import pandas as pd
 import hvplot
 
 hvplot.extension("matplotlib")
+%matplotlib inline
 pl.Config.set_tbl_rows(5)
 pd.options.display.max_rows = 5
 
@@ -465,7 +466,7 @@ Plotting daily donations:
     .select(
         [pl.col("TRANSACTION_DT"), pl.col(pl.Int32).rolling_mean(30, min_periods=0)]
     )
-    .plot.line(x="TRANSACTION_DT", y=["DEM", "REP"], color=["C0", "C3"], line_width=3, title="Daily Donations (30-D Moving Average)", xlabel="Date")
+    .plot.line(x="TRANSACTION_DT", y=["DEM", "REP"], color=["C0", "C3"], linewidth=3, title="Daily Donations (30-D Moving Average)", xlabel="Date")
 )
 ```
 ## Dask
