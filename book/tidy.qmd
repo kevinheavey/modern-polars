@@ -75,7 +75,7 @@ games_pl = (
         pl.col("date").str.strptime(pl.Date, "%a, %b %d, %Y"),
     )
     .sort("date")
-    .with_row_count("game_id")
+    .with_row_index("game_id")
 )
 games_pl.head().collect()
 ```
