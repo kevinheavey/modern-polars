@@ -234,7 +234,7 @@ filter_expr = pl.col("IATA_CODE_Reporting_Airline").is_in(
     .group_by_dynamic(
         "DepTime",
         every="1h",
-        by="IATA_CODE_Reporting_Airline")
+        group_by="IATA_CODE_Reporting_Airline")
     .agg(pl.col("Flight_Number_Reporting_Airline").count())
     .pivot(
         index="DepTime",
