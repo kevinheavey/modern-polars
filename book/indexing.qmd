@@ -100,7 +100,7 @@ Using `head` and `tail`:
 df_pl.select(["Dest", "Tail_Number"]).head(16).tail(4)
 ```
 
-Or using `take`:
+Or using `gather`:
 
 ``` {python}
 df_pl.select(pl.col(["Dest", "Tail_Number"]).gather(list(range(12, 16))))
