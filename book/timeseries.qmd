@@ -139,7 +139,7 @@ ohlcv_pl.upsample("time", every="6h")
 ```
 ## Pandas
 ``` {python}
-ohlcv_pd.resample("6H").mean()
+ohlcv_pd.resample("6h").mean()
 ```
 :::
 

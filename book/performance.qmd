@@ -354,7 +354,7 @@ new_cols_pl = ([
 + [pl.col(col).cast(pl.UInt8) for col in u8_cols]
 )
 fifa_pl = (
-    pl.scan_csv("../data/fifa21_raw_v2.csv", dtypes=dtypes_pl)
+    pl.scan_csv("../data/fifa21_raw_big.csv", dtypes=dtypes_pl)
     .with_columns(new_cols_pl)
     .drop("Contract")
     .rename({"↓OVA": "OVA"})
