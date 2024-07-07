@@ -130,7 +130,7 @@ total_counts_pd.nlargest(100)
 :::
 
 ::: {.callout-note}
-Polars can handle some larger-than-memory data even without streaming. Thanks to [predicate pushdown](https://pola-rs.github.io/polars-book/user-guide/optimizations/lazy/predicate-pushdown.html), we can filter dataframes without reading all the data into memory first. So `streaming` mode is most useful for cases where we really do need to read in a lot of data.
+Polars can handle some larger-than-memory data even without streaming. Thanks to [predicate pushdown](https://pola-rs.github.io/polars-book/user-guide/lazy/optimizations/), we can filter dataframes without reading all the data into memory first. So `streaming` mode is most useful for cases where we really do need to read in a lot of data.
 :::
 
 
