@@ -354,7 +354,7 @@ new_cols_pl = ([
 + [pl.col(col).cast(pl.UInt8) for col in u8_cols]
 )
 fifa_pl = (
-    pl.scan_csv("../data/fifa21_raw_big.csv", dtypes=dtypes_pl)
+    pl.scan_csv("../data/fifa21_raw_big.csv", schema_overrides=dtypes_pl)
     .with_columns(new_cols_pl)
     .drop("Contract")
     .rename({"↓OVA": "OVA"})
@@ -406,7 +406,7 @@ You could play around with the timings here and even try the [`.profile`](https:
 2. It is much faster at processing strings.
 3. It can select/assign columns in parallel.
 
-## NumPy can make Polars faster
+## NumPy might make Polars faster sometimes
 
 Polars gets along well with NumPy [ufuncs](https://numpy.org/doc/stable/reference/ufuncs.html), even in lazy mode (which is interesting because NumPy has no lazy API). Let's see how this looks by calculating the [great-circle distance](http://www.johndcook.com/blog/python_longitude_latitude/) between a bunch of coordinates.
 
@@ -476,7 +476,8 @@ pairs.select(
 ).collect()
 ```
 
-On my machine the NumPy version tends to be 5-20% faster than the pure Polars version:
+On my machine the NumPy version used to be 5-20% faster than the pure Polars version, but this is no longer the case.
+Still you may want to see if it helps you:
 
 ``` {python}
 %%timeit
@@ -490,7 +491,7 @@ pairs.select(
 ).collect()
 ```
 
-This may not be a huge performance difference, but it at least means you don't sacrifice speed when relying on NumPy. There are some [gotchas](https://pola-rs.github.io/polars-book/user-guide/howcani/interop/numpy.html) though so watch out for those.
+This may not be a huge performance difference, but it at least means you don't sacrifice speed when relying on NumPy. There are some [gotchas](https://pola-rs.github.io/polars-book/user-guide/expressions/numpy/#interoperability) though so watch out for those.
 
 Also watch out for `.to_numpy()` - you don't always need to call this and it can slow things down:
 

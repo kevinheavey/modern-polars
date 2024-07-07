@@ -123,12 +123,12 @@ prices = pl.DataFrame({
 prices
 ```
 
-In both Polars and Pandas you can call `df.pivot(index="date", values="price", columns="ticker")`
+In both Polars and Pandas you can call `df.pivot`
 to get a dataframe that looks like this:
 
 ``` {python}
 #| code-fold: true
-pivoted = prices.pivot(index="date", values="price", columns="ticker")
+pivoted = prices.pivot(index="date", values="price", on="ticker")
 pivoted
 ```
 
@@ -136,19 +136,21 @@ As you can see, `.pivot` creates a dataframe where the columns are the unique la
 
 If our dataframe had multiple prices for the same ticker on the same date, we would use the `aggregate_fn` parameter of the `.pivot` method, e.g.: `prices.pivot(..., aggregate_fn="mean")`. Pivoting with an aggregate function gives us similar behaviour to what Excel calls "pivot tables".
 
-### Melt
+### Melt / Unpivot
 
 Melt is the inverse of pivot. While pivot takes us from *long* data to *wide* data, melt goes from wide to long.
-If we call `.melt(id_vars="date", value_name="price")` on our pivoted dataframe we get our original dataframe back:
+Note: Polars has recently replaced its `melt` method with an `unpivot` method.
+
+If we call `.unpivot(index="date", value_name="price")` on our pivoted dataframe we get our original dataframe back:
 
 ``` {python}
 #| code-fold: true
-pivoted.melt(id_vars="date", value_name="price")
+pivoted.unpivot(index="date", value_name="price")
 ```
 
 ## Tidy NBA data
 
-Suppose we want to calculate the days of rest each team had before each game. In the current structure this is difficult because we need to track both the `home_team` and `away_team` columns. We'll use `.melt` so that there's a single `team` column. This makes it easier to add a `rest` column with the per-team rest days between games.
+Suppose we want to calculate the days of rest each team had before each game. In the current structure this is difficult because we need to track both the `home_team` and `away_team` columns. We'll use `.unpivot` so that there's a single `team` column. This makes it easier to add a `rest` column with the per-team rest days between games.
 
 ::: {.panel-tabset}
 ## Polars
@@ -156,9 +158,9 @@ Suppose we want to calculate the days of rest each team had before each game. In
 ``` {python}
 tidy_pl = (
     games_pl
-    .melt(
-        id_vars=["game_id", "date"],
-        value_vars=["away_team", "home_team"],
+    .unpivot(
+        index=["game_id", "date"],
+        on=["away_team", "home_team"],
         value_name="team",
     )
     .sort("game_id")
@@ -211,7 +213,7 @@ by_game_pl = (
     .pivot(
         values="rest",
         index=["game_id", "date"],
-        columns="variable"
+        on="variable"
     )
     .rename({"away_team": "away_rest", "home_team": "home_rest"})
 )
@@ -359,7 +361,7 @@ In Polars we use `.pivot` to do what in Pandas would require `.unstack`:
 ::: {.panel-tabset}
 ## Polars
 ``` {python}
-rest_pl.pivot(index="date", columns="variable", values="rest")
+rest_pl.pivot(index="date", on="variable", values="rest")
 ```
 ## Pandas
 ``` {python}
@@ -373,7 +375,7 @@ Plotting the moving average of rest days:
 ## Polars
 ``` {python}
 ax = (
-    rest_pl.pivot(index="date", values="rest", columns="variable")
+    rest_pl.pivot(index="date", values="rest", on="variable")
     .filter(pl.col("away_team") < 7)
     .sort("date")
     .select([pl.col("date"), pl.col(pl.Float64).rolling_mean(7)])
@@ -410,11 +412,11 @@ We want to control for the strength of the teams playing. The team's victory per
 ``` {python}
 win_col = pl.col("win")
 wins_pl = (
-    joined_pl.melt(
-        id_vars=["game_id", "date", "home_win"],
+    joined_pl.unpivot(
+        index=["game_id", "date", "home_win"],
         value_name="team",
         variable_name="is_home",
-        value_vars=["home_team", "away_team"],
+        on=["home_team", "away_team"],
     )
     .with_columns(pl.col("home_win").alias("win") == (pl.col("is_home") == "home_team"))
     .group_by(["team", "is_home"])
@@ -517,7 +519,7 @@ Here's a plot of team home court advantage against team overall win percentage:
 ## Polars
 ``` {python}
 wins_to_plot_pl = (
-    wins_pl.pivot(index="team", columns="is_home", values="win_pct")
+    wins_pl.pivot(index="team", on="is_home", values="win_pct")
     .with_columns(
         [
             pl.col("home_team").alias("Home Win % - Away %") - pl.col("away_team"),

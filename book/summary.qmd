@@ -24,11 +24,6 @@ to measure which library is buggier.
 
 Suppose you have a bunch of important stuff in another library that works fine, even if it's a bit slow. Maybe it doesn't have good tests. Switching library is tricky and may not be worth it here. Even if Polars is bug-free, various default behaviours might differ from your expectations.
 
-### API stability
-
-Since Polars is young and has not made a 1.0 release yet, the API is subject to breaking changes. Indeed, it has quite a few features that are explicitly labelled as experimental.
-
-
 ## Other cool stuff you might like
 
 - [r-polars](https://github.com/pola-rs/r-polars), a work-in-progress project bringing Polars to R.

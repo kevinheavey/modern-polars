@@ -469,7 +469,7 @@ Plotting daily donations:
 ax = (
     party_donations_pl
     .pivot(
-        index="TRANSACTION_DT", columns="CMTE_PTY_AFFILIATION", values="TRANSACTION_AMT"
+        index="TRANSACTION_DT", on="CMTE_PTY_AFFILIATION", values="TRANSACTION_AMT"
     )[1:, :]
     .select(
         [pl.col("TRANSACTION_DT"), pl.col(pl.Int32).rolling_mean(30, min_periods=0)]

@@ -167,7 +167,7 @@ dtypes_pl = (
     | {col: pl.Utf8 for col in time_cols}
 )
 df_pl = (
-    pl.scan_csv(extracted, dtypes=dtypes_pl, null_values="")
+    pl.scan_csv(extracted, schema_overrides=dtypes_pl, null_values="")
     .select(cols)
     .with_columns([extract_city_name_pl(), *time_to_datetime_pl(time_cols)])
     .collect()
@@ -238,7 +238,7 @@ filter_expr = pl.col("IATA_CODE_Reporting_Airline").is_in(
     .agg(pl.col("Flight_Number_Reporting_Airline").count())
     .pivot(
         index="DepTime",
-        columns="IATA_CODE_Reporting_Airline",
+        on="IATA_CODE_Reporting_Airline",
         values="Flight_Number_Reporting_Airline",
     )
     .sort("DepTime")
@@ -272,7 +272,7 @@ filter_expr = pl.col("IATA_CODE_Reporting_Airline").is_in(
     )
     .set_index("DepTime")
     # TimeGrouper to resample & groupby at once
-    .groupby(["IATA_CODE_Reporting_Airline", pd.Grouper(freq="H")])[
+    .groupby(["IATA_CODE_Reporting_Airline", pd.Grouper(freq="h")])[
         "Flight_Number_Reporting_Airline"
     ]
     .count()
