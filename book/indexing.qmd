@@ -71,7 +71,7 @@ columns but is also very complicated. To quote *Modern Pandas*:
 > The complexity of pandas' indexing is a microcosm for the complexity of the pandas API in general. There's a reason for the complexity (well, most of it), but that's not much consolation while you're learning. Still, all of these ways of indexing really are useful enough to justify their inclusion in the library.
 
 It's true that Pandas indexing is quite useful,
-but it's also true that everyone always forgets how do to anything non-trivial with it. The benefits of being able to put
+but it's also true that everyone always forgets how to do anything non-trivial with it. The benefits of being able to put
 `df.loc[pd.IndexSlice[:, 'B0':'B1'], :]]` in your code base are somewhat dubious.
 
 Polars avoids this complexity by simply **not having an index.** 
@@ -173,7 +173,7 @@ df_pd.iloc[[0, 1, 3], [0, 1]]
 
 Pandas has this cute thing where if you assign values to some subset of the dataframe with square bracket indexing, it doesn't work and gives the notorious `SettingWithCopyWarning`. To be fair, this warning also tells you to assign using `.loc`. Unfortunately many people in the Pandas community can't read and instead just ignore the warning.
 
-Polars is not yet popular enough to attact the same crowd, but when it does it should not run into the same problem, as the only way to add or overwrite columns in Polars is the `with_columns` method.
+Polars is not yet popular enough to attract the same crowd, but when it does it should not run into the same problem, as the only way to add or overwrite columns in Polars is the `with_columns` method.
 
 
 ::: {.panel-tabset}
