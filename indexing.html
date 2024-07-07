@@ -2,13 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.280">
+<meta name="generator" content="quarto-1.5.53">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="description" content="A side-by-side comparison of the Polars and Pandas libraries.">
 
-<title>Modern Polars - 1&nbsp; Indexing (Or Lack Thereof)</title>
+<title>1&nbsp; Indexing (Or Lack Thereof) – Modern Polars</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -18,11 +18,12 @@ div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
   width: 0.8em;
-  margin: 0 0.8em 0.2em -1.6em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -33,7 +34,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -47,47 +48,17 @@ pre.numberSource code > span > a:first-child::before
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
     padding: 0 4px; width: 4em;
-    color: #aaaaaa;
   }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
 div.sourceCode
   {   }
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { color: #008000; } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { color: #008000; font-weight: bold; } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="site_libs/quarto-nav/headroom.min.js"></script>
 <script src="site_libs/clipboard/clipboard.min.js"></script>
 <script src="site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -112,7 +83,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   "collapse-after": 3,
   "panel-placement": "start",
   "type": "textbox",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -121,31 +98,38 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
-    "search-submit-button-title": "Submit"
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
   }
 }</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 <link rel="stylesheet" href="custom.css">
-<meta property="og:title" content="Modern Polars - 1&nbsp; Indexing (Or Lack Thereof)">
+<meta property="og:title" content="1&nbsp; Indexing (Or Lack Thereof) – Modern Polars">
 <meta property="og:description" content="A side-by-side comparison of the Polars and Pandas libraries.">
 <meta property="og:image" content="https://github.com/kevinheavey/modern-polars/raw/master/book/resized-og-polar-bear-airpods-no-background.png">
-<meta property="og:site-name" content="Modern Polars">
+<meta property="og:site_name" content="Modern Polars">
 </head>
 
 <body class="nav-sidebar floating">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
-  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-    <div class="container-fluid d-flex justify-content-between">
-      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Indexing (Or Lack Thereof)</span></h1>
-      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
-        <i class="bi bi-chevron-right"></i>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./indexing.html"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Indexing (Or Lack Thereof)</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
       </button>
     </div>
   </nav>
@@ -153,7 +137,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
       <a href="./index.html" class="sidebar-logo-link">
       <img src="./polar-bear-airpods-no-background.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
@@ -161,107 +145,118 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <div class="sidebar-title mb-0 py-0">
       <a href="./">Modern Polars</a> 
         <div class="sidebar-tools-main">
-    <a href="https://github.com/kevinheavey/modern-polars/tree/master/book/" title="Source Code" class="sidebar-tool px-1"><i class="bi bi-github"></i></a>
-    <a href="" title="Share" id="sidebar-tool-dropdown-0" class="sidebar-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-share"></i></a>
-    <ul class="dropdown-menu" aria-labelledby="sidebar-tool-dropdown-0">
-        <li>
-          <a class="dropdown-item sidebar-tools-main-item" href="https://twitter.com/intent/tweet?url=|url|">
-            <i class="bi bi-bi-twitter pe-1"></i>
-          Twitter
-          </a>
-        </li>
-        <li>
-          <a class="dropdown-item sidebar-tools-main-item" href="https://www.facebook.com/sharer/sharer.php?u=|url|">
-            <i class="bi bi-bi-facebook pe-1"></i>
-          Facebook
-          </a>
-        </li>
-        <li>
-          <a class="dropdown-item sidebar-tools-main-item" href="https://www.linkedin.com/sharing/share-offsite/?url=|url|">
-            <i class="bi bi-bi-linkedin pe-1"></i>
-          LinkedIn
-          </a>
-        </li>
-    </ul>
+    <a href="https://github.com/kevinheavey/modern-polars/tree/master/book/" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <div class="dropdown">
+      <a href="" title="Share" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label="Share"><i class="bi bi-share"></i></a>
+      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://twitter.com/intent/tweet?url=|url|">
+              <i class="bi bi-twitter pe-1"></i>
+            Twitter
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://www.facebook.com/sharer/sharer.php?u=|url|">
+              <i class="bi bi-facebook pe-1"></i>
+            Facebook
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://www.linkedin.com/sharing/share-offsite/?url=|url|">
+              <i class="bi bi-linkedin pe-1"></i>
+            LinkedIn
+            </a>
+          </li>
+      </ul>
+    </div>
 </div>
     </div>
       </div>
-      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="mt-2 flex-shrink-0 align-items-center">
         <div class="sidebar-search">
         <div id="quarto-search" class="" title="Search"></div>
         </div>
-      </div>
+        </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link">Preface</a>
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./indexing.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Indexing (Or Lack Thereof)</span></a>
+  <a href="./indexing.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Indexing (Or Lack Thereof)</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./method_chaining.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Method Chaining</span></a>
+  <a href="./method_chaining.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Method Chaining</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./performance.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Performance</span></a>
+  <a href="./performance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Performance</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./tidy.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Reshaping and Tidy Data</span></a>
+  <a href="./tidy.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Reshaping and Tidy Data</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./timeseries.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Timeseries</span></a>
+  <a href="./timeseries.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Timeseries</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./scaling.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Scaling</span></a>
+  <a href="./scaling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Scaling</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./summary.html" class="sidebar-item-text sidebar-link">Summary</a>
+  <a href="./summary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Summary</span></a>
   </div>
 </li>
     </ul>
     </div>
 </nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#fetch-data-no-dataframes-here" id="toc-fetch-data-no-dataframes-here" class="nav-link active" data-scroll-target="#fetch-data-no-dataframes-here"><span class="toc-section-number">1.1</span>  Fetch Data (No Dataframes Here)</a></li>
-  <li><a href="#read-the-data" id="toc-read-the-data" class="nav-link" data-scroll-target="#read-the-data"><span class="toc-section-number">1.2</span>  Read the data</a></li>
-  <li><a href="#indexing" id="toc-indexing" class="nav-link" data-scroll-target="#indexing"><span class="toc-section-number">1.3</span>  Indexing</a></li>
-  <li><a href="#slicing-vs-selecting" id="toc-slicing-vs-selecting" class="nav-link" data-scroll-target="#slicing-vs-selecting"><span class="toc-section-number">1.4</span>  Slicing vs Selecting</a>
+  <li><a href="#fetch-data-no-dataframes-here" id="toc-fetch-data-no-dataframes-here" class="nav-link active" data-scroll-target="#fetch-data-no-dataframes-here"><span class="header-section-number">1.1</span> Fetch Data (No Dataframes Here)</a></li>
+  <li><a href="#read-the-data" id="toc-read-the-data" class="nav-link" data-scroll-target="#read-the-data"><span class="header-section-number">1.2</span> Read the data</a></li>
+  <li><a href="#indexing" id="toc-indexing" class="nav-link" data-scroll-target="#indexing"><span class="header-section-number">1.3</span> Indexing</a></li>
+  <li><a href="#slicing-vs-selecting" id="toc-slicing-vs-selecting" class="nav-link" data-scroll-target="#slicing-vs-selecting"><span class="header-section-number">1.4</span> Slicing vs Selecting</a>
   <ul class="collapse">
-  <li><a href="#rows-by-number-columns-by-name" id="toc-rows-by-number-columns-by-name" class="nav-link" data-scroll-target="#rows-by-number-columns-by-name"><span class="toc-section-number">1.4.1</span>  Rows by number, columns by name</a></li>
-  <li><a href="#rows-by-string-index-columns-by-name" id="toc-rows-by-string-index-columns-by-name" class="nav-link" data-scroll-target="#rows-by-string-index-columns-by-name"><span class="toc-section-number">1.4.2</span>  Rows by string index, columns by name</a></li>
-  <li><a href="#rows-by-number-columns-by-number" id="toc-rows-by-number-columns-by-number" class="nav-link" data-scroll-target="#rows-by-number-columns-by-number"><span class="toc-section-number">1.4.3</span>  Rows by number, columns by number</a></li>
+  <li><a href="#rows-by-number-columns-by-name" id="toc-rows-by-number-columns-by-name" class="nav-link" data-scroll-target="#rows-by-number-columns-by-name"><span class="header-section-number">1.4.1</span> Rows by number, columns by name</a></li>
+  <li><a href="#rows-by-string-index-columns-by-name" id="toc-rows-by-string-index-columns-by-name" class="nav-link" data-scroll-target="#rows-by-string-index-columns-by-name"><span class="header-section-number">1.4.2</span> Rows by string index, columns by name</a></li>
+  <li><a href="#rows-by-number-columns-by-number" id="toc-rows-by-number-columns-by-number" class="nav-link" data-scroll-target="#rows-by-number-columns-by-number"><span class="header-section-number">1.4.3</span> Rows by number, columns by number</a></li>
   </ul></li>
-  <li><a href="#settingwithcopy" id="toc-settingwithcopy" class="nav-link" data-scroll-target="#settingwithcopy"><span class="toc-section-number">1.5</span>  SettingWithCopy</a></li>
-  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="toc-section-number">1.6</span>  Summary</a></li>
+  <li><a href="#settingwithcopy" id="toc-settingwithcopy" class="nav-link" data-scroll-target="#settingwithcopy"><span class="header-section-number">1.5</span> SettingWithCopy</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">1.6</span> Summary</a></li>
   </ul>
-<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/kevinheavey/modern-polars/edit/master/book/indexing.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/kevinheavey/modern-polars/issues/new" class="toc-action">Report an issue</a></p><p><a href="https://github.com/kevinheavey/modern-polars/blob/master/book/indexing.qmd" class="toc-action">View source</a></p></div></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/kevinheavey/modern-polars/edit/master/book/indexing.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/kevinheavey/modern-polars/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/kevinheavey/modern-polars/blob/master/book/indexing.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span id="sec-indexing" class="quarto-section-identifier d-none d-lg-block"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Indexing (Or Lack Thereof)</span></span></h1>
+<h1 class="title"><span id="sec-indexing" class="quarto-section-identifier"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Indexing (Or Lack Thereof)</span></span></h1>
 </div>
 
 
@@ -274,14 +269,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </div>
   
 
+
 </header>
+
 
 <p>This chapter is about indexes, which are the source of much confusion in Pandas and simply don’t exist in Polars.</p>
 <section id="fetch-data-no-dataframes-here" class="level2" data-number="1.1">
 <h2 data-number="1.1" class="anchored" data-anchor-id="fetch-data-no-dataframes-here"><span class="header-section-number">1.1</span> Fetch Data (No Dataframes Here)</h2>
 <p>First we fetch some flight delay data. This part isn’t about dataframes so feel free to skip the code.</p>
-<div class="cell" data-execution_count="1">
-<details>
+<div id="43a6495a" class="cell" data-execution_count="1">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> zipfile <span class="im">import</span> ZipFile</span>
@@ -312,12 +309,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </section>
 <section id="read-the-data" class="level2" data-number="1.2">
 <h2 data-number="1.2" class="anchored" data-anchor-id="read-the-data"><span class="header-section-number">1.2</span> Read the data</h2>
-<div class="callout-tip callout callout-style-default callout-captioned">
+<div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<div class="callout-caption-container flex-fill">
+<div class="callout-title-container flex-fill">
 Tip
 </div>
 </div>
@@ -325,17 +322,16 @@ Tip
 <p>The examples in this book use the <a href="https://pola-rs.github.io/polars/user-guide/migration/pandas/#be-lazy">lazy evaluation</a> feature of Polars less than you should. It’s just inconvenient to use the lazy API when displaying dozens of intermediate results for educational purposes.</p>
 </div>
 </div>
-<div class="panel-tabset">
+<div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">Pandas</a></li></ul>
 <div class="tab-content">
 <div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
-<div class="cell" data-execution_count="2">
+<div id="1c9ac63e" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>pl.Config.set_tbl_rows(<span class="dv">5</span>) <span class="co"># don't print too many rows in the book</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>df_pl <span class="op">=</span> pl.read_csv(extracted, truncate_ragged_lines<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>df_pl</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
-
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -343,176 +339,798 @@ Tip
   white-space: pre-wrap;
 }
 </style>
-<small>shape: (537_902, 110)</small><table class="dataframe table table-sm table-striped"><thead><tr><th>Year</th><th>Quarter</th><th>Month</th><th>DayofMonth</th><th>DayOfWeek</th><th>FlightDate</th><th>Reporting_Airline</th><th>DOT_ID_Reporting_Airline</th><th>IATA_CODE_Reporting_Airline</th><th>Tail_Number</th><th>Flight_Number_Reporting_Airline</th><th>OriginAirportID</th><th>OriginAirportSeqID</th><th>OriginCityMarketID</th><th>Origin</th><th>OriginCityName</th><th>OriginState</th><th>OriginStateFips</th><th>OriginStateName</th><th>OriginWac</th><th>DestAirportID</th><th>DestAirportSeqID</th><th>DestCityMarketID</th><th>Dest</th><th>DestCityName</th><th>DestState</th><th>DestStateFips</th><th>DestStateName</th><th>DestWac</th><th>CRSDepTime</th><th>DepTime</th><th>DepDelay</th><th>DepDelayMinutes</th><th>DepDel15</th><th>DepartureDelayGroups</th><th>DepTimeBlk</th><th>TaxiOut</th><th>…</th><th>Div1TotalGTime</th><th>Div1LongestGTime</th><th>Div1WheelsOff</th><th>Div1TailNum</th><th>Div2Airport</th><th>Div2AirportID</th><th>Div2AirportSeqID</th><th>Div2WheelsOn</th><th>Div2TotalGTime</th><th>Div2LongestGTime</th><th>Div2WheelsOff</th><th>Div2TailNum</th><th>Div3Airport</th><th>Div3AirportID</th><th>Div3AirportSeqID</th><th>Div3WheelsOn</th><th>Div3TotalGTime</th><th>Div3LongestGTime</th><th>Div3WheelsOff</th><th>Div3TailNum</th><th>Div4Airport</th><th>Div4AirportID</th><th>Div4AirportSeqID</th><th>Div4WheelsOn</th><th>Div4TotalGTime</th><th>Div4LongestGTime</th><th>Div4WheelsOff</th><th>Div4TailNum</th><th>Div5Airport</th><th>Div5AirportID</th><th>Div5AirportSeqID</th><th>Div5WheelsOn</th><th>Div5TotalGTime</th><th>Div5LongestGTime</th><th>Div5WheelsOff</th><th>Div5TailNum</th><th></th></tr><tr><td>i64</td><td>i64</td><td>i64</td><td>i64</td><td>i64</td><td>str</td><td>str</td><td>i64</td><td>str</td><td>str</td><td>i64</td><td>i64</td><td>i64</td><td>i64</td><td>str</td><td>str</td><td>str</td><td>i64</td><td>str</td><td>i64</td><td>i64</td><td>i64</td><td>i64</td><td>str</td><td>str</td><td>str</td><td>i64</td><td>str</td><td>i64</td><td>i64</td><td>str</td><td>f64</td><td>f64</td><td>f64</td><td>i64</td><td>str</td><td>f64</td><td>…</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td><td>str</td></tr></thead><tbody><tr><td>2022</td><td>1</td><td>1</td><td>14</td><td>5</td><td>"2022-01-14"</td><td>"YX"</td><td>20452</td><td>"YX"</td><td>"N119HQ"</td><td>4879</td><td>11066</td><td>1106606</td><td>31066</td><td>"CMH"</td><td>"Columbus, OH"</td><td>"OH"</td><td>39</td><td>"Ohio"</td><td>44</td><td>11278</td><td>1127805</td><td>30852</td><td>"DCA"</td><td>"Washington, DC…</td><td>"VA"</td><td>51</td><td>"Virginia"</td><td>38</td><td>1224</td><td>"1221"</td><td>-3.0</td><td>0.0</td><td>0.0</td><td>-1</td><td>"1200-1259"</td><td>28.0</td><td>…</td><td>null</td><td>null</td><td>""</td><td>""</td><td>""</td><td>null</td><td>null</td><td>""</td><td>null</td><td>null</td><td>""</td><td>""</td><td>""</td><td>null</td><td>null</td><td>""</td><td>null</td><td>null</td><td>""</td><td>""</td><td>""</td><td>null</td><td>null</td><td>""</td><td>null</td><td>null</td><td>""</td><td>""</td><td>""</td><td>null</td><td>null</td><td>""</td><td>null</td><td>null</td><td>""</td><td>""</td><td>null</td></tr><tr><td>2022</td><td>1</td><td>1</td><td>15</td><td>6</td><td>"2022-01-15"</td><td>"YX"</td><td>20452</td><td>"YX"</td><td>"N122HQ"</td><td>4879</td><td>11066</td><td>1106606</td><td>31066</td><td>"CMH"</td><td>"Columbus, OH"</td><td>"OH"</td><td>39</td><td>"Ohio"</td><td>44</td><td>11278</td><td>1127805</td><td>30852</td><td>"DCA"</td><td>"Washington, DC…</td><td>"VA"</td><td>51</td><td>"Virginia"</td><td>38</td><td>1224</td><td>"1214"</td><td>-10.0</td><td>0.0</td><td>0.0</td><td>-1</td><td>"1200-1259"</td><td>19.0</td><td>…</td><td>null</td><td>null</td><td>""</td><td>""</td><td>""</td><td>null</td><td>null</td><td>""</td><td>null</td><td>null</td><td>""</td><td>""</td><td>""</td><td>null</td><td>null</td><td>""</td><td>null</td><td>null</td><td>""</td><td>""</td><td>""</td><td>null</td><td>null</td><td>""</td><td>null</td><td>null</td><td>""</td><td>""</td><td>""</td><td>null</td><td>null</td><td>""</td><td>null</td><td>null</td><td>""</td><td>""</td><td>null</td></tr><tr><td>2022</td><td>1</td><td>1</td><td>16</td><td>7</td><td>"2022-01-16"</td><td>"YX"</td><td>20452</td><td>"YX"</td><td>"N412YX"</td><td>4879</td><td>11066</td><td>1106606</td><td>31066</td><td>"CMH"</td><td>"Columbus, OH"</td><td>"OH"</td><td>39</td><td>"Ohio"</td><td>44</td><td>11278</td><td>1127805</td><td>30852</td><td>"DCA"</td><td>"Washington, DC…</td><td>"VA"</td><td>51</td><td>"Virginia"</td><td>38</td><td>1224</td><td>"1218"</td><td>-6.0</td><td>0.0</td><td>0.0</td><td>-1</td><td>"1200-1259"</td><td>16.0</td><td>…</td><td>null</td><td>null</td><td>""</td><td>""</td><td>""</td><td>null</td><td>null</td><td>""</td><td>null</td><td>null</td><td>""</td><td>""</td><td>""</td><td>null</td><td>null</td><td>""</td><td>null</td><td>null</td><td>""</td><td>""</td><td>""</td><td>null</td><td>null</td><td>""</td><td>null</td><td>null</td><td>""</td><td>""</td><td>""</td><td>null</td><td>null</td><td>""</td><td>null</td><td>null</td><td>""</td><td>""</td><td>null</td></tr><tr><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td></tr><tr><td>2022</td><td>1</td><td>1</td><td>6</td><td>4</td><td>"2022-01-06"</td><td>"DL"</td><td>19790</td><td>"DL"</td><td>"N989AT"</td><td>1579</td><td>11057</td><td>1105703</td><td>31057</td><td>"CLT"</td><td>"Charlotte, NC"</td><td>"NC"</td><td>37</td><td>"North Carolina…</td><td>36</td><td>10397</td><td>1039707</td><td>30397</td><td>"ATL"</td><td>"Atlanta, GA"</td><td>"GA"</td><td>13</td><td>"Georgia"</td><td>34</td><td>1258</td><td>"1257"</td><td>-1.0</td><td>0.0</td><td>0.0</td><td>-1</td><td>"1200-1259"</td><td>15.0</td><td>…</td><td>null</td><td>null</td><td>""</td><td>""</td><td>""</td><td>null</td><td>null</td><td>""</td><td>null</td><td>null</td><td>""</td><td>""</td><td>""</td><td>null</td><td>null</td><td>""</td><td>null</td><td>null</td><td>""</td><td>""</td><td>""</td><td>null</td><td>null</td><td>""</td><td>null</td><td>null</td><td>""</td><td>""</td><td>""</td><td>null</td><td>null</td><td>""</td><td>null</td><td>null</td><td>""</td><td>""</td><td>null</td></tr><tr><td>2022</td><td>1</td><td>1</td><td>6</td><td>4</td><td>"2022-01-06"</td><td>"DL"</td><td>19790</td><td>"DL"</td><td>"N815DN"</td><td>1580</td><td>14869</td><td>1486903</td><td>34614</td><td>"SLC"</td><td>"Salt Lake City…</td><td>"UT"</td><td>49</td><td>"Utah"</td><td>87</td><td>14057</td><td>1405702</td><td>34057</td><td>"PDX"</td><td>"Portland, OR"</td><td>"OR"</td><td>41</td><td>"Oregon"</td><td>92</td><td>2240</td><td>"2231"</td><td>-9.0</td><td>0.0</td><td>0.0</td><td>-1</td><td>"2200-2259"</td><td>10.0</td><td>…</td><td>null</td><td>null</td><td>""</td><td>""</td><td>""</td><td>null</td><td>null</td><td>""</td><td>null</td><td>null</td><td>""</td><td>""</td><td>""</td><td>null</td><td>null</td><td>""</td><td>null</td><td>null</td><td>""</td><td>""</td><td>""</td><td>null</td><td>null</td><td>""</td><td>null</td><td>null</td><td>""</td><td>""</td><td>""</td><td>null</td><td>null</td><td>""</td><td>null</td><td>null</td><td>""</td><td>""</td><td>null</td></tr></tbody></table></div>
+<small>shape: (537_902, 110)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Year</th>
+<th data-quarto-table-cell-role="th">Quarter</th>
+<th data-quarto-table-cell-role="th">Month</th>
+<th data-quarto-table-cell-role="th">DayofMonth</th>
+<th data-quarto-table-cell-role="th">DayOfWeek</th>
+<th data-quarto-table-cell-role="th">FlightDate</th>
+<th data-quarto-table-cell-role="th">Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">DOT_ID_Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">IATA_CODE_Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">Tail_Number</th>
+<th data-quarto-table-cell-role="th">Flight_Number_Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">OriginAirportID</th>
+<th data-quarto-table-cell-role="th">OriginAirportSeqID</th>
+<th data-quarto-table-cell-role="th">OriginCityMarketID</th>
+<th data-quarto-table-cell-role="th">Origin</th>
+<th data-quarto-table-cell-role="th">OriginCityName</th>
+<th data-quarto-table-cell-role="th">OriginState</th>
+<th data-quarto-table-cell-role="th">OriginStateFips</th>
+<th data-quarto-table-cell-role="th">OriginStateName</th>
+<th data-quarto-table-cell-role="th">OriginWac</th>
+<th data-quarto-table-cell-role="th">DestAirportID</th>
+<th data-quarto-table-cell-role="th">DestAirportSeqID</th>
+<th data-quarto-table-cell-role="th">DestCityMarketID</th>
+<th data-quarto-table-cell-role="th">Dest</th>
+<th data-quarto-table-cell-role="th">DestCityName</th>
+<th data-quarto-table-cell-role="th">DestState</th>
+<th data-quarto-table-cell-role="th">DestStateFips</th>
+<th data-quarto-table-cell-role="th">DestStateName</th>
+<th data-quarto-table-cell-role="th">DestWac</th>
+<th data-quarto-table-cell-role="th">CRSDepTime</th>
+<th data-quarto-table-cell-role="th">DepTime</th>
+<th data-quarto-table-cell-role="th">DepDelay</th>
+<th data-quarto-table-cell-role="th">DepDelayMinutes</th>
+<th data-quarto-table-cell-role="th">DepDel15</th>
+<th data-quarto-table-cell-role="th">DepartureDelayGroups</th>
+<th data-quarto-table-cell-role="th">DepTimeBlk</th>
+<th data-quarto-table-cell-role="th">TaxiOut</th>
+<th data-quarto-table-cell-role="th">…</th>
+<th data-quarto-table-cell-role="th">Div1TotalGTime</th>
+<th data-quarto-table-cell-role="th">Div1LongestGTime</th>
+<th data-quarto-table-cell-role="th">Div1WheelsOff</th>
+<th data-quarto-table-cell-role="th">Div1TailNum</th>
+<th data-quarto-table-cell-role="th">Div2Airport</th>
+<th data-quarto-table-cell-role="th">Div2AirportID</th>
+<th data-quarto-table-cell-role="th">Div2AirportSeqID</th>
+<th data-quarto-table-cell-role="th">Div2WheelsOn</th>
+<th data-quarto-table-cell-role="th">Div2TotalGTime</th>
+<th data-quarto-table-cell-role="th">Div2LongestGTime</th>
+<th data-quarto-table-cell-role="th">Div2WheelsOff</th>
+<th data-quarto-table-cell-role="th">Div2TailNum</th>
+<th data-quarto-table-cell-role="th">Div3Airport</th>
+<th data-quarto-table-cell-role="th">Div3AirportID</th>
+<th data-quarto-table-cell-role="th">Div3AirportSeqID</th>
+<th data-quarto-table-cell-role="th">Div3WheelsOn</th>
+<th data-quarto-table-cell-role="th">Div3TotalGTime</th>
+<th data-quarto-table-cell-role="th">Div3LongestGTime</th>
+<th data-quarto-table-cell-role="th">Div3WheelsOff</th>
+<th data-quarto-table-cell-role="th">Div3TailNum</th>
+<th data-quarto-table-cell-role="th">Div4Airport</th>
+<th data-quarto-table-cell-role="th">Div4AirportID</th>
+<th data-quarto-table-cell-role="th">Div4AirportSeqID</th>
+<th data-quarto-table-cell-role="th">Div4WheelsOn</th>
+<th data-quarto-table-cell-role="th">Div4TotalGTime</th>
+<th data-quarto-table-cell-role="th">Div4LongestGTime</th>
+<th data-quarto-table-cell-role="th">Div4WheelsOff</th>
+<th data-quarto-table-cell-role="th">Div4TailNum</th>
+<th data-quarto-table-cell-role="th">Div5Airport</th>
+<th data-quarto-table-cell-role="th">Div5AirportID</th>
+<th data-quarto-table-cell-role="th">Div5AirportSeqID</th>
+<th data-quarto-table-cell-role="th">Div5WheelsOn</th>
+<th data-quarto-table-cell-role="th">Div5TotalGTime</th>
+<th data-quarto-table-cell-role="th">Div5LongestGTime</th>
+<th data-quarto-table-cell-role="th">Div5WheelsOff</th>
+<th data-quarto-table-cell-role="th">Div5TailNum</th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+<tr class="odd">
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>str</th>
+<th>str</th>
+<th>i64</th>
+<th>str</th>
+<th>str</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>i64</th>
+<th>str</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>i64</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>i64</th>
+<th>str</th>
+<th>i64</th>
+<th>i64</th>
+<th>str</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>i64</th>
+<th>str</th>
+<th>f64</th>
+<th>…</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+<th>str</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2022</td>
+<td>1</td>
+<td>1</td>
+<td>14</td>
+<td>5</td>
+<td>"2022-01-14"</td>
+<td>"YX"</td>
+<td>20452</td>
+<td>"YX"</td>
+<td>"N119HQ"</td>
+<td>4879</td>
+<td>11066</td>
+<td>1106606</td>
+<td>31066</td>
+<td>"CMH"</td>
+<td>"Columbus, OH"</td>
+<td>"OH"</td>
+<td>39</td>
+<td>"Ohio"</td>
+<td>44</td>
+<td>11278</td>
+<td>1127805</td>
+<td>30852</td>
+<td>"DCA"</td>
+<td>"Washington, DC"</td>
+<td>"VA"</td>
+<td>51</td>
+<td>"Virginia"</td>
+<td>38</td>
+<td>1224</td>
+<td>"1221"</td>
+<td>-3.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>-1</td>
+<td>"1200-1259"</td>
+<td>28.0</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>2022</td>
+<td>1</td>
+<td>1</td>
+<td>15</td>
+<td>6</td>
+<td>"2022-01-15"</td>
+<td>"YX"</td>
+<td>20452</td>
+<td>"YX"</td>
+<td>"N122HQ"</td>
+<td>4879</td>
+<td>11066</td>
+<td>1106606</td>
+<td>31066</td>
+<td>"CMH"</td>
+<td>"Columbus, OH"</td>
+<td>"OH"</td>
+<td>39</td>
+<td>"Ohio"</td>
+<td>44</td>
+<td>11278</td>
+<td>1127805</td>
+<td>30852</td>
+<td>"DCA"</td>
+<td>"Washington, DC"</td>
+<td>"VA"</td>
+<td>51</td>
+<td>"Virginia"</td>
+<td>38</td>
+<td>1224</td>
+<td>"1214"</td>
+<td>-10.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>-1</td>
+<td>"1200-1259"</td>
+<td>19.0</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>2022</td>
+<td>1</td>
+<td>1</td>
+<td>16</td>
+<td>7</td>
+<td>"2022-01-16"</td>
+<td>"YX"</td>
+<td>20452</td>
+<td>"YX"</td>
+<td>"N412YX"</td>
+<td>4879</td>
+<td>11066</td>
+<td>1106606</td>
+<td>31066</td>
+<td>"CMH"</td>
+<td>"Columbus, OH"</td>
+<td>"OH"</td>
+<td>39</td>
+<td>"Ohio"</td>
+<td>44</td>
+<td>11278</td>
+<td>1127805</td>
+<td>30852</td>
+<td>"DCA"</td>
+<td>"Washington, DC"</td>
+<td>"VA"</td>
+<td>51</td>
+<td>"Virginia"</td>
+<td>38</td>
+<td>1224</td>
+<td>"1218"</td>
+<td>-6.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>-1</td>
+<td>"1200-1259"</td>
+<td>16.0</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>2022</td>
+<td>1</td>
+<td>1</td>
+<td>6</td>
+<td>4</td>
+<td>"2022-01-06"</td>
+<td>"DL"</td>
+<td>19790</td>
+<td>"DL"</td>
+<td>"N989AT"</td>
+<td>1579</td>
+<td>11057</td>
+<td>1105703</td>
+<td>31057</td>
+<td>"CLT"</td>
+<td>"Charlotte, NC"</td>
+<td>"NC"</td>
+<td>37</td>
+<td>"North Carolina"</td>
+<td>36</td>
+<td>10397</td>
+<td>1039707</td>
+<td>30397</td>
+<td>"ATL"</td>
+<td>"Atlanta, GA"</td>
+<td>"GA"</td>
+<td>13</td>
+<td>"Georgia"</td>
+<td>34</td>
+<td>1258</td>
+<td>"1257"</td>
+<td>-1.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>-1</td>
+<td>"1200-1259"</td>
+<td>15.0</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>2022</td>
+<td>1</td>
+<td>1</td>
+<td>6</td>
+<td>4</td>
+<td>"2022-01-06"</td>
+<td>"DL"</td>
+<td>19790</td>
+<td>"DL"</td>
+<td>"N815DN"</td>
+<td>1580</td>
+<td>14869</td>
+<td>1486903</td>
+<td>34614</td>
+<td>"SLC"</td>
+<td>"Salt Lake City, UT"</td>
+<td>"UT"</td>
+<td>49</td>
+<td>"Utah"</td>
+<td>87</td>
+<td>14057</td>
+<td>1405702</td>
+<td>34057</td>
+<td>"PDX"</td>
+<td>"Portland, OR"</td>
+<td>"OR"</td>
+<td>41</td>
+<td>"Oregon"</td>
+<td>92</td>
+<td>2240</td>
+<td>"2231"</td>
+<td>-9.0</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>-1</td>
+<td>"2200-2259"</td>
+<td>10.0</td>
+<td>…</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>null</td>
+<td>null</td>
+<td>""</td>
+<td>""</td>
+<td>null</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 </div>
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
-<div class="cell" data-execution_count="3">
+<div id="aa196aa1" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>pd.options.display.max_rows <span class="op">=</span> <span class="dv">5</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>df_pd <span class="op">=</span> pd.read_csv(extracted)</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>df_pd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_28258/2805799744.py:3: DtypeWarning:
-
-Columns (76,77,84) have mixed types. Specify dtype option on import or set low_memory=False.
-</code></pre>
+<pre><code>/tmp/ipykernel_347874/2805799744.py:3: DtypeWarning: Columns (76,77,84) have mixed types. Specify dtype option on import or set low_memory=False.
+  df_pd = pd.read_csv(extracted)</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="3">
-
 <div>
 
-<table class="dataframe table table-sm table-striped">
-  <thead>
-    <tr>
-      <th></th>
-      <th>Year</th>
-      <th>Quarter</th>
-      <th>Month</th>
-      <th>DayofMonth</th>
-      <th>DayOfWeek</th>
-      <th>FlightDate</th>
-      <th>Reporting_Airline</th>
-      <th>DOT_ID_Reporting_Airline</th>
-      <th>IATA_CODE_Reporting_Airline</th>
-      <th>Tail_Number</th>
-      <th>...</th>
-      <th>Div4TailNum</th>
-      <th>Div5Airport</th>
-      <th>Div5AirportID</th>
-      <th>Div5AirportSeqID</th>
-      <th>Div5WheelsOn</th>
-      <th>Div5TotalGTime</th>
-      <th>Div5LongestGTime</th>
-      <th>Div5WheelsOff</th>
-      <th>Div5TailNum</th>
-      <th>Unnamed: 109</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>2022</td>
-      <td>1</td>
-      <td>1</td>
-      <td>14</td>
-      <td>5</td>
-      <td>2022-01-14</td>
-      <td>YX</td>
-      <td>20452</td>
-      <td>YX</td>
-      <td>N119HQ</td>
-      <td>...</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>2022</td>
-      <td>1</td>
-      <td>1</td>
-      <td>15</td>
-      <td>6</td>
-      <td>2022-01-15</td>
-      <td>YX</td>
-      <td>20452</td>
-      <td>YX</td>
-      <td>N122HQ</td>
-      <td>...</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>537900</th>
-      <td>2022</td>
-      <td>1</td>
-      <td>1</td>
-      <td>6</td>
-      <td>4</td>
-      <td>2022-01-06</td>
-      <td>DL</td>
-      <td>19790</td>
-      <td>DL</td>
-      <td>N989AT</td>
-      <td>...</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-    </tr>
-    <tr>
-      <th>537901</th>
-      <td>2022</td>
-      <td>1</td>
-      <td>1</td>
-      <td>6</td>
-      <td>4</td>
-      <td>2022-01-06</td>
-      <td>DL</td>
-      <td>19790</td>
-      <td>DL</td>
-      <td>N815DN</td>
-      <td>...</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-    </tr>
-  </tbody>
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Year</th>
+<th data-quarto-table-cell-role="th">Quarter</th>
+<th data-quarto-table-cell-role="th">Month</th>
+<th data-quarto-table-cell-role="th">DayofMonth</th>
+<th data-quarto-table-cell-role="th">DayOfWeek</th>
+<th data-quarto-table-cell-role="th">FlightDate</th>
+<th data-quarto-table-cell-role="th">Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">DOT_ID_Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">IATA_CODE_Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">Tail_Number</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">Div4TailNum</th>
+<th data-quarto-table-cell-role="th">Div5Airport</th>
+<th data-quarto-table-cell-role="th">Div5AirportID</th>
+<th data-quarto-table-cell-role="th">Div5AirportSeqID</th>
+<th data-quarto-table-cell-role="th">Div5WheelsOn</th>
+<th data-quarto-table-cell-role="th">Div5TotalGTime</th>
+<th data-quarto-table-cell-role="th">Div5LongestGTime</th>
+<th data-quarto-table-cell-role="th">Div5WheelsOff</th>
+<th data-quarto-table-cell-role="th">Div5TailNum</th>
+<th data-quarto-table-cell-role="th">Unnamed: 109</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>2022</td>
+<td>1</td>
+<td>1</td>
+<td>14</td>
+<td>5</td>
+<td>2022-01-14</td>
+<td>YX</td>
+<td>20452</td>
+<td>YX</td>
+<td>N119HQ</td>
+<td>...</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2022</td>
+<td>1</td>
+<td>1</td>
+<td>15</td>
+<td>6</td>
+<td>2022-01-15</td>
+<td>YX</td>
+<td>20452</td>
+<td>YX</td>
+<td>N122HQ</td>
+<td>...</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">537900</td>
+<td>2022</td>
+<td>1</td>
+<td>1</td>
+<td>6</td>
+<td>4</td>
+<td>2022-01-06</td>
+<td>DL</td>
+<td>19790</td>
+<td>DL</td>
+<td>N989AT</td>
+<td>...</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">537901</td>
+<td>2022</td>
+<td>1</td>
+<td>1</td>
+<td>6</td>
+<td>4</td>
+<td>2022-01-06</td>
+<td>DL</td>
+<td>19790</td>
+<td>DL</td>
+<td>N815DN</td>
+<td>...</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+</tbody>
 </table>
+
 <p>537902 rows × 110 columns</p>
 </div>
 </div>
@@ -527,7 +1145,7 @@ Columns (76,77,84) have mixed types. Specify dtype option on import or set low_m
 <blockquote class="blockquote">
 <p>The complexity of pandas’ indexing is a microcosm for the complexity of the pandas API in general. There’s a reason for the complexity (well, most of it), but that’s not much consolation while you’re learning. Still, all of these ways of indexing really are useful enough to justify their inclusion in the library.</p>
 </blockquote>
-<p>It’s true that Pandas indexing is quite useful, but it’s also true that everyone always forgets how do to anything non-trivial with it. The benefits of being able to put <code>df.loc[pd.IndexSlice[:, 'B0':'B1'], :]]</code> in your code base are somewhat dubious.</p>
+<p>It’s true that Pandas indexing is quite useful, but it’s also true that everyone always forgets how to do anything non-trivial with it. The benefits of being able to put <code>df.loc[pd.IndexSlice[:, 'B0':'B1'], :]]</code> in your code base are somewhat dubious.</p>
 <p>Polars avoids this complexity by simply <strong>not having an index.</strong> It just has ordinary methods like <code>.select</code>, <code>.filter</code> and <code>.head</code> for accessing a subset of rows or columns.</p>
 </section>
 <section id="slicing-vs-selecting" class="level2" data-number="1.4">
@@ -537,15 +1155,14 @@ Columns (76,77,84) have mixed types. Specify dtype option on import or set low_m
 <p>Here are some examples:</p>
 <section id="rows-by-number-columns-by-name" class="level3" data-number="1.4.1">
 <h3 data-number="1.4.1" class="anchored" data-anchor-id="rows-by-number-columns-by-name"><span class="header-section-number">1.4.1</span> Rows by number, columns by name</h3>
-<div class="panel-tabset">
+<div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">Polars (recommended)</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">Polars (square bracket)</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-3" role="tab" aria-controls="tabset-2-3" aria-selected="false">Pandas</a></li></ul>
 <div class="tab-content">
 <div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
 <p>Using <code>head</code> and <code>tail</code>:</p>
-<div class="cell" data-execution_count="4">
+<div id="74fa403b" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df_pl.select([<span class="st">"Dest"</span>, <span class="st">"Tail_Number"</span>]).head(<span class="dv">16</span>).tail(<span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
-
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -553,14 +1170,44 @@ Columns (76,77,84) have mixed types. Specify dtype option on import or set low_m
   white-space: pre-wrap;
 }
 </style>
-<small>shape: (4, 2)</small><table class="dataframe table table-sm table-striped"><thead><tr><th>Dest</th><th>Tail_Number</th></tr><tr><td>str</td><td>str</td></tr></thead><tbody><tr><td>"DCA"</td><td>"N132HQ"</td></tr><tr><td>"DCA"</td><td>"N109HQ"</td></tr><tr><td>"DCA"</td><td>"N421YX"</td></tr><tr><td>"DCA"</td><td>"N137HQ"</td></tr></tbody></table></div>
+<small>shape: (4, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Dest</th>
+<th data-quarto-table-cell-role="th">Tail_Number</th>
+</tr>
+<tr class="odd">
+<th>str</th>
+<th>str</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"DCA"</td>
+<td>"N132HQ"</td>
+</tr>
+<tr class="even">
+<td>"DCA"</td>
+<td>"N109HQ"</td>
+</tr>
+<tr class="odd">
+<td>"DCA"</td>
+<td>"N421YX"</td>
+</tr>
+<tr class="even">
+<td>"DCA"</td>
+<td>"N137HQ"</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
-<p>Or using <code>take</code>:</p>
-<div class="cell" data-execution_count="5">
+</div>
+<p>Or using <code>gather</code>:</p>
+<div id="d8d26b82" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>df_pl.select(pl.col([<span class="st">"Dest"</span>, <span class="st">"Tail_Number"</span>]).gather(<span class="bu">list</span>(<span class="bu">range</span>(<span class="dv">12</span>, <span class="dv">16</span>))))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
-
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -568,15 +1215,45 @@ Columns (76,77,84) have mixed types. Specify dtype option on import or set low_m
   white-space: pre-wrap;
 }
 </style>
-<small>shape: (4, 2)</small><table class="dataframe table table-sm table-striped"><thead><tr><th>Dest</th><th>Tail_Number</th></tr><tr><td>str</td><td>str</td></tr></thead><tbody><tr><td>"DCA"</td><td>"N132HQ"</td></tr><tr><td>"DCA"</td><td>"N109HQ"</td></tr><tr><td>"DCA"</td><td>"N421YX"</td></tr><tr><td>"DCA"</td><td>"N137HQ"</td></tr></tbody></table></div>
+<small>shape: (4, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Dest</th>
+<th data-quarto-table-cell-role="th">Tail_Number</th>
+</tr>
+<tr class="odd">
+<th>str</th>
+<th>str</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"DCA"</td>
+<td>"N132HQ"</td>
+</tr>
+<tr class="even">
+<td>"DCA"</td>
+<td>"N109HQ"</td>
+</tr>
+<tr class="odd">
+<td>"DCA"</td>
+<td>"N421YX"</td>
+</tr>
+<tr class="even">
+<td>"DCA"</td>
+<td>"N137HQ"</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 </div>
 <div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
-<div class="cell" data-execution_count="6">
+<div id="8d28f4d8" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>df_pl[<span class="dv">12</span>:<span class="dv">16</span>, [<span class="st">"Dest"</span>, <span class="st">"Tail_Number"</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
-
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -584,48 +1261,80 @@ Columns (76,77,84) have mixed types. Specify dtype option on import or set low_m
   white-space: pre-wrap;
 }
 </style>
-<small>shape: (4, 2)</small><table class="dataframe table table-sm table-striped"><thead><tr><th>Dest</th><th>Tail_Number</th></tr><tr><td>str</td><td>str</td></tr></thead><tbody><tr><td>"DCA"</td><td>"N132HQ"</td></tr><tr><td>"DCA"</td><td>"N109HQ"</td></tr><tr><td>"DCA"</td><td>"N421YX"</td></tr><tr><td>"DCA"</td><td>"N137HQ"</td></tr></tbody></table></div>
+<small>shape: (4, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Dest</th>
+<th data-quarto-table-cell-role="th">Tail_Number</th>
+</tr>
+<tr class="odd">
+<th>str</th>
+<th>str</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"DCA"</td>
+<td>"N132HQ"</td>
+</tr>
+<tr class="even">
+<td>"DCA"</td>
+<td>"N109HQ"</td>
+</tr>
+<tr class="odd">
+<td>"DCA"</td>
+<td>"N421YX"</td>
+</tr>
+<tr class="even">
+<td>"DCA"</td>
+<td>"N137HQ"</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 </div>
 <div id="tabset-2-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-3-tab">
-<div class="cell" data-execution_count="7">
+<div id="a6e7f2f9" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>df_pd.loc[<span class="dv">12</span>:<span class="dv">15</span>, [<span class="st">"Dest"</span>, <span class="st">"Tail_Number"</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="7">
-
 <div>
 
-<table class="dataframe table table-sm table-striped">
-  <thead>
-    <tr>
-      <th></th>
-      <th>Dest</th>
-      <th>Tail_Number</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>12</th>
-      <td>DCA</td>
-      <td>N132HQ</td>
-    </tr>
-    <tr>
-      <th>13</th>
-      <td>DCA</td>
-      <td>N109HQ</td>
-    </tr>
-    <tr>
-      <th>14</th>
-      <td>DCA</td>
-      <td>N421YX</td>
-    </tr>
-    <tr>
-      <th>15</th>
-      <td>DCA</td>
-      <td>N137HQ</td>
-    </tr>
-  </tbody>
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Dest</th>
+<th data-quarto-table-cell-role="th">Tail_Number</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">12</td>
+<td>DCA</td>
+<td>N132HQ</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">13</td>
+<td>DCA</td>
+<td>N109HQ</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">14</td>
+<td>DCA</td>
+<td>N421YX</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">15</td>
+<td>DCA</td>
+<td>N137HQ</td>
+</tr>
+</tbody>
 </table>
+
 </div>
 </div>
 </div>
@@ -636,18 +1345,17 @@ Columns (76,77,84) have mixed types. Specify dtype option on import or set low_m
 <section id="rows-by-string-index-columns-by-name" class="level3" data-number="1.4.2">
 <h3 data-number="1.4.2" class="anchored" data-anchor-id="rows-by-string-index-columns-by-name"><span class="header-section-number">1.4.2</span> Rows by string index, columns by name</h3>
 <p>Since there’s no such thing as an index in Polars, so we just use <code>.filter</code>:</p>
-<div class="panel-tabset">
+<div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false">Pandas</a></li></ul>
 <div class="tab-content">
 <div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
-<div class="cell" data-execution_count="8">
+<div id="4a3f901e" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    df_pl</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">filter</span>(pl.col(<span class="st">"IATA_CODE_Reporting_Airline"</span>).is_in([<span class="st">'AA'</span>, <span class="st">'DL'</span>]))</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    .select([<span class="st">"IATA_CODE_Reporting_Airline"</span>, <span class="st">"Dest"</span>, <span class="st">"Tail_Number"</span>])</span>
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
-
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -655,62 +1363,110 @@ Columns (76,77,84) have mixed types. Specify dtype option on import or set low_m
   white-space: pre-wrap;
 }
 </style>
-<small>shape: (138_363, 3)</small><table class="dataframe table table-sm table-striped"><thead><tr><th>IATA_CODE_Reporting_Airline</th><th>Dest</th><th>Tail_Number</th></tr><tr><td>str</td><td>str</td><td>str</td></tr></thead><tbody><tr><td>"DL"</td><td>"LGA"</td><td>"N315DN"</td></tr><tr><td>"DL"</td><td>"FLL"</td><td>"N545US"</td></tr><tr><td>"DL"</td><td>"ATL"</td><td>"N545US"</td></tr><tr><td>…</td><td>…</td><td>…</td></tr><tr><td>"DL"</td><td>"ATL"</td><td>"N989AT"</td></tr><tr><td>"DL"</td><td>"PDX"</td><td>"N815DN"</td></tr></tbody></table></div>
+<small>shape: (138_363, 3)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">IATA_CODE_Reporting_Airline</th>
+<th data-quarto-table-cell-role="th">Dest</th>
+<th data-quarto-table-cell-role="th">Tail_Number</th>
+</tr>
+<tr class="odd">
+<th>str</th>
+<th>str</th>
+<th>str</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>"DL"</td>
+<td>"LGA"</td>
+<td>"N315DN"</td>
+</tr>
+<tr class="even">
+<td>"DL"</td>
+<td>"FLL"</td>
+<td>"N545US"</td>
+</tr>
+<tr class="odd">
+<td>"DL"</td>
+<td>"ATL"</td>
+<td>"N545US"</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>"DL"</td>
+<td>"ATL"</td>
+<td>"N989AT"</td>
+</tr>
+<tr class="even">
+<td>"DL"</td>
+<td>"PDX"</td>
+<td>"N815DN"</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 </div>
 <div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
-<div class="cell" data-execution_count="9">
+<div id="82fe8446" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    df_pd</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    .set_index(<span class="st">"IATA_CODE_Reporting_Airline"</span>)</span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    .loc[[<span class="st">'AA'</span>, <span class="st">'DL'</span>], [<span class="st">"Dest"</span>, <span class="st">"Tail_Number"</span>]]</span>
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="9">
-
 <div>
 
-<table class="dataframe table table-sm table-striped">
-  <thead>
-    <tr>
-      <th></th>
-      <th>Dest</th>
-      <th>Tail_Number</th>
-    </tr>
-    <tr>
-      <th>IATA_CODE_Reporting_Airline</th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>AA</th>
-      <td>LAX</td>
-      <td>N106NN</td>
-    </tr>
-    <tr>
-      <th>AA</th>
-      <td>LAX</td>
-      <td>N112AN</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>DL</th>
-      <td>ATL</td>
-      <td>N989AT</td>
-    </tr>
-    <tr>
-      <th>DL</th>
-      <td>PDX</td>
-      <td>N815DN</td>
-    </tr>
-  </tbody>
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Dest</th>
+<th data-quarto-table-cell-role="th">Tail_Number</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">IATA_CODE_Reporting_Airline</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">AA</td>
+<td>LAX</td>
+<td>N106NN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">AA</td>
+<td>LAX</td>
+<td>N112AN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">DL</td>
+<td>ATL</td>
+<td>N989AT</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">DL</td>
+<td>PDX</td>
+<td>N815DN</td>
+</tr>
+</tbody>
 </table>
+
 <p>138363 rows × 2 columns</p>
 </div>
 </div>
@@ -722,14 +1478,13 @@ Columns (76,77,84) have mixed types. Specify dtype option on import or set low_m
 <section id="rows-by-number-columns-by-number" class="level3" data-number="1.4.3">
 <h3 data-number="1.4.3" class="anchored" data-anchor-id="rows-by-number-columns-by-number"><span class="header-section-number">1.4.3</span> Rows by number, columns by number</h3>
 <p>The Polars docs recommend doing this the evil way with square brackets, so make of that what you will. Selecting columns by number isn’t a very common operation anyway.</p>
-<div class="panel-tabset">
+<div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-4-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-1" role="tab" aria-controls="tabset-4-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-2" role="tab" aria-controls="tabset-4-2" aria-selected="false">Pandas</a></li></ul>
 <div class="tab-content">
 <div id="tabset-4-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-4-1-tab">
-<div class="cell" data-execution_count="10">
+<div id="5a37e6d8" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>df_pl[[<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">3</span>], [<span class="dv">0</span>, <span class="dv">1</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="10">
-
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -737,43 +1492,71 @@ Columns (76,77,84) have mixed types. Specify dtype option on import or set low_m
   white-space: pre-wrap;
 }
 </style>
-<small>shape: (3, 2)</small><table class="dataframe table table-sm table-striped"><thead><tr><th>Year</th><th>Quarter</th></tr><tr><td>i64</td><td>i64</td></tr></thead><tbody><tr><td>2022</td><td>1</td></tr><tr><td>2022</td><td>1</td></tr><tr><td>2022</td><td>1</td></tr></tbody></table></div>
+<small>shape: (3, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Year</th>
+<th data-quarto-table-cell-role="th">Quarter</th>
+</tr>
+<tr class="odd">
+<th>i64</th>
+<th>i64</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2022</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>2022</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td>2022</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 </div>
 <div id="tabset-4-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-2-tab">
-<div class="cell" data-execution_count="11">
+<div id="e55dc531" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>df_pd.iloc[[<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">3</span>], [<span class="dv">0</span>, <span class="dv">1</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
-
 <div>
 
-<table class="dataframe table table-sm table-striped">
-  <thead>
-    <tr>
-      <th></th>
-      <th>Year</th>
-      <th>Quarter</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>2022</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>2022</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>2022</td>
-      <td>1</td>
-    </tr>
-  </tbody>
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Year</th>
+<th data-quarto-table-cell-role="th">Quarter</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>2022</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2022</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">3</td>
+<td>2022</td>
+<td>1</td>
+</tr>
+</tbody>
 </table>
+
 </div>
 </div>
 </div>
@@ -785,12 +1568,12 @@ Columns (76,77,84) have mixed types. Specify dtype option on import or set low_m
 <section id="settingwithcopy" class="level2" data-number="1.5">
 <h2 data-number="1.5" class="anchored" data-anchor-id="settingwithcopy"><span class="header-section-number">1.5</span> SettingWithCopy</h2>
 <p>Pandas has this cute thing where if you assign values to some subset of the dataframe with square bracket indexing, it doesn’t work and gives the notorious <code>SettingWithCopyWarning</code>. To be fair, this warning also tells you to assign using <code>.loc</code>. Unfortunately many people in the Pandas community can’t read and instead just ignore the warning.</p>
-<p>Polars is not yet popular enough to attact the same crowd, but when it does it should not run into the same problem, as the only way to add or overwrite columns in Polars is the <code>with_columns</code> method.</p>
-<div class="panel-tabset">
+<p>Polars is not yet popular enough to attract the same crowd, but when it does it should not run into the same problem, as the only way to add or overwrite columns in Polars is the <code>with_columns</code> method.</p>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-5-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-1" role="tab" aria-controls="tabset-5-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-2" role="tab" aria-controls="tabset-5-2" aria-selected="false">Pandas (bad)</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-3" role="tab" aria-controls="tabset-5-3" aria-selected="false">Pandas (good)</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-4" role="tab" aria-controls="tabset-5-4" aria-selected="false">Pandas (better)</a></li></ul>
 <div class="tab-content">
 <div id="tabset-5-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-5-1-tab">
-<div class="cell" data-execution_count="12">
+<div id="b815034b" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> pl.DataFrame({<span class="st">'a'</span>: [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>], <span class="st">'b'</span>: [<span class="dv">10</span>,<span class="dv">20</span>,<span class="dv">30</span>,<span class="dv">40</span>,<span class="dv">50</span>]})</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>f.with_columns(</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    pl.when(pl.col(<span class="st">"a"</span>) <span class="op">&lt;=</span> <span class="dv">3</span>)</span>
@@ -798,7 +1581,6 @@ Columns (76,77,84) have mixed types. Specify dtype option on import or set low_m
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    .otherwise(pl.col(<span class="st">"b"</span>))</span>
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="12">
-
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -806,162 +1588,198 @@ Columns (76,77,84) have mixed types. Specify dtype option on import or set low_m
   white-space: pre-wrap;
 }
 </style>
-<small>shape: (5, 2)</small><table class="dataframe table table-sm table-striped"><thead><tr><th>a</th><th>b</th></tr><tr><td>i64</td><td>i64</td></tr></thead><tbody><tr><td>1</td><td>1</td></tr><tr><td>2</td><td>2</td></tr><tr><td>3</td><td>3</td></tr><tr><td>4</td><td>40</td></tr><tr><td>5</td><td>50</td></tr></tbody></table></div>
+<small>shape: (5, 2)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">a</th>
+<th data-quarto-table-cell-role="th">b</th>
+</tr>
+<tr class="odd">
+<th>i64</th>
+<th>i64</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>3</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>40</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>50</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 </div>
 <div id="tabset-5-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-2-tab">
-<div class="cell" data-execution_count="13">
+<div id="8c0d0fdb" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> pd.DataFrame({<span class="st">'a'</span>: [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>], <span class="st">'b'</span>: [<span class="dv">10</span>,<span class="dv">20</span>,<span class="dv">30</span>,<span class="dv">40</span>,<span class="dv">50</span>]})</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>f[f[<span class="st">'a'</span>] <span class="op">&lt;=</span> <span class="dv">3</span>][<span class="st">'b'</span>] <span class="op">=</span> f[<span class="st">'b'</span>] <span class="op">//</span> <span class="dv">10</span></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>f</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_28258/1317853993.py:2: SettingWithCopyWarning:
-
-
+<pre><code>/tmp/ipykernel_347874/1317853993.py:2: SettingWithCopyWarning: 
 A value is trying to be set on a copy of a slice from a DataFrame.
 Try using .loc[row_indexer,col_indexer] = value instead
 
 See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-</code></pre>
+  f[f['a'] &lt;= 3]['b'] = f['b'] // 10</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="13">
-
 <div>
 
-<table class="dataframe table table-sm table-striped">
-  <thead>
-    <tr>
-      <th></th>
-      <th>a</th>
-      <th>b</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>1</td>
-      <td>10</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>2</td>
-      <td>20</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>3</td>
-      <td>30</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>4</td>
-      <td>40</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>5</td>
-      <td>50</td>
-    </tr>
-  </tbody>
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">a</th>
+<th data-quarto-table-cell-role="th">b</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1</td>
+<td>10</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2</td>
+<td>20</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>3</td>
+<td>30</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>4</td>
+<td>40</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>5</td>
+<td>50</td>
+</tr>
+</tbody>
 </table>
+
 </div>
 </div>
 </div>
 </div>
 <div id="tabset-5-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-3-tab">
-<div class="cell" data-execution_count="14">
+<div id="042ef0ef" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> pd.DataFrame({<span class="st">'a'</span>: [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>], <span class="st">'b'</span>: [<span class="dv">10</span>,<span class="dv">20</span>,<span class="dv">30</span>,<span class="dv">40</span>,<span class="dv">50</span>]})</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>f.loc[f[<span class="st">'a'</span>] <span class="op">&lt;=</span> <span class="dv">3</span>, <span class="st">"b"</span>] <span class="op">=</span> f[<span class="st">'b'</span>] <span class="op">//</span> <span class="dv">10</span></span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>f</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="14">
-
 <div>
 
-<table class="dataframe table table-sm table-striped">
-  <thead>
-    <tr>
-      <th></th>
-      <th>a</th>
-      <th>b</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>1</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>2</td>
-      <td>2</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>3</td>
-      <td>3</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>4</td>
-      <td>40</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>5</td>
-      <td>50</td>
-    </tr>
-  </tbody>
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">a</th>
+<th data-quarto-table-cell-role="th">b</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>4</td>
+<td>40</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>5</td>
+<td>50</td>
+</tr>
+</tbody>
 </table>
+
 </div>
 </div>
 </div>
 </div>
 <div id="tabset-5-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-4-tab">
-<div class="cell" data-execution_count="15">
+<div id="4310970c" class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> pd.DataFrame({<span class="st">'a'</span>: [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>], <span class="st">'b'</span>: [<span class="dv">10</span>,<span class="dv">20</span>,<span class="dv">30</span>,<span class="dv">40</span>,<span class="dv">50</span>]})</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>f.assign(b<span class="op">=</span>f[<span class="st">"b"</span>].mask(f[<span class="st">"a"</span>] <span class="op">&lt;=</span><span class="dv">3</span>, f[<span class="st">"b"</span>] <span class="op">//</span> <span class="dv">10</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="15">
-
 <div>
 
-<table class="dataframe table table-sm table-striped">
-  <thead>
-    <tr>
-      <th></th>
-      <th>a</th>
-      <th>b</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>1</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>2</td>
-      <td>2</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>3</td>
-      <td>3</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>4</td>
-      <td>40</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>5</td>
-      <td>50</td>
-    </tr>
-  </tbody>
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">a</th>
+<th data-quarto-table-cell-role="th">b</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>4</td>
+<td>40</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>5</td>
+<td>50</td>
+</tr>
+</tbody>
 </table>
+
 </div>
 </div>
 </div>
@@ -1004,12 +1822,15 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     icon: icon
   };
   anchorJS.add('.anchored');
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    target: function(trigger) {
-      return trigger.previousElementSibling;
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
     }
-  });
-  clipboard.on('success', function(e) {
+    return false;
+  }
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -1041,11 +1862,50 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
-  function tippyHover(el, contentFn) {
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -1055,8 +1915,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -1068,9 +1937,245 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
     });
   }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
   const findCites = (el) => {
     const parentEl = el.parentElement;
     if (parentEl) {
@@ -1112,14 +2217,16 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <script src="https://giscus.app/client.js" data-repo="kevinheavey/modern-polars" data-repo-id="R_kgDOIqAHAQ" data-category="General" data-category-id="DIC_kwDOIqAHAc4CTW4n" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="en" crossorigin="anonymous" async="">
 </script>
+<input type="hidden" id="giscus-base-theme" value="light">
+<input type="hidden" id="giscus-alt-theme" value="dark">
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./index.html" class="pagination-link">
+      <a href="./index.html" class="pagination-link" aria-label="Preface">
         <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Preface</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./method_chaining.html" class="pagination-link">
+      <a href="./method_chaining.html" class="pagination-link" aria-label="Method Chaining">
         <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Method Chaining</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
@@ -1128,4 +2235,5 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-</body></html>
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/kevinheavey/modern-polars/edit/master/book/indexing.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/kevinheavey/modern-polars/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/kevinheavey/modern-polars/blob/master/book/indexing.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></div></div></footer></body></html>

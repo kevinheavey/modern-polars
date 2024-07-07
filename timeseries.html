@@ -2,13 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.280">
+<meta name="generator" content="quarto-1.5.53">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="description" content="A side-by-side comparison of the Polars and Pandas libraries.">
 
-<title>Modern Polars - 5&nbsp; Timeseries</title>
+<title>5&nbsp; Timeseries – Modern Polars</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -18,11 +18,12 @@ div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
   width: 0.8em;
-  margin: 0 0.8em 0.2em -1.6em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -33,7 +34,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -47,47 +48,17 @@ pre.numberSource code > span > a:first-child::before
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
     padding: 0 4px; width: 4em;
-    color: #aaaaaa;
   }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
 div.sourceCode
   {   }
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { color: #008000; } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { color: #008000; font-weight: bold; } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="site_libs/quarto-nav/headroom.min.js"></script>
 <script src="site_libs/clipboard/clipboard.min.js"></script>
 <script src="site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -112,7 +83,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   "collapse-after": 3,
   "panel-placement": "start",
   "type": "textbox",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -121,31 +98,38 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
-    "search-submit-button-title": "Submit"
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
   }
 }</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 <link rel="stylesheet" href="custom.css">
-<meta property="og:title" content="Modern Polars - 5&nbsp; Timeseries">
+<meta property="og:title" content="5&nbsp; Timeseries – Modern Polars">
 <meta property="og:description" content="A side-by-side comparison of the Polars and Pandas libraries.">
 <meta property="og:image" content="https://github.com/kevinheavey/modern-polars/raw/master/book/resized-og-polar-bear-airpods-no-background.png">
-<meta property="og:site-name" content="Modern Polars">
+<meta property="og:site_name" content="Modern Polars">
 </head>
 
 <body class="nav-sidebar floating">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
-  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-    <div class="container-fluid d-flex justify-content-between">
-      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Timeseries</span></h1>
-      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
-        <i class="bi bi-chevron-right"></i>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./timeseries.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Timeseries</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
       </button>
     </div>
   </nav>
@@ -153,7 +137,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
       <a href="./index.html" class="sidebar-logo-link">
       <img src="./polar-bear-airpods-no-background.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
@@ -161,114 +145,125 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <div class="sidebar-title mb-0 py-0">
       <a href="./">Modern Polars</a> 
         <div class="sidebar-tools-main">
-    <a href="https://github.com/kevinheavey/modern-polars/tree/master/book/" title="Source Code" class="sidebar-tool px-1"><i class="bi bi-github"></i></a>
-    <a href="" title="Share" id="sidebar-tool-dropdown-0" class="sidebar-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-share"></i></a>
-    <ul class="dropdown-menu" aria-labelledby="sidebar-tool-dropdown-0">
-        <li>
-          <a class="dropdown-item sidebar-tools-main-item" href="https://twitter.com/intent/tweet?url=|url|">
-            <i class="bi bi-bi-twitter pe-1"></i>
-          Twitter
-          </a>
-        </li>
-        <li>
-          <a class="dropdown-item sidebar-tools-main-item" href="https://www.facebook.com/sharer/sharer.php?u=|url|">
-            <i class="bi bi-bi-facebook pe-1"></i>
-          Facebook
-          </a>
-        </li>
-        <li>
-          <a class="dropdown-item sidebar-tools-main-item" href="https://www.linkedin.com/sharing/share-offsite/?url=|url|">
-            <i class="bi bi-bi-linkedin pe-1"></i>
-          LinkedIn
-          </a>
-        </li>
-    </ul>
+    <a href="https://github.com/kevinheavey/modern-polars/tree/master/book/" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <div class="dropdown">
+      <a href="" title="Share" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" role="link" aria-label="Share"><i class="bi bi-share"></i></a>
+      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://twitter.com/intent/tweet?url=|url|">
+              <i class="bi bi-twitter pe-1"></i>
+            Twitter
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://www.facebook.com/sharer/sharer.php?u=|url|">
+              <i class="bi bi-facebook pe-1"></i>
+            Facebook
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item sidebar-tools-main-item" href="https://www.linkedin.com/sharing/share-offsite/?url=|url|">
+              <i class="bi bi-linkedin pe-1"></i>
+            LinkedIn
+            </a>
+          </li>
+      </ul>
+    </div>
 </div>
     </div>
       </div>
-      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="mt-2 flex-shrink-0 align-items-center">
         <div class="sidebar-search">
         <div id="quarto-search" class="" title="Search"></div>
         </div>
-      </div>
+        </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link">Preface</a>
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./indexing.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Indexing (Or Lack Thereof)</span></a>
+  <a href="./indexing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Indexing (Or Lack Thereof)</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./method_chaining.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Method Chaining</span></a>
+  <a href="./method_chaining.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Method Chaining</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./performance.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Performance</span></a>
+  <a href="./performance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Performance</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./tidy.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Reshaping and Tidy Data</span></a>
+  <a href="./tidy.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Reshaping and Tidy Data</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./timeseries.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Timeseries</span></a>
+  <a href="./timeseries.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Timeseries</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./scaling.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Scaling</span></a>
+  <a href="./scaling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Scaling</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./summary.html" class="sidebar-item-text sidebar-link">Summary</a>
+  <a href="./summary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Summary</span></a>
   </div>
 </li>
     </ul>
     </div>
 </nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#get-the-data" id="toc-get-the-data" class="nav-link active" data-scroll-target="#get-the-data"><span class="toc-section-number">5.1</span>  Get the data</a></li>
-  <li><a href="#filtering" id="toc-filtering" class="nav-link" data-scroll-target="#filtering"><span class="toc-section-number">5.2</span>  Filtering</a></li>
-  <li><a href="#resampling" id="toc-resampling" class="nav-link" data-scroll-target="#resampling"><span class="toc-section-number">5.3</span>  Resampling</a>
+  <li><a href="#get-the-data" id="toc-get-the-data" class="nav-link active" data-scroll-target="#get-the-data"><span class="header-section-number">5.1</span> Get the data</a></li>
+  <li><a href="#filtering" id="toc-filtering" class="nav-link" data-scroll-target="#filtering"><span class="header-section-number">5.2</span> Filtering</a></li>
+  <li><a href="#resampling" id="toc-resampling" class="nav-link" data-scroll-target="#resampling"><span class="header-section-number">5.3</span> Resampling</a>
   <ul class="collapse">
-  <li><a href="#downsampling" id="toc-downsampling" class="nav-link" data-scroll-target="#downsampling"><span class="toc-section-number">5.3.1</span>  Downsampling</a></li>
-  <li><a href="#upsampling" id="toc-upsampling" class="nav-link" data-scroll-target="#upsampling"><span class="toc-section-number">5.3.2</span>  Upsampling</a></li>
+  <li><a href="#downsampling" id="toc-downsampling" class="nav-link" data-scroll-target="#downsampling"><span class="header-section-number">5.3.1</span> Downsampling</a></li>
+  <li><a href="#upsampling" id="toc-upsampling" class="nav-link" data-scroll-target="#upsampling"><span class="header-section-number">5.3.2</span> Upsampling</a></li>
   </ul></li>
-  <li><a href="#rolling-expanding-ew" id="toc-rolling-expanding-ew" class="nav-link" data-scroll-target="#rolling-expanding-ew"><span class="toc-section-number">5.4</span>  Rolling / Expanding / EW</a>
+  <li><a href="#rolling-expanding-ew" id="toc-rolling-expanding-ew" class="nav-link" data-scroll-target="#rolling-expanding-ew"><span class="header-section-number">5.4</span> Rolling / Expanding / EW</a>
   <ul class="collapse">
-  <li><a href="#combining-rolling-aggregations" id="toc-combining-rolling-aggregations" class="nav-link" data-scroll-target="#combining-rolling-aggregations"><span class="toc-section-number">5.4.1</span>  Combining rolling aggregations</a></li>
+  <li><a href="#combining-rolling-aggregations" id="toc-combining-rolling-aggregations" class="nav-link" data-scroll-target="#combining-rolling-aggregations"><span class="header-section-number">5.4.1</span> Combining rolling aggregations</a></li>
   </ul></li>
-  <li><a href="#grab-bag" id="toc-grab-bag" class="nav-link" data-scroll-target="#grab-bag"><span class="toc-section-number">5.5</span>  Grab Bag</a>
+  <li><a href="#grab-bag" id="toc-grab-bag" class="nav-link" data-scroll-target="#grab-bag"><span class="header-section-number">5.5</span> Grab Bag</a>
   <ul class="collapse">
-  <li><a href="#offsets" id="toc-offsets" class="nav-link" data-scroll-target="#offsets"><span class="toc-section-number">5.5.1</span>  Offsets</a></li>
-  <li><a href="#holiday-calendars" id="toc-holiday-calendars" class="nav-link" data-scroll-target="#holiday-calendars"><span class="toc-section-number">5.5.2</span>  Holiday calendars</a></li>
-  <li><a href="#timezones" id="toc-timezones" class="nav-link" data-scroll-target="#timezones"><span class="toc-section-number">5.5.3</span>  Timezones</a></li>
+  <li><a href="#offsets" id="toc-offsets" class="nav-link" data-scroll-target="#offsets"><span class="header-section-number">5.5.1</span> Offsets</a></li>
+  <li><a href="#holiday-calendars" id="toc-holiday-calendars" class="nav-link" data-scroll-target="#holiday-calendars"><span class="header-section-number">5.5.2</span> Holiday calendars</a></li>
+  <li><a href="#timezones" id="toc-timezones" class="nav-link" data-scroll-target="#timezones"><span class="header-section-number">5.5.3</span> Timezones</a></li>
   </ul></li>
-  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="toc-section-number">5.6</span>  Conclusion</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">5.6</span> Conclusion</a></li>
   </ul>
-<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/kevinheavey/modern-polars/edit/master/book/timeseries.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/kevinheavey/modern-polars/issues/new" class="toc-action">Report an issue</a></p><p><a href="https://github.com/kevinheavey/modern-polars/blob/master/book/timeseries.qmd" class="toc-action">View source</a></p></div></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/kevinheavey/modern-polars/edit/master/book/timeseries.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/kevinheavey/modern-polars/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/kevinheavey/modern-polars/blob/master/book/timeseries.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Timeseries</span></h1>
+<h1 class="title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Timeseries</span></h1>
 </div>
 
 
@@ -281,13 +276,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </div>
   
 
+
 </header>
+
 
 <p>Temporal data is an area in which Pandas actually far outshines R’s dataframe libraries. Things like resampling and rolling calculations are baked into the dataframe library and work quite well. Fortunately this is also true of Polars!</p>
 <section id="get-the-data" class="level2" data-number="5.1">
 <h2 data-number="5.1" class="anchored" data-anchor-id="get-the-data"><span class="header-section-number">5.1</span> Get the data</h2>
 <p>We’ll download a year’s worth of daily price and volume data for Bitcoin:</p>
-<div class="cell" data-execution_count="1">
+<div id="27c090e3" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> io <span class="im">import</span> StringIO</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime, date</span>
@@ -340,11 +337,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <section id="filtering" class="level2" data-number="5.2">
 <h2 data-number="5.2" class="anchored" data-anchor-id="filtering"><span class="header-section-number">5.2</span> Filtering</h2>
 <p>Pandas has special methods for filtering data with a DatetimeIndex. Since Polars doesn’t have an index, we just use <code>.filter</code>. I will admit the Pandas code is more convenient for things like filtering for a specific month:</p>
-<div class="panel-tabset">
+<div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">Pandas</a></li></ul>
 <div class="tab-content">
 <div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
-<div class="cell" data-execution_count="2">
+<div id="02d8cec1" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pl.<span class="bu">filter</span>(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">"time"</span>).is_between(</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        date(<span class="dv">2021</span>, <span class="dv">2</span>, <span class="dv">1</span>),</span>
@@ -353,7 +350,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
-
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -361,79 +357,151 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   white-space: pre-wrap;
 }
 </style>
-<small>shape: (28, 6)</small><table class="dataframe table table-sm table-striped"><thead><tr><th>time</th><th>open</th><th>high</th><th>low</th><th>close</th><th>volume</th></tr><tr><td>date</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td></tr></thead><tbody><tr><td>2021-02-01</td><td>33092.97</td><td>34717.27</td><td>32296.16</td><td>33526.37</td><td>82718.276882</td></tr><tr><td>2021-02-02</td><td>33517.09</td><td>35984.33</td><td>33418.0</td><td>35466.24</td><td>78056.65988</td></tr><tr><td>2021-02-03</td><td>35472.71</td><td>37662.63</td><td>35362.38</td><td>37618.87</td><td>80784.333663</td></tr><tr><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td></tr><tr><td>2021-02-27</td><td>46276.88</td><td>48394.0</td><td>45000.0</td><td>46106.43</td><td>66060.834292</td></tr><tr><td>2021-02-28</td><td>46103.67</td><td>46638.46</td><td>43000.0</td><td>45135.66</td><td>83055.369042</td></tr></tbody></table></div>
+<small>shape: (28, 6)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">time</th>
+<th data-quarto-table-cell-role="th">open</th>
+<th data-quarto-table-cell-role="th">high</th>
+<th data-quarto-table-cell-role="th">low</th>
+<th data-quarto-table-cell-role="th">close</th>
+<th data-quarto-table-cell-role="th">volume</th>
+</tr>
+<tr class="odd">
+<th>date</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2021-02-01</td>
+<td>33092.97</td>
+<td>34717.27</td>
+<td>32296.16</td>
+<td>33526.37</td>
+<td>82718.276882</td>
+</tr>
+<tr class="even">
+<td>2021-02-02</td>
+<td>33517.09</td>
+<td>35984.33</td>
+<td>33418.0</td>
+<td>35466.24</td>
+<td>78056.65988</td>
+</tr>
+<tr class="odd">
+<td>2021-02-03</td>
+<td>35472.71</td>
+<td>37662.63</td>
+<td>35362.38</td>
+<td>37618.87</td>
+<td>80784.333663</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>2021-02-27</td>
+<td>46276.88</td>
+<td>48394.0</td>
+<td>45000.0</td>
+<td>46106.43</td>
+<td>66060.834292</td>
+</tr>
+<tr class="even">
+<td>2021-02-28</td>
+<td>46103.67</td>
+<td>46638.46</td>
+<td>43000.0</td>
+<td>45135.66</td>
+<td>83055.369042</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 </div>
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
-<div class="cell" data-execution_count="3">
+<div id="f68e1a7f" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pd.loc[<span class="st">"2021-02"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
-
 <div>
 
-<table class="dataframe table table-sm table-striped">
-  <thead>
-    <tr>
-      <th></th>
-      <th>open</th>
-      <th>high</th>
-      <th>low</th>
-      <th>close</th>
-      <th>volume</th>
-    </tr>
-    <tr>
-      <th>time</th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>2021-02-01</th>
-      <td>33092.97</td>
-      <td>34717.27</td>
-      <td>32296.16</td>
-      <td>33526.37</td>
-      <td>82718.276882</td>
-    </tr>
-    <tr>
-      <th>2021-02-02</th>
-      <td>33517.09</td>
-      <td>35984.33</td>
-      <td>33418.00</td>
-      <td>35466.24</td>
-      <td>78056.659880</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>2021-02-27</th>
-      <td>46276.88</td>
-      <td>48394.00</td>
-      <td>45000.00</td>
-      <td>46106.43</td>
-      <td>66060.834292</td>
-    </tr>
-    <tr>
-      <th>2021-02-28</th>
-      <td>46103.67</td>
-      <td>46638.46</td>
-      <td>43000.00</td>
-      <td>45135.66</td>
-      <td>83055.369042</td>
-    </tr>
-  </tbody>
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">open</th>
+<th data-quarto-table-cell-role="th">high</th>
+<th data-quarto-table-cell-role="th">low</th>
+<th data-quarto-table-cell-role="th">close</th>
+<th data-quarto-table-cell-role="th">volume</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">time</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2021-02-01</td>
+<td>33092.97</td>
+<td>34717.27</td>
+<td>32296.16</td>
+<td>33526.37</td>
+<td>82718.276882</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2021-02-02</td>
+<td>33517.09</td>
+<td>35984.33</td>
+<td>33418.00</td>
+<td>35466.24</td>
+<td>78056.659880</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2021-02-27</td>
+<td>46276.88</td>
+<td>48394.00</td>
+<td>45000.00</td>
+<td>46106.43</td>
+<td>66060.834292</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2021-02-28</td>
+<td>46103.67</td>
+<td>46638.46</td>
+<td>43000.00</td>
+<td>45135.66</td>
+<td>83055.369042</td>
+</tr>
+</tbody>
 </table>
+
 <p>28 rows × 5 columns</p>
 </div>
 </div>
@@ -450,18 +518,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h3 data-number="5.3.1" class="anchored" data-anchor-id="downsampling"><span class="header-section-number">5.3.1</span> Downsampling</h3>
 <p>Downsampling moves from a higher time frequency to a lower time frequency. This requires some aggregation or subsetting, since we’re reducing the number of rows in our data.</p>
 <p>In Polars we use the <a href="https://pola-rs.github.io/polars/py-polars/html/reference/dataframe/api/polars.DataFrame.groupby_dynamic.html#polars.DataFrame.groupby_dynamic"><code>.groupby_dynamic</code></a> method for downsampling (we also use <code>groupby_dynamic</code> when we want to combine resampling with regular groupby logic).</p>
-<div class="panel-tabset">
+<div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">Pandas</a></li></ul>
 <div class="tab-content">
 <div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
-<div class="cell" data-execution_count="4">
+<div id="3ec9cbc6" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    ohlcv_pl</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    .group_by_dynamic(<span class="st">"time"</span>, every<span class="op">=</span><span class="st">"5d"</span>)</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    .agg(pl.col(pl.Float64).mean())</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
-
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -469,79 +536,151 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   white-space: pre-wrap;
 }
 </style>
-<small>shape: (74, 6)</small><table class="dataframe table table-sm table-striped"><thead><tr><th>time</th><th>open</th><th>high</th><th>low</th><th>close</th><th>volume</th></tr><tr><td>date</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td></tr></thead><tbody><tr><td>2020-12-29</td><td>29127.665</td><td>31450.0</td><td>28785.55</td><td>30755.01</td><td>92088.399186</td></tr><tr><td>2021-01-03</td><td>33577.028</td><td>36008.464</td><td>31916.198</td><td>35027.986</td><td>127574.470245</td></tr><tr><td>2021-01-08</td><td>38733.61</td><td>39914.548</td><td>34656.422</td><td>37655.352</td><td>143777.954392</td></tr><tr><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td></tr><tr><td>2021-12-24</td><td>50707.08</td><td>51407.656</td><td>49540.152</td><td>50048.066</td><td>29607.160572</td></tr><tr><td>2021-12-29</td><td>46836.5525</td><td>48135.4925</td><td>45970.84</td><td>46881.2775</td><td>31098.406725</td></tr></tbody></table></div>
+<small>shape: (74, 6)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">time</th>
+<th data-quarto-table-cell-role="th">open</th>
+<th data-quarto-table-cell-role="th">high</th>
+<th data-quarto-table-cell-role="th">low</th>
+<th data-quarto-table-cell-role="th">close</th>
+<th data-quarto-table-cell-role="th">volume</th>
+</tr>
+<tr class="odd">
+<th>date</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2020-12-29</td>
+<td>29127.665</td>
+<td>31450.0</td>
+<td>28785.55</td>
+<td>30755.01</td>
+<td>92088.399186</td>
+</tr>
+<tr class="even">
+<td>2021-01-03</td>
+<td>33577.028</td>
+<td>36008.464</td>
+<td>31916.198</td>
+<td>35027.986</td>
+<td>127574.470245</td>
+</tr>
+<tr class="odd">
+<td>2021-01-08</td>
+<td>38733.61</td>
+<td>39914.548</td>
+<td>34656.422</td>
+<td>37655.352</td>
+<td>143777.954392</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>2021-12-24</td>
+<td>50707.08</td>
+<td>51407.656</td>
+<td>49540.152</td>
+<td>50048.066</td>
+<td>29607.160572</td>
+</tr>
+<tr class="even">
+<td>2021-12-29</td>
+<td>46836.5525</td>
+<td>48135.4925</td>
+<td>45970.84</td>
+<td>46881.2775</td>
+<td>31098.406725</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 </div>
 <div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
-<div class="cell" data-execution_count="5">
+<div id="3254b144" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pd.resample(<span class="st">"5d"</span>).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
-
 <div>
 
-<table class="dataframe table table-sm table-striped">
-  <thead>
-    <tr>
-      <th></th>
-      <th>open</th>
-      <th>high</th>
-      <th>low</th>
-      <th>close</th>
-      <th>volume</th>
-    </tr>
-    <tr>
-      <th>time</th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>2021-01-01</th>
-      <td>31084.316</td>
-      <td>33127.622</td>
-      <td>29512.818</td>
-      <td>32089.662</td>
-      <td>112416.849570</td>
-    </tr>
-    <tr>
-      <th>2021-01-06</th>
-      <td>38165.310</td>
-      <td>40396.842</td>
-      <td>35983.822</td>
-      <td>39004.538</td>
-      <td>118750.076685</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>2021-12-27</th>
-      <td>48521.240</td>
-      <td>49475.878</td>
-      <td>47087.400</td>
-      <td>47609.528</td>
-      <td>35886.943710</td>
-    </tr>
-    <tr>
-      <th>2022-01-01</th>
-      <td>46216.930</td>
-      <td>47954.630</td>
-      <td>46208.370</td>
-      <td>47722.650</td>
-      <td>19604.463250</td>
-    </tr>
-  </tbody>
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">open</th>
+<th data-quarto-table-cell-role="th">high</th>
+<th data-quarto-table-cell-role="th">low</th>
+<th data-quarto-table-cell-role="th">close</th>
+<th data-quarto-table-cell-role="th">volume</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">time</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2021-01-01</td>
+<td>31084.316</td>
+<td>33127.622</td>
+<td>29512.818</td>
+<td>32089.662</td>
+<td>112416.849570</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2021-01-06</td>
+<td>38165.310</td>
+<td>40396.842</td>
+<td>35983.822</td>
+<td>39004.538</td>
+<td>118750.076685</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2021-12-27</td>
+<td>48521.240</td>
+<td>49475.878</td>
+<td>47087.400</td>
+<td>47609.528</td>
+<td>35886.943710</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2022-01-01</td>
+<td>46216.930</td>
+<td>47954.630</td>
+<td>46208.370</td>
+<td>47722.650</td>
+<td>19604.463250</td>
+</tr>
+</tbody>
 </table>
+
 <p>74 rows × 5 columns</p>
 </div>
 </div>
@@ -550,11 +689,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 </div>
 <p>Resampling and performing multiple aggregations to each column:</p>
-<div class="panel-tabset">
+<div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false">Pandas</a></li></ul>
 <div class="tab-content">
 <div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
-<div class="cell" data-execution_count="6">
+<div id="61503683" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    ohlcv_pl</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    .group_by_dynamic(<span class="st">"time"</span>, every<span class="op">=</span><span class="st">"1w"</span>, start_by<span class="op">=</span><span class="st">"friday"</span>)</span>
@@ -564,7 +703,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    ])</span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
-
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -572,122 +710,234 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   white-space: pre-wrap;
 }
 </style>
-<small>shape: (53, 11)</small><table class="dataframe table table-sm table-striped"><thead><tr><th>time</th><th>open_mean</th><th>high_mean</th><th>low_mean</th><th>close_mean</th><th>volume_mean</th><th>open_sum</th><th>high_sum</th><th>low_sum</th><th>close_sum</th><th>volume_sum</th></tr><tr><td>date</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td></tr></thead><tbody><tr><td>2021-01-01</td><td>32305.781429</td><td>34706.045714</td><td>31021.727143</td><td>33807.135714</td><td>117435.5928</td><td>226140.47</td><td>242942.32</td><td>217152.09</td><td>236649.95</td><td>822049.149598</td></tr><tr><td>2021-01-08</td><td>37869.797143</td><td>39646.105714</td><td>34623.334286</td><td>37827.52</td><td>135188.296617</td><td>265088.58</td><td>277522.74</td><td>242363.34</td><td>264792.64</td><td>946318.076319</td></tr><tr><td>2021-01-15</td><td>36527.891429</td><td>37412.2</td><td>33961.551429</td><td>35343.847143</td><td>94212.715129</td><td>255695.24</td><td>261885.4</td><td>237730.86</td><td>247406.93</td><td>659489.005903</td></tr><tr><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td></tr><tr><td>2021-12-24</td><td>49649.114286</td><td>50439.622857</td><td>48528.25</td><td>49117.98</td><td>31126.709793</td><td>347543.8</td><td>353077.36</td><td>339697.75</td><td>343825.86</td><td>217886.96855</td></tr><tr><td>2021-12-31</td><td>46668.905</td><td>48251.445</td><td>45943.185</td><td>46969.79</td><td>27271.230605</td><td>93337.81</td><td>96502.89</td><td>91886.37</td><td>93939.58</td><td>54542.46121</td></tr></tbody></table></div>
+<small>shape: (53, 11)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">time</th>
+<th data-quarto-table-cell-role="th">open_mean</th>
+<th data-quarto-table-cell-role="th">high_mean</th>
+<th data-quarto-table-cell-role="th">low_mean</th>
+<th data-quarto-table-cell-role="th">close_mean</th>
+<th data-quarto-table-cell-role="th">volume_mean</th>
+<th data-quarto-table-cell-role="th">open_sum</th>
+<th data-quarto-table-cell-role="th">high_sum</th>
+<th data-quarto-table-cell-role="th">low_sum</th>
+<th data-quarto-table-cell-role="th">close_sum</th>
+<th data-quarto-table-cell-role="th">volume_sum</th>
+</tr>
+<tr class="odd">
+<th>date</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2021-01-01</td>
+<td>32305.781429</td>
+<td>34706.045714</td>
+<td>31021.727143</td>
+<td>33807.135714</td>
+<td>117435.5928</td>
+<td>226140.47</td>
+<td>242942.32</td>
+<td>217152.09</td>
+<td>236649.95</td>
+<td>822049.149598</td>
+</tr>
+<tr class="even">
+<td>2021-01-08</td>
+<td>37869.797143</td>
+<td>39646.105714</td>
+<td>34623.334286</td>
+<td>37827.52</td>
+<td>135188.296617</td>
+<td>265088.58</td>
+<td>277522.74</td>
+<td>242363.34</td>
+<td>264792.64</td>
+<td>946318.076319</td>
+</tr>
+<tr class="odd">
+<td>2021-01-15</td>
+<td>36527.891429</td>
+<td>37412.2</td>
+<td>33961.551429</td>
+<td>35343.847143</td>
+<td>94212.715129</td>
+<td>255695.24</td>
+<td>261885.4</td>
+<td>237730.86</td>
+<td>247406.93</td>
+<td>659489.005903</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>2021-12-24</td>
+<td>49649.114286</td>
+<td>50439.622857</td>
+<td>48528.25</td>
+<td>49117.98</td>
+<td>31126.709793</td>
+<td>347543.8</td>
+<td>353077.36</td>
+<td>339697.75</td>
+<td>343825.86</td>
+<td>217886.96855</td>
+</tr>
+<tr class="even">
+<td>2021-12-31</td>
+<td>46668.905</td>
+<td>48251.445</td>
+<td>45943.185</td>
+<td>46969.79</td>
+<td>27271.230605</td>
+<td>93337.81</td>
+<td>96502.89</td>
+<td>91886.37</td>
+<td>93939.58</td>
+<td>54542.46121</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 </div>
 <div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
-<div class="cell" data-execution_count="7">
+<div id="1dda96a7" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pd.resample(<span class="st">"W-Fri"</span>, closed<span class="op">=</span><span class="st">"left"</span>, label<span class="op">=</span><span class="st">"left"</span>).agg([<span class="st">'mean'</span>, <span class="st">'sum'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="7">
-
 <div>
 
-<table class="dataframe table table-sm table-striped">
-  <thead>
-    <tr>
-      <th></th>
-      <th colspan="2" halign="left">open</th>
-      <th colspan="2" halign="left">high</th>
-      <th colspan="2" halign="left">low</th>
-      <th colspan="2" halign="left">close</th>
-      <th colspan="2" halign="left">volume</th>
-    </tr>
-    <tr>
-      <th></th>
-      <th>mean</th>
-      <th>sum</th>
-      <th>mean</th>
-      <th>sum</th>
-      <th>mean</th>
-      <th>sum</th>
-      <th>mean</th>
-      <th>sum</th>
-      <th>mean</th>
-      <th>sum</th>
-    </tr>
-    <tr>
-      <th>time</th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>2021-01-01</th>
-      <td>32305.781429</td>
-      <td>226140.47</td>
-      <td>34706.045714</td>
-      <td>242942.32</td>
-      <td>31021.727143</td>
-      <td>217152.09</td>
-      <td>33807.135714</td>
-      <td>236649.95</td>
-      <td>117435.592800</td>
-      <td>822049.149598</td>
-    </tr>
-    <tr>
-      <th>2021-01-08</th>
-      <td>37869.797143</td>
-      <td>265088.58</td>
-      <td>39646.105714</td>
-      <td>277522.74</td>
-      <td>34623.334286</td>
-      <td>242363.34</td>
-      <td>37827.520000</td>
-      <td>264792.64</td>
-      <td>135188.296617</td>
-      <td>946318.076319</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>2021-12-24</th>
-      <td>49649.114286</td>
-      <td>347543.80</td>
-      <td>50439.622857</td>
-      <td>353077.36</td>
-      <td>48528.250000</td>
-      <td>339697.75</td>
-      <td>49117.980000</td>
-      <td>343825.86</td>
-      <td>31126.709793</td>
-      <td>217886.968550</td>
-    </tr>
-    <tr>
-      <th>2021-12-31</th>
-      <td>46668.905000</td>
-      <td>93337.81</td>
-      <td>48251.445000</td>
-      <td>96502.89</td>
-      <td>45943.185000</td>
-      <td>91886.37</td>
-      <td>46969.790000</td>
-      <td>93939.58</td>
-      <td>27271.230605</td>
-      <td>54542.461210</td>
-    </tr>
-  </tbody>
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th colspan="2" data-quarto-table-cell-role="th" data-halign="left">open</th>
+<th colspan="2" data-quarto-table-cell-role="th" data-halign="left">high</th>
+<th colspan="2" data-quarto-table-cell-role="th" data-halign="left">low</th>
+<th colspan="2" data-quarto-table-cell-role="th" data-halign="left">close</th>
+<th colspan="2" data-quarto-table-cell-role="th" data-halign="left">volume</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">sum</th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">sum</th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">sum</th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">sum</th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">sum</th>
+</tr>
+<tr class="header">
+<th data-quarto-table-cell-role="th">time</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2021-01-01</td>
+<td>32305.781429</td>
+<td>226140.47</td>
+<td>34706.045714</td>
+<td>242942.32</td>
+<td>31021.727143</td>
+<td>217152.09</td>
+<td>33807.135714</td>
+<td>236649.95</td>
+<td>117435.592800</td>
+<td>822049.149598</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2021-01-08</td>
+<td>37869.797143</td>
+<td>265088.58</td>
+<td>39646.105714</td>
+<td>277522.74</td>
+<td>34623.334286</td>
+<td>242363.34</td>
+<td>37827.520000</td>
+<td>264792.64</td>
+<td>135188.296617</td>
+<td>946318.076319</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2021-12-24</td>
+<td>49649.114286</td>
+<td>347543.80</td>
+<td>50439.622857</td>
+<td>353077.36</td>
+<td>48528.250000</td>
+<td>339697.75</td>
+<td>49117.980000</td>
+<td>343825.86</td>
+<td>31126.709793</td>
+<td>217886.968550</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2021-12-31</td>
+<td>46668.905000</td>
+<td>93337.81</td>
+<td>48251.445000</td>
+<td>96502.89</td>
+<td>45943.185000</td>
+<td>91886.37</td>
+<td>46969.790000</td>
+<td>93939.58</td>
+<td>27271.230605</td>
+<td>54542.461210</td>
+</tr>
+</tbody>
 </table>
+
 <p>53 rows × 10 columns</p>
 </div>
 </div>
@@ -699,14 +949,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <section id="upsampling" class="level3" data-number="5.3.2">
 <h3 data-number="5.3.2" class="anchored" data-anchor-id="upsampling"><span class="header-section-number">5.3.2</span> Upsampling</h3>
 <p>Upsampling moves in the opposite direction, from low-frequency data to high frequency data. Since we can’t create new data by magic, upsampling defaults to filling the new rows with nulls (which we could then interpolate, perhaps). In Polars we have a special <a href="https://pola-rs.github.io/polars/py-polars/html/reference/dataframe/api/polars.DataFrame.upsample.html#polars.DataFrame.upsample"><code>upsample</code></a> method for this, while Pandas reuses its <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.resample.html"><code>resample</code></a> method.</p>
-<div class="panel-tabset">
+<div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-4-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-1" role="tab" aria-controls="tabset-4-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-2" role="tab" aria-controls="tabset-4-2" aria-selected="false">Pandas</a></li></ul>
 <div class="tab-content">
 <div id="tabset-4-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-4-1-tab">
-<div class="cell" data-execution_count="8">
+<div id="54f97455" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pl.upsample(<span class="st">"time"</span>, every<span class="op">=</span><span class="st">"6h"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
-
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -714,79 +963,151 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   white-space: pre-wrap;
 }
 </style>
-<small>shape: (1_461, 6)</small><table class="dataframe table table-sm table-striped"><thead><tr><th>time</th><th>open</th><th>high</th><th>low</th><th>close</th><th>volume</th></tr><tr><td>date</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td></tr></thead><tbody><tr><td>2021-01-01</td><td>28923.63</td><td>29600.0</td><td>28624.57</td><td>29331.69</td><td>54182.925011</td></tr><tr><td>2021-01-01</td><td>null</td><td>null</td><td>null</td><td>null</td><td>null</td></tr><tr><td>2021-01-01</td><td>null</td><td>null</td><td>null</td><td>null</td><td>null</td></tr><tr><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td></tr><tr><td>2021-12-31</td><td>null</td><td>null</td><td>null</td><td>null</td><td>null</td></tr><tr><td>2022-01-01</td><td>46216.93</td><td>47954.63</td><td>46208.37</td><td>47722.65</td><td>19604.46325</td></tr></tbody></table></div>
+<small>shape: (1_461, 6)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">time</th>
+<th data-quarto-table-cell-role="th">open</th>
+<th data-quarto-table-cell-role="th">high</th>
+<th data-quarto-table-cell-role="th">low</th>
+<th data-quarto-table-cell-role="th">close</th>
+<th data-quarto-table-cell-role="th">volume</th>
+</tr>
+<tr class="odd">
+<th>date</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2021-01-01</td>
+<td>28923.63</td>
+<td>29600.0</td>
+<td>28624.57</td>
+<td>29331.69</td>
+<td>54182.925011</td>
+</tr>
+<tr class="even">
+<td>2021-01-01</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="odd">
+<td>2021-01-01</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>2021-12-31</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+<td>null</td>
+</tr>
+<tr class="even">
+<td>2022-01-01</td>
+<td>46216.93</td>
+<td>47954.63</td>
+<td>46208.37</td>
+<td>47722.65</td>
+<td>19604.46325</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 </div>
 <div id="tabset-4-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-2-tab">
-<div class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pd.resample(<span class="st">"6H"</span>).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="aca27070" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pd.resample(<span class="st">"6h"</span>).mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="9">
-
 <div>
 
-<table class="dataframe table table-sm table-striped">
-  <thead>
-    <tr>
-      <th></th>
-      <th>open</th>
-      <th>high</th>
-      <th>low</th>
-      <th>close</th>
-      <th>volume</th>
-    </tr>
-    <tr>
-      <th>time</th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>2021-01-01 00:00:00</th>
-      <td>28923.63</td>
-      <td>29600.00</td>
-      <td>28624.57</td>
-      <td>29331.69</td>
-      <td>54182.925011</td>
-    </tr>
-    <tr>
-      <th>2021-01-01 06:00:00</th>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>2021-12-31 18:00:00</th>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-    </tr>
-    <tr>
-      <th>2022-01-01 00:00:00</th>
-      <td>46216.93</td>
-      <td>47954.63</td>
-      <td>46208.37</td>
-      <td>47722.65</td>
-      <td>19604.463250</td>
-    </tr>
-  </tbody>
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">open</th>
+<th data-quarto-table-cell-role="th">high</th>
+<th data-quarto-table-cell-role="th">low</th>
+<th data-quarto-table-cell-role="th">close</th>
+<th data-quarto-table-cell-role="th">volume</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">time</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2021-01-01 00:00:00</td>
+<td>28923.63</td>
+<td>29600.00</td>
+<td>28624.57</td>
+<td>29331.69</td>
+<td>54182.925011</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2021-01-01 06:00:00</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2021-12-31 18:00:00</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2022-01-01 00:00:00</td>
+<td>46216.93</td>
+<td>47954.63</td>
+<td>46208.37</td>
+<td>47722.65</td>
+<td>19604.463250</td>
+</tr>
+</tbody>
 </table>
+
 <p>1461 rows × 5 columns</p>
 </div>
 </div>
@@ -799,11 +1120,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <section id="rolling-expanding-ew" class="level2" data-number="5.4">
 <h2 data-number="5.4" class="anchored" data-anchor-id="rolling-expanding-ew"><span class="header-section-number">5.4</span> Rolling / Expanding / EW</h2>
 <p>Polars supports all three of these but they’re not quite as powerful as in Pandas, since they don’t have as many different methods. The <code>expanding</code> support is <a href="https://github.com/pola-rs/polars/issues/4799">more limited again</a>, though there are workarounds for this (see below):</p>
-<div class="panel-tabset">
+<div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-5-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-1" role="tab" aria-controls="tabset-5-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-2" role="tab" aria-controls="tabset-5-2" aria-selected="false">Pandas</a></li></ul>
 <div class="tab-content">
 <div id="tabset-5-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-5-1-tab">
-<div class="cell" data-execution_count="10">
+<div id="4681d79f" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>close <span class="op">=</span> pl.col(<span class="st">"close"</span>)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>ohlcv_pl.select(</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    [</span>
@@ -816,34 +1137,36 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>).to_pandas().set_index(<span class="st">"time"</span>).plot()</span>
 <span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Close ($)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>/tmp/ipykernel_28816/3570598896.py:8: DeprecationWarning:
-
-The default value for `ignore_nulls` for `ewm` methods will change from True to False in the next breaking release. Explicitly set `ignore_nulls=True` to keep the existing behavior and silence this warning.
-</code></pre>
-</div>
 <div class="cell-output cell-output-display" data-execution_count="10">
 <pre><code>Text(0, 0.5, 'Close ($)')</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="timeseries_files/figure-html/cell-11-output-3.png" width="627" height="448"></p>
+<div>
+<figure class="figure">
+<p><img src="timeseries_files/figure-html/cell-11-output-2.png" width="627" height="448" class="figure-img"></p>
+</figure>
+</div>
 </div>
 </div>
 </div>
 <div id="tabset-5-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-2-tab">
-<div class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pd[<span class="st">"close"</span>].plot(label<span class="op">=</span><span class="st">"Raw"</span>)</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>ohlcv_pd[<span class="st">"close"</span>].rolling(<span class="dv">28</span>).mean().plot(label<span class="op">=</span><span class="st">"28D MA"</span>)</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>ohlcv_pd[<span class="st">"close"</span>].expanding().mean().plot(label<span class="op">=</span><span class="st">"Expanding Average"</span>)</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>ohlcv_pd[<span class="st">"close"</span>].ewm(alpha<span class="op">=</span><span class="fl">0.03</span>).mean().plot(label<span class="op">=</span><span class="st">"EWMA($</span><span class="ch">\\</span><span class="st">alpha=.03$)"</span>)</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>plt.legend(bbox_to_anchor<span class="op">=</span>(<span class="fl">0.63</span>, <span class="fl">0.27</span>))</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Close ($)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="8097bbe5" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pd[<span class="st">"close"</span>].plot(label<span class="op">=</span><span class="st">"Raw"</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>ohlcv_pd[<span class="st">"close"</span>].rolling(<span class="dv">28</span>).mean().plot(label<span class="op">=</span><span class="st">"28D MA"</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>ohlcv_pd[<span class="st">"close"</span>].expanding().mean().plot(label<span class="op">=</span><span class="st">"Expanding Average"</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>ohlcv_pd[<span class="st">"close"</span>].ewm(alpha<span class="op">=</span><span class="fl">0.03</span>).mean().plot(label<span class="op">=</span><span class="st">"EWMA($</span><span class="ch">\\</span><span class="st">alpha=.03$)"</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>plt.legend(bbox_to_anchor<span class="op">=</span>(<span class="fl">0.63</span>, <span class="fl">0.27</span>))</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Close ($)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
 <pre><code>Text(0, 0.5, 'Close ($)')</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="timeseries_files/figure-html/cell-12-output-2.png" width="627" height="444"></p>
+<div>
+<figure class="figure">
+<p><img src="timeseries_files/figure-html/cell-12-output-2.png" width="627" height="444" class="figure-img"></p>
+</figure>
+</div>
 </div>
 </div>
 </div>
@@ -852,53 +1175,61 @@ The default value for `ignore_nulls` for `ewm` methods will change from True to 
 <p>Polars doesn’t have an <code>expanding_mean</code> yet so we make do by combining <code>cumsum</code> and <code>cumcount</code>.</p>
 <section id="combining-rolling-aggregations" class="level3" data-number="5.4.1">
 <h3 data-number="5.4.1" class="anchored" data-anchor-id="combining-rolling-aggregations"><span class="header-section-number">5.4.1</span> Combining rolling aggregations</h3>
-<div class="panel-tabset">
+<div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-6-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-1" role="tab" aria-controls="tabset-6-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-2" role="tab" aria-controls="tabset-6-2" aria-selected="false">Pandas</a></li></ul>
 <div class="tab-content">
 <div id="tabset-6-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-6-1-tab">
-<div class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>mean_std_pl <span class="op">=</span> ohlcv_pl.select(</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    [</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"time"</span>,</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"close"</span>).rolling_mean(<span class="dv">30</span>, center<span class="op">=</span><span class="va">True</span>).alias(<span class="st">"mean"</span>),</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"close"</span>).rolling_std(<span class="dv">30</span>, center<span class="op">=</span><span class="va">True</span>).alias(<span class="st">"std"</span>),</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> mean_std_pl.to_pandas().set_index(<span class="st">"time"</span>)[<span class="st">"mean"</span>].plot()</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>ax.fill_between(</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    mean_std_pl[<span class="st">"time"</span>].to_numpy(),</span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    mean_std_pl[<span class="st">"mean"</span>] <span class="op">-</span> mean_std_pl[<span class="st">"std"</span>],</span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    mean_std_pl[<span class="st">"mean"</span>] <span class="op">+</span> mean_std_pl[<span class="st">"std"</span>],</span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    alpha<span class="op">=</span><span class="fl">0.25</span>,</span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Close ($)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="69620d8a" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>mean_std_pl <span class="op">=</span> ohlcv_pl.select(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"time"</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"close"</span>).rolling_mean(<span class="dv">30</span>, center<span class="op">=</span><span class="va">True</span>).alias(<span class="st">"mean"</span>),</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"close"</span>).rolling_std(<span class="dv">30</span>, center<span class="op">=</span><span class="va">True</span>).alias(<span class="st">"std"</span>),</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> mean_std_pl.to_pandas().set_index(<span class="st">"time"</span>)[<span class="st">"mean"</span>].plot()</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>ax.fill_between(</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    mean_std_pl[<span class="st">"time"</span>].to_numpy(),</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    mean_std_pl[<span class="st">"mean"</span>] <span class="op">-</span> mean_std_pl[<span class="st">"std"</span>],</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    mean_std_pl[<span class="st">"mean"</span>] <span class="op">+</span> mean_std_pl[<span class="st">"std"</span>],</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    alpha<span class="op">=</span><span class="fl">0.25</span>,</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Close ($)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="12">
 <pre><code>Text(26.83333333333334, 0.5, 'Close ($)')</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="timeseries_files/figure-html/cell-13-output-2.png" width="681" height="467"></p>
+<div>
+<figure class="figure">
+<p><img src="timeseries_files/figure-html/cell-13-output-2.png" width="681" height="467" class="figure-img"></p>
+</figure>
+</div>
 </div>
 </div>
 </div>
 <div id="tabset-6-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-2-tab">
-<div class="cell" data-execution_count="13">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>roll_pd <span class="op">=</span> ohlcv_pd[<span class="st">"close"</span>].rolling(<span class="dv">30</span>, center<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>mean_std_pd <span class="op">=</span> roll_pd.agg([<span class="st">"mean"</span>, <span class="st">"std"</span>])</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> mean_std_pd[<span class="st">"mean"</span>].plot()</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>ax.fill_between(</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    mean_std_pd.index,</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    mean_std_pd[<span class="st">"mean"</span>] <span class="op">-</span> mean_std_pd[<span class="st">"std"</span>],</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    mean_std_pd[<span class="st">"mean"</span>] <span class="op">+</span> mean_std_pd[<span class="st">"std"</span>],</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    alpha<span class="op">=</span><span class="fl">0.25</span>,</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Close ($)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="b0c368f2" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>roll_pd <span class="op">=</span> ohlcv_pd[<span class="st">"close"</span>].rolling(<span class="dv">30</span>, center<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>mean_std_pd <span class="op">=</span> roll_pd.agg([<span class="st">"mean"</span>, <span class="st">"std"</span>])</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> mean_std_pd[<span class="st">"mean"</span>].plot()</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>ax.fill_between(</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    mean_std_pd.index,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    mean_std_pd[<span class="st">"mean"</span>] <span class="op">-</span> mean_std_pd[<span class="st">"std"</span>],</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    mean_std_pd[<span class="st">"mean"</span>] <span class="op">+</span> mean_std_pd[<span class="st">"std"</span>],</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    alpha<span class="op">=</span><span class="fl">0.25</span>,</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Close ($)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="13">
 <pre><code>Text(26.83333333333334, 0.5, 'Close ($)')</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="timeseries_files/figure-html/cell-14-output-2.png" width="681" height="467"></p>
+<div>
+<figure class="figure">
+<p><img src="timeseries_files/figure-html/cell-14-output-2.png" width="681" height="467" class="figure-img"></p>
+</figure>
+</div>
 </div>
 </div>
 </div>
@@ -912,14 +1243,13 @@ The default value for `ignore_nulls` for `ewm` methods will change from True to 
 <h3 data-number="5.5.1" class="anchored" data-anchor-id="offsets"><span class="header-section-number">5.5.1</span> Offsets</h3>
 <p>Pandas has two similar objects for datetime arithmetic: <code>DateOffset</code> which respects calendar arithmetic, and <code>Timedelta</code> which respects absolute time arithmetic. <code>DateOffset</code> understands things like daylight savings time, and can work with holidays too.</p>
 <p>Polars just has a <code>Duration</code> type which is like Pandas <code>Timedelta</code>.</p>
-<div class="panel-tabset">
+<div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-7-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-1" role="tab" aria-controls="tabset-7-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-7-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-2" role="tab" aria-controls="tabset-7-2" aria-selected="false">Pandas (Timedelta)</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-7-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-3" role="tab" aria-controls="tabset-7-3" aria-selected="false">Pandas (DateOffset)</a></li></ul>
 <div class="tab-content">
 <div id="tabset-7-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-7-1-tab">
-<div class="cell" data-execution_count="14">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pl.select(pl.col(<span class="st">"time"</span>) <span class="op">+</span> pl.duration(days<span class="op">=</span><span class="dv">80</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="250381bc" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pl.select(pl.col(<span class="st">"time"</span>) <span class="op">+</span> pl.duration(days<span class="op">=</span><span class="dv">80</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="14">
-
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -927,13 +1257,44 @@ The default value for `ignore_nulls` for `ewm` methods will change from True to 
   white-space: pre-wrap;
 }
 </style>
-<small>shape: (366, 1)</small><table class="dataframe table table-sm table-striped"><thead><tr><th>time</th></tr><tr><td>date</td></tr></thead><tbody><tr><td>2021-03-22</td></tr><tr><td>2021-03-23</td></tr><tr><td>2021-03-24</td></tr><tr><td>…</td></tr><tr><td>2022-03-21</td></tr><tr><td>2022-03-22</td></tr></tbody></table></div>
+<small>shape: (366, 1)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">time</th>
+</tr>
+<tr class="odd">
+<th>date</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2021-03-22</td>
+</tr>
+<tr class="even">
+<td>2021-03-23</td>
+</tr>
+<tr class="odd">
+<td>2021-03-24</td>
+</tr>
+<tr class="even">
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>2022-03-21</td>
+</tr>
+<tr class="even">
+<td>2022-03-22</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 </div>
 <div id="tabset-7-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-7-2-tab">
-<div class="cell" data-execution_count="15">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pd.index <span class="op">+</span> pd.Timedelta(<span class="dv">80</span>, <span class="st">"D"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="b2a2d7d4" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pd.index <span class="op">+</span> pd.Timedelta(<span class="dv">80</span>, <span class="st">"D"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="15">
 <pre><code>DatetimeIndex(['2021-03-22', '2021-03-23', '2021-03-24', '2021-03-25',
                '2021-03-26', '2021-03-27', '2021-03-28', '2021-03-29',
@@ -947,8 +1308,8 @@ The default value for `ignore_nulls` for `ewm` methods will change from True to 
 </div>
 </div>
 <div id="tabset-7-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-7-3-tab">
-<div class="cell" data-execution_count="16">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pd.index <span class="op">+</span> pd.DateOffset(months<span class="op">=</span><span class="dv">3</span>, days<span class="op">=-</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="c9240c71" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>ohlcv_pd.index <span class="op">+</span> pd.DateOffset(months<span class="op">=</span><span class="dv">3</span>, days<span class="op">=-</span><span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="16">
 <pre><code>DatetimeIndex(['2021-03-22', '2021-03-23', '2021-03-24', '2021-03-25',
                '2021-03-26', '2021-03-27', '2021-03-28', '2021-03-29',
@@ -957,7 +1318,7 @@ The default value for `ignore_nulls` for `ewm` methods will change from True to 
                '2022-03-13', '2022-03-14', '2022-03-15', '2022-03-16',
                '2022-03-17', '2022-03-18', '2022-03-19', '2022-03-20',
                '2022-03-21', '2022-03-22'],
-              dtype='datetime64[ns]', name='time', length=366, freq=None)</code></pre>
+              dtype='datetime64[us]', name='time', length=366, freq=None)</code></pre>
 </div>
 </div>
 </div>
@@ -971,22 +1332,21 @@ The default value for `ignore_nulls` for `ewm` methods will change from True to 
 <section id="timezones" class="level3" data-number="5.5.3">
 <h3 data-number="5.5.3" class="anchored" data-anchor-id="timezones"><span class="header-section-number">5.5.3</span> Timezones</h3>
 <p>Suppose we know that our timestamps are UTC, and we want to see what time it was in <code>US/Eastern</code>:</p>
-<div class="panel-tabset">
+<div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-8-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-1" role="tab" aria-controls="tabset-8-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-8-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-2" role="tab" aria-controls="tabset-8-2" aria-selected="false">Pandas</a></li></ul>
 <div class="tab-content">
 <div id="tabset-8-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-8-1-tab">
-<div class="cell" data-execution_count="17">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    ohlcv_pl</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"time"</span>)</span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>        .cast(pl.Datetime)</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>        .dt.replace_time_zone(<span class="st">"UTC"</span>)</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>        .dt.convert_time_zone(<span class="st">"US/Eastern"</span>)</span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="355107f0" class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    ohlcv_pl</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"time"</span>)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>        .cast(pl.Datetime)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>        .dt.replace_time_zone(<span class="st">"UTC"</span>)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>        .dt.convert_time_zone(<span class="st">"US/Eastern"</span>)</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="17">
-
 <div><style>
 .dataframe > thead > tr,
 .dataframe > tbody > tr {
@@ -994,83 +1354,155 @@ The default value for `ignore_nulls` for `ewm` methods will change from True to 
   white-space: pre-wrap;
 }
 </style>
-<small>shape: (366, 6)</small><table class="dataframe table table-sm table-striped"><thead><tr><th>time</th><th>open</th><th>high</th><th>low</th><th>close</th><th>volume</th></tr><tr><td>datetime[μs, US/Eastern]</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td></tr></thead><tbody><tr><td>2020-12-31 19:00:00 EST</td><td>28923.63</td><td>29600.0</td><td>28624.57</td><td>29331.69</td><td>54182.925011</td></tr><tr><td>2021-01-01 19:00:00 EST</td><td>29331.7</td><td>33300.0</td><td>28946.53</td><td>32178.33</td><td>129993.873362</td></tr><tr><td>2021-01-02 19:00:00 EST</td><td>32176.45</td><td>34778.11</td><td>31962.99</td><td>33000.05</td><td>120957.56675</td></tr><tr><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td></tr><tr><td>2021-12-30 19:00:00 EST</td><td>47120.88</td><td>48548.26</td><td>45678.0</td><td>46216.93</td><td>34937.99796</td></tr><tr><td>2021-12-31 19:00:00 EST</td><td>46216.93</td><td>47954.63</td><td>46208.37</td><td>47722.65</td><td>19604.46325</td></tr></tbody></table></div>
+<small>shape: (366, 6)</small>
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">time</th>
+<th data-quarto-table-cell-role="th">open</th>
+<th data-quarto-table-cell-role="th">high</th>
+<th data-quarto-table-cell-role="th">low</th>
+<th data-quarto-table-cell-role="th">close</th>
+<th data-quarto-table-cell-role="th">volume</th>
+</tr>
+<tr class="odd">
+<th>datetime[μs, US/Eastern]</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+<th>f64</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2020-12-31 19:00:00 EST</td>
+<td>28923.63</td>
+<td>29600.0</td>
+<td>28624.57</td>
+<td>29331.69</td>
+<td>54182.925011</td>
+</tr>
+<tr class="even">
+<td>2021-01-01 19:00:00 EST</td>
+<td>29331.7</td>
+<td>33300.0</td>
+<td>28946.53</td>
+<td>32178.33</td>
+<td>129993.873362</td>
+</tr>
+<tr class="odd">
+<td>2021-01-02 19:00:00 EST</td>
+<td>32176.45</td>
+<td>34778.11</td>
+<td>31962.99</td>
+<td>33000.05</td>
+<td>120957.56675</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+<tr class="odd">
+<td>2021-12-30 19:00:00 EST</td>
+<td>47120.88</td>
+<td>48548.26</td>
+<td>45678.0</td>
+<td>46216.93</td>
+<td>34937.99796</td>
+</tr>
+<tr class="even">
+<td>2021-12-31 19:00:00 EST</td>
+<td>46216.93</td>
+<td>47954.63</td>
+<td>46208.37</td>
+<td>47722.65</td>
+<td>19604.46325</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 </div>
 <div id="tabset-8-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-8-2-tab">
-<div class="cell" data-execution_count="18">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    ohlcv_pd</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    .tz_localize(<span class="st">'UTC'</span>)</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    .tz_convert(<span class="st">'US/Eastern'</span>)</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="8df5e5a6" class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    ohlcv_pd</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    .tz_localize(<span class="st">'UTC'</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    .tz_convert(<span class="st">'US/Eastern'</span>)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="18">
-
 <div>
 
-<table class="dataframe table table-sm table-striped">
-  <thead>
-    <tr>
-      <th></th>
-      <th>open</th>
-      <th>high</th>
-      <th>low</th>
-      <th>close</th>
-      <th>volume</th>
-    </tr>
-    <tr>
-      <th>time</th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>2020-12-31 19:00:00-05:00</th>
-      <td>28923.63</td>
-      <td>29600.00</td>
-      <td>28624.57</td>
-      <td>29331.69</td>
-      <td>54182.925011</td>
-    </tr>
-    <tr>
-      <th>2021-01-01 19:00:00-05:00</th>
-      <td>29331.70</td>
-      <td>33300.00</td>
-      <td>28946.53</td>
-      <td>32178.33</td>
-      <td>129993.873362</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>2021-12-30 19:00:00-05:00</th>
-      <td>47120.88</td>
-      <td>48548.26</td>
-      <td>45678.00</td>
-      <td>46216.93</td>
-      <td>34937.997960</td>
-    </tr>
-    <tr>
-      <th>2021-12-31 19:00:00-05:00</th>
-      <td>46216.93</td>
-      <td>47954.63</td>
-      <td>46208.37</td>
-      <td>47722.65</td>
-      <td>19604.463250</td>
-    </tr>
-  </tbody>
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">open</th>
+<th data-quarto-table-cell-role="th">high</th>
+<th data-quarto-table-cell-role="th">low</th>
+<th data-quarto-table-cell-role="th">close</th>
+<th data-quarto-table-cell-role="th">volume</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">time</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2020-12-31 19:00:00-05:00</td>
+<td>28923.63</td>
+<td>29600.00</td>
+<td>28624.57</td>
+<td>29331.69</td>
+<td>54182.925011</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2021-01-01 19:00:00-05:00</td>
+<td>29331.70</td>
+<td>33300.00</td>
+<td>28946.53</td>
+<td>32178.33</td>
+<td>129993.873362</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2021-12-30 19:00:00-05:00</td>
+<td>47120.88</td>
+<td>48548.26</td>
+<td>45678.00</td>
+<td>46216.93</td>
+<td>34937.997960</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2021-12-31 19:00:00-05:00</td>
+<td>46216.93</td>
+<td>47954.63</td>
+<td>46208.37</td>
+<td>47722.65</td>
+<td>19604.463250</td>
+</tr>
+</tbody>
 </table>
+
 <p>366 rows × 5 columns</p>
 </div>
 </div>
@@ -1115,12 +1547,15 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     icon: icon
   };
   anchorJS.add('.anchored');
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    target: function(trigger) {
-      return trigger.previousElementSibling;
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
     }
-  });
-  clipboard.on('success', function(e) {
+    return false;
+  }
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -1152,11 +1587,50 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
-  function tippyHover(el, contentFn) {
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -1166,8 +1640,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -1179,9 +1662,245 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
     });
   }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
   const findCites = (el) => {
     const parentEl = el.parentElement;
     if (parentEl) {
@@ -1223,14 +1942,16 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <script src="https://giscus.app/client.js" data-repo="kevinheavey/modern-polars" data-repo-id="R_kgDOIqAHAQ" data-category="General" data-category-id="DIC_kwDOIqAHAc4CTW4n" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="en" crossorigin="anonymous" async="">
 </script>
+<input type="hidden" id="giscus-base-theme" value="light">
+<input type="hidden" id="giscus-alt-theme" value="dark">
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./tidy.html" class="pagination-link">
+      <a href="./tidy.html" class="pagination-link" aria-label="Reshaping and Tidy Data">
         <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Reshaping and Tidy Data</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./scaling.html" class="pagination-link">
+      <a href="./scaling.html" class="pagination-link" aria-label="Scaling">
         <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Scaling</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
@@ -1239,4 +1960,5 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-</body></html>
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/kevinheavey/modern-polars/edit/master/book/timeseries.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/kevinheavey/modern-polars/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li><li><a href="https://github.com/kevinheavey/modern-polars/blob/master/book/timeseries.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></div></div></footer></body></html>
