@@ -6,7 +6,7 @@ By now you should have a good idea of what Polars can do and how it compares to 
 
 - It's really fast.
 - It has a nice API.
-- It does most of the things Pandas does. The biggest missing things are plotting and some I/O methods.
+- It does most of the things Pandas does. The biggest missing things are some I/O methods.
 - It's available in Python, Rust, NodeJS and Ruby. This is partly because most of the code is written in Rust, and calling Rust in other languages works much better than calling Python.
 - The lead dev is **very** productive and quick to fix bugs.
 
@@ -14,10 +14,8 @@ By now you should have a good idea of what Polars can do and how it compares to 
 
 ### Bugs (maybe)
 
-By my count I ran into [11 bugs](https://github.com/pola-rs/polars/issues?q=is%3Aissue+author%3Akevinheavey) while writing this book. They were fixed quickly and tests were added to make sure they don't happen again, but it made me feel somewhat uneasy.
-
-However that was some time ago, and Pandas also has plenty of bugs, so at this point it's quite difficult
-to measure which library is buggier.
+As of July 2024 Polars has a few hundred open issues marked as bugs. This is not so bad when you consider
+that Pandas has three times that number. But maybe you already use Pandas and are well-acquainted with these bugs.
 
 
 ### If it ain't broke, don't fix it
