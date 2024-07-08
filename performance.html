@@ -307,7 +307,7 @@ Tip
 <h2 data-number="3.2" class="anchored" data-anchor-id="polars-is-faster-at-the-boring-stuff"><span class="header-section-number">3.2</span> Polars is faster at the boring stuff</h2>
 <p>Here we’ll clean up a messy dataset, kindly <a href="https://www.kaggle.com/datasets/yagunnersya/fifa-21-messy-raw-dataset-for-cleaning-exploring?resource=download">provided</a> by Kaggle user Rachit Toshniwal as a deliberate example of a really crap CSV. Most of the cleanup involves extracting numeric data from awkward strings.</p>
 <p>Also, the data is too small so I’ve concatenated it to itself 20 times. We’re not doing anything that will care about the duplication. Here’s how the raw table looks:</p>
-<div id="c6867d3c" class="cell" data-execution_count="1">
+<div id="3046e191" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -401,7 +401,7 @@ Tip
 </div>
 </div>
 <p>For this exercise we’ll assume we want to make use of all the columns. First some boilerplate where we map out the different data types:</p>
-<div id="62541377" class="cell" data-execution_count="2">
+<div id="ed5bde3e" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -522,7 +522,7 @@ Tip
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">Pandas</a></li></ul>
 <div class="tab-content">
 <div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
-<div id="7c9b0870" class="cell" data-execution_count="3">
+<div id="77cee005" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># can't use UInt8/16 in scan_csv</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>dtypes_pl <span class="op">=</span> (</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    {col: pl.Utf8 <span class="cf">for</span> col <span class="kw">in</span> initially_str_cols_pl}</span>
@@ -532,7 +532,7 @@ Tip
 </div>
 </div>
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
-<div id="1527dad0" class="cell" data-execution_count="4">
+<div id="03d3e69e" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>dtypes_pd <span class="op">=</span> (</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    {col: pd.StringDtype() <span class="cf">for</span> col <span class="kw">in</span> initially_str_cols}</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">|</span> {col: pd.CategoricalDtype() <span class="cf">for</span> col <span class="kw">in</span> category_cols}</span>
@@ -566,7 +566,7 @@ Tip
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">Pandas</a></li></ul>
 <div class="tab-content">
 <div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
-<div id="e2b151b2" class="cell" data-execution_count="5">
+<div id="539b45e9" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parse_date_pl(col: pl.Expr) <span class="op">-&gt;</span> pl.Expr:</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> col.<span class="bu">str</span>.strptime(pl.Date, <span class="bu">format</span><span class="op">=</span><span class="st">"%b </span><span class="sc">%d</span><span class="st">, %Y"</span>)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -645,7 +645,7 @@ Tip
 </div>
 </div>
 <div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
-<div id="5737d812" class="cell" data-execution_count="6">
+<div id="f18ed5a6" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> parse_date_pd(col: pd.Series) <span class="op">-&gt;</span> pd.Series:</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pd.to_datetime(col, <span class="bu">format</span><span class="op">=</span><span class="st">"%b </span><span class="sc">%d</span><span class="st">, %Y"</span>)</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -713,7 +713,7 @@ Tip
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false">Pandas</a></li></ul>
 <div class="tab-content">
 <div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
-<div id="fe86710b" class="cell" data-execution_count="7">
+<div id="24742af2" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>new_cols_pl <span class="op">=</span> ([</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    pl.col(<span class="st">"Club"</span>).<span class="bu">str</span>.strip_chars().cast(pl.Categorical),</span>
@@ -737,8 +737,8 @@ Tip
 <span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    .collect()</span>
 <span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>CPU times: user 1.73 s, sys: 189 ms, total: 1.91 s
-Wall time: 199 ms</code></pre>
+<pre><code>CPU times: user 1.78 s, sys: 197 ms, total: 1.98 s
+Wall time: 216 ms</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>&lt;timed exec&gt;:20: CategoricalRemappingWarning: Local categoricals have different encodings, expensive re-encoding is done to perform this merge operation. Consider using a StringCache or an Enum type if the categories are known in advance</code></pre>
@@ -746,7 +746,7 @@ Wall time: 199 ms</code></pre>
 </div>
 </div>
 <div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
-<div id="ef8be676" class="cell" data-execution_count="8">
+<div id="eff91cd4" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>time</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>fifa_pd <span class="op">=</span> (</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    pd.read_csv(<span class="st">"../data/fifa21_raw_big.csv"</span>, dtype<span class="op">=</span>dtypes_pd)</span>
@@ -763,8 +763,8 @@ Wall time: 199 ms</code></pre>
 <span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    .rename(columns<span class="op">=</span>{<span class="st">"↓OVA"</span>: <span class="st">"OVA"</span>})</span>
 <span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>CPU times: user 3.5 s, sys: 368 ms, total: 3.87 s
-Wall time: 3.87 s</code></pre>
+<pre><code>CPU times: user 3.55 s, sys: 347 ms, total: 3.9 s
+Wall time: 3.9 s</code></pre>
 </div>
 </div>
 </div>
@@ -775,7 +775,7 @@ Wall time: 3.87 s</code></pre>
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-4-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-1" role="tab" aria-controls="tabset-4-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-2" role="tab" aria-controls="tabset-4-2" aria-selected="false">Pandas</a></li></ul>
 <div class="tab-content">
 <div id="tabset-4-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-4-1-tab">
-<div id="8e62ad86" class="cell" data-execution_count="9">
+<div id="13f6884f" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fifa_pl.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="9">
 <div><style>
@@ -1336,7 +1336,7 @@ Wall time: 3.87 s</code></pre>
 </div>
 </div>
 <div id="tabset-4-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-2-tab">
-<div id="63b6761a" class="cell" data-execution_count="10">
+<div id="3565324e" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>fifa_pd.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="10">
 <div>
@@ -1514,7 +1514,7 @@ Wall time: 3.87 s</code></pre>
 <section id="get-the-data" class="level3" data-number="3.3.1">
 <h3 data-number="3.3.1" class="anchored" data-anchor-id="get-the-data"><span class="header-section-number">3.3.1</span> Get the data</h3>
 <p>We create a lazy dataframe containing pairs of airports and their coordinates:</p>
-<div id="82098929" class="cell" data-execution_count="11">
+<div id="8f6989a7" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>airports <span class="op">=</span> pl.scan_csv(<span class="st">"../data/airports.csv"</span>).drop_nulls().unique(subset<span class="op">=</span>[<span class="st">"AIRPORT"</span>])</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>pairs <span class="op">=</span> airports.join(airports, on<span class="op">=</span><span class="st">"AIRPORT"</span>, how<span class="op">=</span><span class="st">"cross"</span>).<span class="bu">filter</span>(</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    (pl.col(<span class="st">"AIRPORT"</span>) <span class="op">!=</span> pl.col(<span class="st">"AIRPORT_right"</span>))</span>
@@ -1530,7 +1530,7 @@ Wall time: 3.87 s</code></pre>
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-5-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-1" role="tab" aria-controls="tabset-5-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-2" role="tab" aria-controls="tabset-5-2" aria-selected="false">NumPy</a></li></ul>
 <div class="tab-content">
 <div id="tabset-5-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-5-1-tab">
-<div id="0e896d7d" class="cell" data-execution_count="12">
+<div id="6d012a89" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> deg2rad_pl(degrees: pl.Expr) <span class="op">-&gt;</span> pl.Expr:</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> degrees <span class="op">*</span> math.pi <span class="op">/</span> <span class="dv">180</span></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1547,7 +1547,7 @@ Wall time: 3.87 s</code></pre>
 </div>
 </div>
 <div id="tabset-5-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-2-tab">
-<div id="10a1c1dc" class="cell" data-execution_count="13">
+<div id="612cf4f4" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gcd_np(lat1, lng1, lat2, lng2):</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    ϕ<span class="dv">1</span> <span class="op">=</span> np.deg2rad(<span class="dv">90</span> <span class="op">-</span> lat1)</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    ϕ<span class="dv">2</span> <span class="op">=</span> np.deg2rad(<span class="dv">90</span> <span class="op">-</span> lat2)</span>
@@ -1563,7 +1563,7 @@ Wall time: 3.87 s</code></pre>
 </div>
 </div>
 <p>We can pass Polars expressions directly to our <code>gcd_np</code> function, which is pretty nice since these things don’t even store the data themselves:</p>
-<div id="f1c8f552" class="cell" data-execution_count="14">
+<div id="87e0d18b" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>timeit</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>pairs.select(</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    gcd_np(</span>
@@ -1574,11 +1574,11 @@ Wall time: 3.87 s</code></pre>
 <span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>).collect()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>3.22 s ± 87.7 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
+<pre><code>3.22 s ± 33.8 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
 </div>
 </div>
 <p>On my machine the NumPy version used to be 5-20% faster than the pure Polars version, but this is no longer the case. Still you may want to see if it helps you:</p>
-<div id="2bbe97e3" class="cell" data-execution_count="15">
+<div id="2d983c7d" class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>timeit</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>pairs.select(</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    gcd_pl(</span>
@@ -1589,12 +1589,12 @@ Wall time: 3.87 s</code></pre>
 <span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>).collect()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>4.11 s ± 51.7 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
+<pre><code>3.87 s ± 79.2 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
 </div>
 </div>
 <p>This may not be a huge performance difference, but it at least means you don’t sacrifice speed when relying on NumPy. There are some <a href="https://pola-rs.github.io/polars-book/user-guide/expressions/numpy/#interoperability">gotchas</a> though so watch out for those.</p>
 <p>Also watch out for <code>.to_numpy()</code> - you don’t always need to call this and it can slow things down:</p>
-<div id="1c194843" class="cell" data-execution_count="16">
+<div id="438d2807" class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="op">%%</span>timeit</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>collected <span class="op">=</span> pairs.collect()</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>gcd_np(</span>
@@ -1604,7 +1604,7 @@ Wall time: 3.87 s</code></pre>
 <span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    collected[<span class="st">"LONGITUDE_right"</span>].to_numpy()</span>
 <span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>4.33 s ± 16 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
+<pre><code>3.94 s ± 47.2 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
 </div>
 </div>
 </section>
@@ -1612,7 +1612,7 @@ Wall time: 3.87 s</code></pre>
 <section id="polars-can-be-slower-than-pandas-sometimes-maybe" class="level2" data-number="3.4">
 <h2 data-number="3.4" class="anchored" data-anchor-id="polars-can-be-slower-than-pandas-sometimes-maybe"><span class="header-section-number">3.4</span> Polars can be slower than Pandas sometimes, maybe</h2>
 <p>Here’s an example where we calculate z-scores, using window functions in Polars and using groupby-transform in Pandas:</p>
-<div id="b9f17043" class="cell" data-execution_count="17">
+<div id="0b570f59" class="cell" data-execution_count="17">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_frame(n, n_groups):</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pl.DataFrame(</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"name"</span>: np.random.randint(<span class="dv">0</span>, n_groups, size<span class="op">=</span>n), <span class="st">"value2"</span>: np.random.randn(n)}</span>
@@ -1636,18 +1636,18 @@ Wall time: 3.87 s</code></pre>
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-6-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-1" role="tab" aria-controls="tabset-6-1" aria-selected="true">Polars</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-2" role="tab" aria-controls="tabset-6-2" aria-selected="false">Pandas</a></li></ul>
 <div class="tab-content">
 <div id="tabset-6-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-6-1-tab">
-<div id="96dcec49" class="cell" data-execution_count="18">
+<div id="ca8c4d4a" class="cell" data-execution_count="18">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>timeit rand_df_pl.select(polars_transform())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>1.86 s ± 9.81 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
+<pre><code>1.81 s ± 13.7 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
 </div>
 </div>
 </div>
 <div id="tabset-6-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-2-tab">
-<div id="7e2d4913" class="cell" data-execution_count="19">
+<div id="40be23e3" class="cell" data-execution_count="19">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>timeit pandas_transform(rand_df_pd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>1.51 s ± 17.9 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
+<pre><code>1.35 s ± 62.6 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)</code></pre>
 </div>
 </div>
 </div>
