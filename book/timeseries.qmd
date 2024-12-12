@@ -80,7 +80,7 @@ ohlcv_pd.loc["2021-02"]
 
 ## Resampling
 
-Resampling is like a special case of `groupby` for a time column. You can of course use regular `.groupby` with a time column, but it won't be as powerful because it doesn't understand time like resampling methods do.
+Resampling is like a special case of `group_by` for a time column. You can of course use regular `.group_by` with a time column, but it won't be as powerful because it doesn't understand time like resampling methods do.
 
 There are two kinds of resampling: *downsampling* and *upsampling*.
 
@@ -88,7 +88,7 @@ There are two kinds of resampling: *downsampling* and *upsampling*.
 
 Downsampling moves from a higher time frequency to a lower time frequency. This requires some aggregation or subsetting, since we're reducing the number of rows in our data.
 
-In Polars we use the [`.groupby_dynamic`](https://pola-rs.github.io/polars/py-polars/html/reference/dataframe/api/polars.DataFrame.groupby_dynamic.html#polars.DataFrame.groupby_dynamic) method for downsampling (we also use `groupby_dynamic` when we want to combine resampling with regular groupby logic).
+In Polars we use the [`.group_by_dynamic`](https://pola-rs.github.io/polars/py-polars/html/reference/dataframe/api/polars.DataFrame.group_by_dynamic.html) method for downsampling (we also use `group_by_dynamic` when we want to combine resampling with regular group_by logic).
 
 ::: {.panel-tabset}
 ## Polars
